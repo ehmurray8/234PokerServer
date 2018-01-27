@@ -29,7 +29,7 @@ public interface OptionInterface {
      *
      * @param type
      *            the new {@code OptionType}
-     * @custom.requires {@param type} is of the same {@code OptionKind} of #type
+     * @custom.requires {type} is of the same {@code OptionKind} of #type
      */
     void setType(OptionType type);
 

@@ -119,7 +119,7 @@ public class Option implements Serializable {
         /**
          * Returns the {@code OptionKind} of the enum entry.
          *
-         * @return
+         * @return {@code OptionKind} for the enum instance.
          */
         public OptionKind getKind() {
             return this.kind;
@@ -180,7 +180,7 @@ public class Option implements Serializable {
      *
      * @param type
      *            the new {@code OptionType}
-     * @requires {@param type} is of the same {@code OptionKind} of #type
+     * @custom.requires {type} is of the same {@code OptionKind} of #type
      */
     public void setType(OptionType type) {
         this.type = type;

@@ -104,6 +104,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
          *
          * @param handRankNum
          *            the number to associate with the HandRank
+         * @param str string representation of this
          */
         HandRank(int handRankNum, String str) {
             this.handRankNum = handRankNum;
@@ -154,7 +155,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
     /**
      * The {@code Rank}(s) of any pairs the hand contains.
      *
-     * @ensures |pairRanks| = number of pairs if|pairRanks| = 2 => {top, second}
+     * @ensures |pairRanks| = number of pairs if|pairRanks| = 2 =&gt; {top, second}
      */
     private ArrayList<Rank> pairRanks;
 
@@ -167,7 +168,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
     /**
      * Ranks of the full house.
      *
-     * @ensures {three of a kind rank, two of a kind rank}, or |fullHouseRanks|
+     * @custom.ensures {three of a kind rank, two of a kind rank}, or |fullHouseRanks|
      *          = 0
      */
     private ArrayList<Rank> fullHouseRanks;
@@ -271,7 +272,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
      * The ranks of the cards that aren't pairs.
      *
      * @return the ranks of the cards that aren't part of a pair.
-     * @custom.requires |pairRanks| > 0
+     * @custom.requires |pairRanks| &gt; 0
      * @custom.ensures return is sorted in decreasing order
      */
     protected final List<Rank> getNonPairRanks() {
@@ -318,7 +319,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
      * instance variables.
      * </p>
      *
-     * @custom.ensures |return| = 2 -> {high rank, low rank}
+     * @custom.ensures |return| = 2 -&gt; {high rank, low rank}
      * @custom.requires this is a SimpleAnalyzer
      */
     protected final void findPairRanks() {
@@ -348,7 +349,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
      * instance variables.
      * </p>
      *
-     * @custom.ensures |return| = 2 -> {3Kind rank, Pair rank}
+     * @custom.ensures |return| = 2 -&gt; {3Kind rank, Pair rank}
      * @custom.requires this is a SimpleAnalyzer
      */
     protected final void findFullHouseRanks() {
@@ -385,7 +386,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
      * instance variables.
      * </p>
      *
-     * @requires this is a SimpleAnalyzer
+     * @custom.requires this is a SimpleAnalyzer
      */
     protected final void findBestHand() {
         for (Card c : this.fullHand) {
@@ -398,7 +399,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
      *
      * @return any {@code Rank}s associated with a pair contained in the full
      *         hand
-     * @custom.ensures |return| = number of pairs if|pairRanks| = 2 => {top, second}
+     * @custom.ensures |return| = number of pairs if|pairRanks| = 2 =&gt; {top, second}
      */
     protected final List<Rank> getPairRanks() {
         return this.pairRanks;

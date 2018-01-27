@@ -192,7 +192,7 @@ public class Card {
     /**
      * {@inheritDoc}
      *
-     * @custom.requires (this && obj) != null
+     * @custom.requires (this &amp;&amp; obj) != null
      */
     @Override
     public final boolean equals(Object obj) {
@@ -236,12 +236,8 @@ public class Card {
      * Returns the index corresponding to the {@code Image} object in
      * {@code this.view.cardImages} of {@code c}.
      *
-     * @param c
-     *            the card to convert to its index in
-     *            {@code this.view.cardImages}
      * @return the index of the card's representation in
      *         {@code this.view.cardImages}
-     * @custom.ensures {@code c} && this.view.cardImages[i] represent the same thing
      */
     private int getIndexFromCard() {
         Suit s = this.getSuit();
@@ -420,7 +416,7 @@ public class Card {
         /**
          * {@inheritDoc}
          *
-         * @ensures Returns c1.rank - c2.rank.
+         * @custom.ensures Returns c1.rank - c2.rank.
          */
         @Override
         public int compare(Card c1, Card c2) {

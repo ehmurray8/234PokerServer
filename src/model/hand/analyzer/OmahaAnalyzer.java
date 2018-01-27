@@ -42,8 +42,8 @@ public class OmahaAnalyzer extends HandAnalyzer {
      * @param fullHand
      *            the hand to analyze
      * 
-     * @custom.requires <hand> = <Player hand> * <Community>
-     * 			 the hand was dealt during a Omaha {@code Hand} & the first four
+     * @custom.requires &lt;hand&gt; = &lt;Player hand&gt; * &lt;Community&gt;
+     * 			 the hand was dealt during a Omaha {@code Hand} &amp; the first four
      *           cards of the List are the player's hand and the last five are
      *           community cards
      */

@@ -226,8 +226,8 @@ public class SimplePlayer implements SimplePlayerInterface, Serializable {
          *            the {@code OptionType} of the move
          * @param amount
          *            the amount the {@code Player} object spent on the move
-         * @requires {@param type} = CALL | RAISE | BET
-         * @ensures (During this move) balance < #balance & balance > 0
+         * @custom.requires {type} = CALL | RAISE | BET
+         * @custom.ensures (During this move) balance &lt; #balance &amp; balance &gt; 0
          */
         public Move(Option.OptionType type, int amount) {
             this.move = type.toString() + ": $" + amount;
@@ -248,7 +248,7 @@ public class SimplePlayer implements SimplePlayerInterface, Serializable {
          *
          * @param type
          *            the {@code OptionType} of the move
-         * @requires {@param type} = FOLD | CHECK | ALLIN
+         * @custom.requires {type} = FOLD | CHECK | ALLIN
          * @custom.ensures (During this move) balance = #balance | balance = 0
          */
         public Move(Option.OptionType type) {

@@ -47,7 +47,7 @@ public interface HandAnalyzerInterface {
     /**
      * Analyzes the hand, essentially the main method.
      *
-     * @updates topRank, bestHand, pairRanks, fullHouseRanks
+     * @custom.updates topRank, bestHand, pairRanks, fullHouseRanks
      */
     void analyze();
 }
