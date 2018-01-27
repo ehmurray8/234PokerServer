@@ -155,7 +155,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
     /**
      * The {@code Rank}(s) of any pairs the hand contains.
      *
-     * @ensures |pairRanks| = number of pairs if|pairRanks| = 2 =&gt; {top, second}
+     * @custom.ensures |pairRanks| = number of pairs if|pairRanks| = 2 =&gt; {top, second}
      */
     private ArrayList<Rank> pairRanks;
 

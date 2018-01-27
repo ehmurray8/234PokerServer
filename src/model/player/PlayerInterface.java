@@ -29,7 +29,7 @@ public interface PlayerInterface {
      *
      * @param amount
      *            Amount to add to {@code hand}
-     * @updates balance balance = #balance + amount
+     * @custom.updates balance balance = #balance + amount
      */
     void updateBalance(int amount);
 
