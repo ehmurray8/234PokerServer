@@ -22,16 +22,7 @@ public interface PlayerInterface {
      *
      * @return {@code balance}
      */
-    int getBalance();
-
-    /**
-     * Updates the player's balance.
-     *
-     * @param amount
-     *            Amount to add to {@code hand}
-     * @custom.updates balance balance = #balance + amount
-     */
-    void updateBalance(int amount);
+    double getBalance();
 
     /**
      * Returns the player's hand.
@@ -80,4 +71,13 @@ public interface PlayerInterface {
      * @return {@code name}
      */
     String getName();
+
+    /**
+     * Updates the player's balance.
+     *
+     * @param amount
+     *            Amount to add to {@code hand}
+     * @custom.updates balance balance = #balance + amount
+     */
+	void updateBalance(double amt);
 }

@@ -21,13 +21,17 @@ public class PineappleHand extends Hand {
      *            the amount of the small blind
      * @param bigBlind
      *            the amount of the big blind
+     * @param ante
+     * 			  the amount of the ante
+     * @param players
+     * 			  the players in the current hand
      */
-    public PineappleHand(int smallBlind, int bigBlind) {
-        super(smallBlind, bigBlind);
+    public PineappleHand(double smallBlind, double bigBlind, double ante, List<Player> players) {
+        super(smallBlind, bigBlind, ante, players);
     }
 
     @Override
-    public final void dealInitialHand(List<Player> players) {
+    public final void dealInitialHand() {
         for (Player player : players) {
             player.addCard(super.dealCard());
         }

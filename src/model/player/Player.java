@@ -75,7 +75,7 @@ public class Player implements PlayerInterface, Serializable {
     /**
      * The player's balance.
      */
-    private int balance;
+    private double balance;
 
     /**
      * The player's hand.
@@ -88,21 +88,16 @@ public class Player implements PlayerInterface, Serializable {
     private boolean hasFolded;
 
     private int amountThisTurn;
+    
+    private boolean isSittingOut;
 
     /**
      * Creates a new representation of a player.
-     *
-     * @param balance
-     *            the player's balance
-     * @param name
-     *            the player's name
      */
-    private void createNewRep(int balance, String name) {
-        this.balance = balance;
-        this.name = name;
+    private void resetStatus() {
         this.hand = new ArrayList<Card>();
         this.hasFolded = false;
-        this.amountThisTurn = 0;
+        this.clearAmtThisTurn();
     }
 
     /**
@@ -115,16 +110,34 @@ public class Player implements PlayerInterface, Serializable {
      * @param name
      *            Player's name
      */
-    public Player(int balance, String name) {
-        this.createNewRep(balance, name);
+    public Player(double balance, String name) {
+        this.balance = balance;
+        this.name = name;
+        this.resetStatus();
+        this.isSittingOut = false;
     }
+    
 
-    public int getAmountThisTurn() {
+    public boolean isSittingOut() {
+		return isSittingOut;
+	}
+
+	public void setSittingOut(boolean isSittingOut) {
+		this.isSittingOut = isSittingOut;
+	}
+
+	public int getAmountThisTurn() {
         return this.amountThisTurn;
     }
 
-    public void addAmountThisTurn(int addAmt) {
-        this.amountThisTurn += addAmt;
+    public boolean addAmountThisTurn(double addAmt) {
+    	if(addAmt <= this.balance) { 
+            this.amountThisTurn += addAmt;
+            this.updateBalance(-1 * addAmt);
+            return true;
+    	} else {
+    		return false;
+    	}
     }
 
     public void clearAmtThisTurn() {
@@ -132,14 +145,13 @@ public class Player implements PlayerInterface, Serializable {
     }
 
     @Override
-
-    public final int getBalance() {
+    public final double getBalance() {
         return this.balance;
     }
 
     @Override
-    public final void updateBalance(int amount) {
-        this.balance += amount;
+    public final void updateBalance(double amt) {
+        this.balance += amt;
     }
 
     @Override
@@ -171,9 +183,7 @@ public class Player implements PlayerInterface, Serializable {
 
     @Override
     public final void newHand() {
-        String name = this.name;
-        int balance = this.balance;
-        this.createNewRep(balance, name);
+        this.resetStatus();
     }
 
     @Override
