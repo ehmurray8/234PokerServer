@@ -140,7 +140,7 @@ public class Option implements Serializable {
     /**
      * The amount this option costs to perform.
      */
-    private int amount;
+    private double amount;
 
     /**
      * Creates a Option instance.
@@ -151,7 +151,7 @@ public class Option implements Serializable {
      *            the amount corresponding to the option described by the
      *            instance
      */
-    public Option(OptionType type, int amount) {
+    public Option(OptionType type, double amount) {
         this.type = type;
         this.amount = amount;
         this.kind = this.type.getKind();
@@ -191,7 +191,7 @@ public class Option implements Serializable {
      *
      * @return the amount this option costs to perform
      */
-    public int getAmount() {
+    public double getAmount() {
         return this.amount;
     }
 
@@ -201,7 +201,7 @@ public class Option implements Serializable {
      * @param amount
      *            the new amount of the option
      */
-    public void setAmount(int amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 

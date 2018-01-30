@@ -196,9 +196,7 @@ public class Rules {
 		return this.maxCapacity;
 	}
 	
-	/**
-	 * @Override
-	 */
+	@Override
 	public String toString() {
 		return "Big Blind: " + this.bigBlind + ", Small Blind: " + this.smallBlind + ", Ante: " + this.ante +
 				", Time limit (s): " + this.timeLimitSecs;

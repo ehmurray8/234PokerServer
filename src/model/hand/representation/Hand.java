@@ -3,9 +3,14 @@ package model.hand.representation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Comparator;
 
 import model.card.Card;
 import model.card.Deck;
+import model.hand.analyzer.HandAnalyzer;
+import model.hand.analyzer.HoldEmAnalyzer;
+import model.hand.analyzer.OmahaAnalyzer;
+import model.option.Option;
 import model.player.Player;
 
 /**
@@ -70,6 +75,8 @@ public abstract class Hand implements HandInterface {
      *            the amount of the big blind
      * @param ante
      * 			  the amount of the ante
+     * @param players
+     * 			  the players currently playing the hand
      */
     public Hand(double smallBlind, double bigBlind, double ante, List<Player> players) {
         this.deck = new Deck();
@@ -82,6 +89,7 @@ public abstract class Hand implements HandInterface {
         this.allPots = new ArrayList<Pot>();
         this.players = players;
     }
+    
     
     public List<Pot> getPots() {
     	return pots;
@@ -132,7 +140,6 @@ public abstract class Hand implements HandInterface {
     }
 
     public final void chargeAmount(double amount, List<Player> playersToCharge) {
-    	this.pots.get(0).setAmountOwed(amount);
     	for(Player p : playersToCharge) {
     		if(p.getBalance() > 0) {
                 if(p.addAmountThisTurn(amount)) {
@@ -190,6 +197,7 @@ public abstract class Hand implements HandInterface {
     }
 
     public final void chargeAntes() {
+    	this.pots.get(0).setAmountOwed(this.ante);
     	chargeAmount(this.ante, this.players);
     	for(Player p : this.players) {
     		p.clearAmtThisTurn();
@@ -198,12 +206,139 @@ public abstract class Hand implements HandInterface {
     }
     
     public final void chargeBigBlind(int bigBlindPos) {
+    	double potNum = this.bigBlind;
+    	if(this.pots.size() > 1) {
+    		potNum = this.bigBlind - this.pots.get(0).getAmountOwed();
+    	}
+    	this.pots.get(this.pots.size() - 1).setAmountOwed(potNum);
         chargeAmount(this.bigBlind, Arrays.asList(new Player[]{this.players.get(bigBlindPos)}));
     	removeBrokePlayers();
     	removeOldPots();
     }
     
     public final void chargeSmallBlind(int smallBlindPos) {
+    	this.pots.get(0).setAmountOwed(this.smallBlind);
         chargeAmount(this.smallBlind, Arrays.asList(new Player[]{this.players.get(smallBlindPos)}));
+    }
+    
+    public void setupBetRound() {
+    	for(Player p : this.players) {
+    		p.noActionThisTurn();
+    	}
+    }
+    
+    public boolean playersBetting() {
+    	double amountOwed = 0;
+    	int numPlayersWithMoney = 0;
+    	boolean res = false;
+    	for(Pot p : pots) {
+    		amountOwed += p.getAmountOwed();
+    	}
+    	if(amountOwed != 0) {
+    		return true;
+    	}
+    	
+    	if(players.size() < 2) {
+    		return false;
+    	}
+    	
+    	for(Player p : players) {
+    		if(p.getBalance() == 0) {
+    			numPlayersWithMoney++;
+    		}
+    		if(p.getAmountThisTurn() == -1) {
+    			res = true;
+    		}
+    	}
+    	if(numPlayersWithMoney < 2) {
+    		return false;
+    	}
+    	return res;
+    }
+    
+    public void executeOption(Player player, Option option) {
+    	Option.OptionType type = option.getType();
+    	switch(type) {
+    	case FOLD:
+    		player.fold();
+    		players.remove(player);
+    		break;
+    	case CHECK:
+    		player.check();
+    		break;
+    	case CALL:
+    	case RAISE:
+    	case BET:
+    	case ALLIN:
+    		chargeAmount(option.getAmount(), Arrays.asList(new Player[] {player} ));
+    		break;
+    	default:
+    		break;
+    	}
+    }
+    
+    public void payWinners(boolean isHoldem) {
+    	List<HandAnalyzer> analyzers;
+    	HandAnalyzer analyzer;
+    	List<Card> hand;
+        Comparator<HandAnalyzer> hAC = new HandAnalyzer.HandAnalyzerComparator();
+    	for(Pot pot : pots) {
+            analyzers = new ArrayList<HandAnalyzer>();
+    		for(Player player : pot.getPlayers()) {
+                hand = new ArrayList<Card>();
+                hand.addAll(player.getHand());
+                hand.addAll(this.getCommunityCards());
+    			if(isHoldem) {
+    				analyzer = new HoldEmAnalyzer(hand);
+    				analyzer.analyze();
+    				analyzers.add(analyzer);
+    			} else {
+    				analyzer = new OmahaAnalyzer(hand);
+    				analyzer.analyze();
+    				analyzers.add(analyzer);
+    			}
+    			System.out.println(player.getName() + ": " + analyzer.toString());
+    		}
+    		List<Integer> potWinnerIdxs = new ArrayList<Integer>();
+    		potWinnerIdxs.add(0);
+    		for(int i = 1; i < pot.getPlayers().size(); i++) {
+    			if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) > 0) {
+    				potWinnerIdxs.clear();
+    				potWinnerIdxs.add(i);
+    			} else if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) == 0) {
+    				potWinnerIdxs.add(i);
+    			}
+    		}
+    		for(int pwi : potWinnerIdxs) {
+    			System.out.println(pot.getPlayers().get(pwi).getName() + " has won " + pot.getAmount() + "!");
+    			pot.getPlayers().get(pwi).updateBalance(pot.getAmount());
+    		}
+    	}
+    }
+    
+    public List<Option> generateOptions(Player player) {
+    	double numOwed  = 0;
+    	List<Option> options = new ArrayList<Option>();
+    	if(player.getBalance() > 0) {
+            for(Pot p : pots) {
+                numOwed += p.getAmountOwed();
+            }
+            if(numOwed == 0) {
+                options.add(new Option(Option.OptionType.CHECK, 0));
+                if(this.bigBlind < player.getBalance()) {
+                    options.add(new Option(Option.OptionType.BET, this.bigBlind));
+                }
+            } else {
+                options.add(new Option(Option.OptionType.FOLD, 0));
+                if(numOwed < player.getBalance()) {
+                    options.add(new Option(Option.OptionType.CALL, numOwed));
+                }
+                if(numOwed + this.bigBlind < player.getBalance()) {
+                    options.add(new Option(Option.OptionType.RAISE, this.bigBlind + numOwed));
+                }
+            }
+            options.add(new Option(Option.OptionType.ALLIN, player.getBalance()));
+    	}
+        return options;
     }
 }

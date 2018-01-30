@@ -5,9 +5,11 @@ package game;
 import model.player.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import game.Rules.GameType;
 import model.hand.representation.*;
+import model.option.Option;
 
 /**
  * @author Emmet
@@ -26,9 +28,13 @@ public class Game {
 	int dealerNum;
 	int smallBlindNum;
 	int bigBlindNum;
+	int currentAction;
 	ArrayList<Player> playersInHand;
 	
-	public Game(ArrayList<Player> players, Rules rules) {
+	/**
+	 * TODO Map the players array to a list of clients that allow for communicating between
+	 */
+	public Game(List<Player> players, Rules rules) {
 		this.players = new Player[rules.getMaxCapacity()];
 		for(int i = 0; i < players.size(); i++) {
 			this.players[i] = players.get(i);
@@ -39,6 +45,7 @@ public class Game {
 		updateSmallBlindNum();
 		updateBigBlindNum();
 		this.playersInHand = new ArrayList<Player>();
+		this.currentAction = 0;
 	}
 	
 	/**
@@ -55,7 +62,19 @@ public class Game {
 	public void incrementDealerNum() {
 		do {
             this.dealerNum = (this.dealerNum + 1) % this.players.length;
-		} while (this.players[this.dealerNum] != null);
+		} while (this.players[this.dealerNum] == null || !this.players[this.dealerNum].isSittingOut());
+	}
+	
+	public int findStartingLocation() {
+		int startLoc = -1;
+		int num = 1;
+		do {
+			Player player = players[(this.dealerNum + num) % this.players.length];
+			if(player != null) {
+                startLoc = playersInHand.indexOf(player);
+			}
+		} while (startLoc == -1);
+		return startLoc;
 	}
 	
 	public void updateSmallBlindNum() {
@@ -63,14 +82,19 @@ public class Game {
 		do {
             this.smallBlindNum = (this.dealerNum + num) % this.players.length;
             num++;
-		} while (this.players[this.smallBlindNum] != null);
+		} while (this.players[this.smallBlindNum] == null || this.players[this.smallBlindNum].isSittingOut());
 	}
 	
 	public void updateBigBlindNum() {
 		int num = 1;
 		do {
 			this.bigBlindNum = (this.smallBlindNum + num) % this.players.length;
-		} while(this.players[this.bigBlindNum] != null);
+			num++;
+		} while(this.players[this.bigBlindNum] == null || this.players[this.dealerNum].isSittingOut());
+	}
+	
+	public void updateCurrentAction() {
+        this.currentAction = (this.currentAction + 1) % playersInHand.size();
 	}
 	
 	/**
@@ -109,6 +133,8 @@ public class Game {
 	
 	/**
 	 * Checks whether or not the table is currently full.
+	 * 
+	 * @return whether or not table is full
 	 */
 	public boolean tableFull() {
 		return this.numPlayers == this.rules.getMaxCapacity();
@@ -131,22 +157,41 @@ public class Game {
         case 3:
         	return GameType.OMAHA;
         default:
-        	return GameType.HOLDEM;
-        }
+        	return GameType.HOLDEM; }
 	}
 	
 	public void removeBrokePlayers() {
 		for(int i = 0; i < this.players.length; i++) {
-			if(this.players[i] != null || this.players[i].getBalance() == 0) {
+			if(this.players[i] != null && this.players[i].getBalance() == 0) {
 				this.removePlayer(this.players[i]);
 			}
 		}
 	}
 	
-	public void startHand() {
+	public void bettingRound(Hand currHand) {
+        this.currentAction = findStartingLocation();
+        currHand.setupBetRound();
+        List<Option> currOptions;
+        while(currHand.playersBetting()) {
+            updateCurrentAction();
+            Player player = playersInHand.get(this.currentAction);
+            currOptions = currHand.generateOptions(player);
+            Option option = askPlayerForOption(currOptions, player);
+            currHand.executeOption(player, option);
+            System.out.println(option.toString());
+        }
+	}
+	
+	public Option askPlayerForOption(List<Option> options, Player player) {
+        int randomNum = ThreadLocalRandom.current().nextInt(0, options.size());
+        return options.get(randomNum);
+	}
+	
+	public void startGame() {
         GameType currGameType;
         Hand currHand;
-		while(this.players.length > 0) {
+        int count = 0;
+		while(this.players.length > 0 && count < 5) {
 			for(Player p : players) {
 				if(p != null && !p.isSittingOut()) {
 					this.playersInHand.add(p);
@@ -159,6 +204,7 @@ public class Game {
 				currGameType = askDealerForGameType();
 			}
 			
+			boolean isHoldemAnalyzer = true;
 			switch(currGameType){
 			case HOLDEM:
 				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), Arrays.asList(players));
@@ -168,10 +214,13 @@ public class Game {
 				break;
 			case OMAHA:
 				currHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), Arrays.asList(players));
+				isHoldemAnalyzer = false;
 				break;
 			default:
 				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), Arrays.asList(players));
 			}
+			
+			System.out.println(currHand.toString());
 			
 			currHand.dealInitialHand();
 			if(this.rules.getAnte() > 0) {
@@ -179,25 +228,41 @@ public class Game {
 			}
 			currHand.chargeSmallBlind(smallBlindNum);
 			currHand.chargeBigBlind(bigBlindNum);
+			this.currentAction = playersInHand.indexOf(players[bigBlindNum]);
 			
+			for(Player p : players) {
+				System.out.println(p.toString());
+			}
 			
-			//TODO: Need to add betting round
+			bettingRound(currHand);
 			currHand.dealFlop();
-			//TODO: Need to add betting round
+			
+			for(Player p : players) {
+				System.out.println(p.toString());
+			}
+			
+			bettingRound(currHand);
 			currHand.dealTurn();
-			//TODO: Need to add betting round
+
+			bettingRound(currHand);
 			currHand.dealRiver();
-			//TODO: Need to add betting round
+
+			bettingRound(currHand);
 			
-			//Need to check winner of every pot
+			currHand.dealInitialHand();
 			
-			//Distribute winnings
+			currHand.payWinners(isHoldemAnalyzer);
+			
+			for(Player p : players) {
+				System.out.println(p.toString());
+			}
 			
 			removeBrokePlayers();
 			
 			incrementDealerNum();
 			updateSmallBlindNum();
 			updateBigBlindNum();
+			count++;
 		}
 	}
 	

@@ -69,9 +69,7 @@ public class Pot {
 		this.amount = this.amountOwed * this.numPlayersPaid;
 	}
 	
-	/**
-	 * @Override
-	 */
+	 @Override
 	public String toString() {
 		String playerStr = "";
 		for(Player p : players) {

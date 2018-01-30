@@ -98,7 +98,7 @@ public class HandTest {
     	Player p5 = new Player(7, "P5");
     	Player p6 = new Player(100, "P6");
     	List<Player> players = new ArrayList<Player>(Arrays.asList(new Player[]{p1, p2, p3, p4, p5, p6}));
-    	Hand hand = new HoldEmHand(5, 10, 30, players);
+    	Hand hand = new HoldEmHand(60, 120, 30, players);
     	hand.dealInitialHand();
     	hand.chargeAntes();
     	assertTrue(hand.getAllPots().size() == 4);
@@ -118,7 +118,6 @@ public class HandTest {
     	assertTrue(p5.getBalance() == 0);
     	assertTrue(p6.getBalance() == 70);
     	
-    	//TODO: Debug this weird case
     	hand.chargeSmallBlind(3);
     	hand.chargeBigBlind(5);
     	

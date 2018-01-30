@@ -75,7 +75,7 @@ public interface PlayerInterface {
     /**
      * Updates the player's balance.
      *
-     * @param amount
+     * @param amt
      *            Amount to add to {@code hand}
      * @custom.updates balance balance = #balance + amount
      */

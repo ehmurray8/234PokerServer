@@ -132,6 +132,9 @@ public class Player implements PlayerInterface, Serializable {
 
     public boolean addAmountThisTurn(double addAmt) {
     	if(addAmt <= this.balance) { 
+    		if(this.amountThisTurn == -1) {
+    			this.amountThisTurn = 0;
+    		}
             this.amountThisTurn += addAmt;
             this.updateBalance(-1 * addAmt);
             return true;
@@ -142,6 +145,10 @@ public class Player implements PlayerInterface, Serializable {
 
     public void clearAmtThisTurn() {
         this.amountThisTurn = 0;
+    }
+    
+    public void noActionThisTurn() {
+    	this.amountThisTurn = -1;
     }
 
     @Override
@@ -169,6 +176,11 @@ public class Player implements PlayerInterface, Serializable {
     public final void fold() {
         this.hand = new ArrayList<Card>();
         this.hasFolded = true;
+        this.clearAmtThisTurn();
+    }
+    
+    public final void check() {
+        this.clearAmtThisTurn();
     }
 
     @Override
