@@ -97,7 +97,7 @@ public class HandTest {
     	Player p4 = new Player(50, "P4");
     	Player p5 = new Player(7, "P5");
     	Player p6 = new Player(100, "P6");
-    	List<Player> players = new ArrayList<Player>(Arrays.asList(new Player[]{p1, p2, p3, p4, p5, p6}));
+    	ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(new Player[]{p1, p2, p3, p4, p5, p6}));
     	Hand hand = new HoldEmHand(60, 120, 30, players);
     	hand.dealInitialHand();
     	hand.chargeAntes();

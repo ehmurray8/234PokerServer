@@ -56,8 +56,7 @@ public class Pot {
 		double amountOver = 0;
 		if(this.amountOwed < amount) {
 			amountOver = this.numPlayersPaid * (amount - this.amountOwed);
-			//this.amount -= amountOver;
-			this.amountOwed = amount;
+			this.numPlayersPaid = 0;
 		} else {
 			amountOver = this.numPlayersPaid * (this.amountOwed - amount);
 		}

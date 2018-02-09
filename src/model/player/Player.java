@@ -87,7 +87,7 @@ public class Player implements PlayerInterface, Serializable {
      */
     private boolean hasFolded;
 
-    private int amountThisTurn;
+    private double amountThisTurn;
     
     private boolean isSittingOut;
 
@@ -126,7 +126,7 @@ public class Player implements PlayerInterface, Serializable {
 		this.isSittingOut = isSittingOut;
 	}
 
-	public int getAmountThisTurn() {
+	public double getAmountThisTurn() {
         return this.amountThisTurn;
     }
 

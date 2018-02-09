@@ -62,7 +62,7 @@ public class Game {
 	public void incrementDealerNum() {
 		do {
             this.dealerNum = (this.dealerNum + 1) % this.players.length;
-		} while (this.players[this.dealerNum] == null || !this.players[this.dealerNum].isSittingOut());
+		} while (this.players[this.dealerNum] == null || this.players[this.dealerNum].isSittingOut());
 	}
 	
 	public int findStartingLocation() {
@@ -168,16 +168,18 @@ public class Game {
 		}
 	}
 	
-	public void bettingRound(Hand currHand) {
+	public void bettingRound(Hand currHand, boolean resetBetting) {
         this.currentAction = findStartingLocation();
-        currHand.setupBetRound();
+        if(resetBetting) {
+            currHand.setupBetRound();
+        }
         List<Option> currOptions;
         while(currHand.playersBetting()) {
-            updateCurrentAction();
             Player player = playersInHand.get(this.currentAction);
             currOptions = currHand.generateOptions(player);
             Option option = askPlayerForOption(currOptions, player);
             currHand.executeOption(player, option);
+            updateCurrentAction();
             System.out.println(option.toString());
         }
 	}
@@ -207,17 +209,23 @@ public class Game {
 			boolean isHoldemAnalyzer = true;
 			switch(currGameType){
 			case HOLDEM:
-				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), Arrays.asList(players));
+				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+						new ArrayList<Player>(Arrays.asList(players)));
 				break;
 			case PINEAPPLE:
-				currHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), Arrays.asList(players));
+				//currHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+				//	new ArrayList<Player>(Arrays.asList(players)));
+				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+						new ArrayList<Player>(Arrays.asList(players)));
 				break;
 			case OMAHA:
-				currHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), Arrays.asList(players));
+				currHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+						new ArrayList<Player>(Arrays.asList(players)));
 				isHoldemAnalyzer = false;
 				break;
 			default:
-				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), Arrays.asList(players));
+				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+						new ArrayList<Player>(Arrays.asList(players)));
 			}
 			
 			System.out.println(currHand.toString());
@@ -234,20 +242,20 @@ public class Game {
 				System.out.println(p.toString());
 			}
 			
-			bettingRound(currHand);
+			bettingRound(currHand, false);
 			currHand.dealFlop();
 			
 			for(Player p : players) {
 				System.out.println(p.toString());
 			}
 			
-			bettingRound(currHand);
+			bettingRound(currHand, true);
 			currHand.dealTurn();
 
-			bettingRound(currHand);
+			bettingRound(currHand, true);
 			currHand.dealRiver();
 
-			bettingRound(currHand);
+			bettingRound(currHand, true);
 			
 			currHand.dealInitialHand();
 			

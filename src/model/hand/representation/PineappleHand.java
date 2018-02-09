@@ -1,6 +1,6 @@
 package model.hand.representation;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import model.player.Player;
 
@@ -26,7 +26,7 @@ public class PineappleHand extends Hand {
      * @param players
      * 			  the players in the current hand
      */
-    public PineappleHand(double smallBlind, double bigBlind, double ante, List<Player> players) {
+    public PineappleHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
         super(smallBlind, bigBlind, ante, players);
     }
 

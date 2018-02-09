@@ -15,8 +15,7 @@ import game.Rules.GameType;
 import model.player.Player;
 
 /**
- * @author Emmet
- *
+ * @author Emmet Emmet
  */
 public class GameTest {
 
@@ -29,5 +28,4 @@ public class GameTest {
 		Game game = new Game(players, rules);
 		game.startGame();
 	}
-	
 }

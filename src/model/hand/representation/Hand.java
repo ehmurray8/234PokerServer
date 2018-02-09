@@ -63,7 +63,7 @@ public abstract class Hand implements HandInterface {
      */
     private List<Pot> allPots;
 
-    protected List<Player> players;
+    protected ArrayList<Player> players;
 
     /**
      * The Hand constructor initializes an abstract hand representing one turn
@@ -78,7 +78,7 @@ public abstract class Hand implements HandInterface {
      * @param players
      * 			  the players currently playing the hand
      */
-    public Hand(double smallBlind, double bigBlind, double ante, List<Player> players) {
+    public Hand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
         this.deck = new Deck();
         this.smallBlind = smallBlind;
         this.bigBlind = bigBlind;
@@ -142,11 +142,18 @@ public abstract class Hand implements HandInterface {
     public final void chargeAmount(double amount, List<Player> playersToCharge) {
     	for(Player p : playersToCharge) {
     		if(p.getBalance() > 0) {
+    			double tempAmount = amount;
                 if(p.addAmountThisTurn(amount)) {
                     for(Pot pot : pots) {
                         if(pot.getAmountOwed() != 0) {
                             pot.addAmount(pot.getAmountOwed(), 1);
+                            tempAmount -= pot.getAmountOwed();
                         }
+                    }
+                    if(tempAmount > 0) {
+                    	Pot currPot = pots.get(pots.size() - 1);
+                    	currPot.setAmountOwed(currPot.getAmountOwed() + tempAmount);
+                    	currPot.addAmount(tempAmount, 1);
                     }
                 } else {
                     int numPotsPaid = 0;
@@ -211,6 +218,7 @@ public abstract class Hand implements HandInterface {
     		potNum = this.bigBlind - this.pots.get(0).getAmountOwed();
     	}
     	this.pots.get(this.pots.size() - 1).setAmountOwed(potNum);
+    	//this.pots.get(this.pots.size() - 1).
         chargeAmount(this.bigBlind, Arrays.asList(new Player[]{this.players.get(bigBlindPos)}));
     	removeBrokePlayers();
     	removeOldPots();
@@ -231,28 +239,33 @@ public abstract class Hand implements HandInterface {
     	double amountOwed = 0;
     	int numPlayersWithMoney = 0;
     	boolean res = false;
-    	for(Pot p : pots) {
-    		amountOwed += p.getAmountOwed();
-    	}
-    	if(amountOwed != 0) {
-    		return true;
-    	}
     	
     	if(players.size() < 2) {
     		return false;
     	}
     	
+    	for(Pot p : pots) {
+    		amountOwed += p.getAmountOwed();
+    	}
+    	
+    	
     	for(Player p : players) {
-    		if(p.getBalance() == 0) {
+    		if(p.getBalance() > 0) {
     			numPlayersWithMoney++;
     		}
     		if(p.getAmountThisTurn() == -1) {
     			res = true;
     		}
     	}
+    	
+    	if(numPlayersWithMoney > 0 && amountOwed != 0) {
+    		return true;
+    	}
+    	
     	if(numPlayersWithMoney < 2) {
     		return false;
     	}
+
     	return res;
     }
     
@@ -331,7 +344,7 @@ public abstract class Hand implements HandInterface {
             } else {
                 options.add(new Option(Option.OptionType.FOLD, 0));
                 if(numOwed < player.getBalance()) {
-                    options.add(new Option(Option.OptionType.CALL, numOwed));
+                    options.add(new Option(Option.OptionType.CALL, numOwed - player.getAmountThisTurn()));
                 }
                 if(numOwed + this.bigBlind < player.getBalance()) {
                     options.add(new Option(Option.OptionType.RAISE, this.bigBlind + numOwed));
