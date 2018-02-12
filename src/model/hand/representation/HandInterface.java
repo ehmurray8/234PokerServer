@@ -1,10 +1,8 @@
 package model.hand.representation;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import model.card.Card;
-import model.player.Player;
 
 /**
  * This interface defines a Hand that contains informations about the pot, the

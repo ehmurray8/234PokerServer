@@ -1,5 +1,6 @@
 package model.hand.representation;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
@@ -146,8 +147,8 @@ public abstract class Hand implements HandInterface {
                 if(p.addAmountThisTurn(amount)) {
                     for(Pot pot : pots) {
                         if(pot.getAmountOwed() != 0) {
-                            pot.addAmount(pot.getAmountOwed(), 1);
                             tempAmount -= pot.getAmountOwed();
+                            pot.addAmount(pot.getAmountOwed(), 1);
                         }
                     }
                     if(tempAmount > 0) {
@@ -239,8 +240,18 @@ public abstract class Hand implements HandInterface {
     	double amountOwed = 0;
     	int numPlayersWithMoney = 0;
     	boolean res = false;
-    	
+    	int numNotFolded = 0;
+
     	if(players.size() < 2) {
+    		return false;
+    	}
+
+    	for(Player p : players) {
+    		if(!p.hasFolded()) {
+    			numNotFolded += 1;
+    		}
+    	}
+    	if(numNotFolded < 2) {
     		return false;
     	}
     	
@@ -279,10 +290,12 @@ public abstract class Hand implements HandInterface {
     	case CHECK:
     		player.check();
     		break;
-    	case CALL:
     	case RAISE:
     	case BET:
     	case ALLIN:
+    		this.pots.get(this.pots.size()-1).setAmountOwed(this.pots.get(this.pots.size()-1).getAmountOwed() 
+    				+ option.getAmount());
+    	case CALL:
     		chargeAmount(option.getAmount(), Arrays.asList(new Player[] {player} ));
     		break;
     	default:
@@ -301,31 +314,47 @@ public abstract class Hand implements HandInterface {
                 hand = new ArrayList<Card>();
                 hand.addAll(player.getHand());
                 hand.addAll(this.getCommunityCards());
-    			if(isHoldem) {
-    				analyzer = new HoldEmAnalyzer(hand);
-    				analyzer.analyze();
-    				analyzers.add(analyzer);
-    			} else {
-    				analyzer = new OmahaAnalyzer(hand);
-    				analyzer.analyze();
-    				analyzers.add(analyzer);
-    			}
-    			System.out.println(player.getName() + ": " + analyzer.toString());
+                if(!player.hasFolded() && !player.isSittingOut()) {
+                    if(isHoldem) {
+                        analyzer = new HoldEmAnalyzer(hand);
+                        analyzer.analyze();
+                        analyzers.add(analyzer);
+                    } else {
+                        analyzer = new OmahaAnalyzer(hand);
+                        analyzer.analyze();
+                        analyzers.add(analyzer);
+                    }
+                    System.out.println(player.getName() + ": " + analyzer.toString());
+                } else {
+                	analyzers.add(null);
+                }
     		}
     		List<Integer> potWinnerIdxs = new ArrayList<Integer>();
-    		potWinnerIdxs.add(0);
-    		for(int i = 1; i < pot.getPlayers().size(); i++) {
-    			if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) > 0) {
-    				potWinnerIdxs.clear();
-    				potWinnerIdxs.add(i);
-    			} else if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) == 0) {
-    				potWinnerIdxs.add(i);
-    			}
-    		}
-    		for(int pwi : potWinnerIdxs) {
-    			System.out.println(pot.getPlayers().get(pwi).getName() + " has won " + pot.getAmount() + "!");
-    			pot.getPlayers().get(pwi).updateBalance(pot.getAmount());
-    		}
+    		//potWinnerIdxs.add(0);
+            for(int i = 0; i < pot.getPlayers().size(); i++) {
+            	if(analyzers.get(i) != null) {
+            		if(potWinnerIdxs.isEmpty()) {
+            			potWinnerIdxs.add(i);
+            		} else {
+            			if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) > 0) {
+                            potWinnerIdxs.clear();
+                            potWinnerIdxs.add(i);
+                        } else if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) == 0) {
+                            potWinnerIdxs.add(i);
+                        }
+            		}
+            	}
+                
+            }
+            double winnings = pot.getAmount() / potWinnerIdxs.size();
+            DecimalFormat df = new DecimalFormat(".##");
+            winnings = Double.parseDouble(df.format(winnings));
+            for(int pwi : potWinnerIdxs) {
+                System.out.println(pot.getPlayers().get(pwi).getName() + " has won " + winnings + "!");
+                pot.getPlayers().get(pwi).updateBalance(winnings);
+            }
+            pot.getPlayers().get(0).updateBalance(pot.getAmount() - winnings);
+            System.out.println("Left over: " + (pot.getAmount() - winnings));
     	}
     }
     
@@ -336,6 +365,7 @@ public abstract class Hand implements HandInterface {
             for(Pot p : pots) {
                 numOwed += p.getAmountOwed();
             }
+            numOwed -= player.getAmountThisTurn();
             if(numOwed == 0) {
                 options.add(new Option(Option.OptionType.CHECK, 0));
                 if(this.bigBlind < player.getBalance()) {
@@ -344,13 +374,23 @@ public abstract class Hand implements HandInterface {
             } else {
                 options.add(new Option(Option.OptionType.FOLD, 0));
                 if(numOwed < player.getBalance()) {
-                    options.add(new Option(Option.OptionType.CALL, numOwed - player.getAmountThisTurn()));
+                    options.add(new Option(Option.OptionType.CALL, numOwed));
                 }
                 if(numOwed + this.bigBlind < player.getBalance()) {
-                    options.add(new Option(Option.OptionType.RAISE, this.bigBlind + numOwed));
+                	int count = 0;
+                	for(Player p : players) {
+                		if(p.getBalance() > 0 && !p.hasFolded() && !p.isSittingOut()) {
+                			count++;
+                		}
+                	}
+                	if(count > 1) {
+                        options.add(new Option(Option.OptionType.RAISE, this.bigBlind + numOwed));
+                	}
                 }
             }
-            options.add(new Option(Option.OptionType.ALLIN, player.getBalance()));
+            if(numOwed + this.bigBlind <= player.getBalance()) {
+                options.add(new Option(Option.OptionType.ALLIN, player.getBalance()));
+            }
     	}
         return options;
     }
