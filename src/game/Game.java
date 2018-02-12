@@ -4,7 +4,6 @@
 package game;
 import model.player.Player;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import game.Rules.GameType;
@@ -189,16 +188,52 @@ public class Game {
         return options.get(randomNum);
 	}
 	
+	private boolean tableEmpty() {
+		for(Player p : players) {
+			if(p != null) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean stillBetting() {
+		int count = 0;
+		for(Player p : playersInHand) {
+			if(!p.hasFolded()) {
+				count ++;
+			}
+		}
+		if(count > 1) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Main loop of an individual game, the game loops infinitely as long as there
+	 * are players at the table. This loop uses the hand class to keep track of the
+	 * game state, and uses Game helper methods to communicate with the client.
+	 * 
+	 * TODO: Handle dead and inactive game
+	 * TODO: Handle showing cards
+	 */
 	public void startGame() {
         GameType currGameType;
         Hand currHand;
         int count = 0;
-		while(this.players.length > 0 && count < 5) {
+		while(!tableEmpty() && count < 5) {
 			for(Player p : players) {
 				if(p != null && !p.isSittingOut()) {
 					this.playersInHand.add(p);
 					p.newHand();
 				}
+			}
+			
+			if(this.playersInHand.size() <= 1) {
+				// Inactive game
+				System.out.println("Inactive game.");
+				break;
 			}
 	
 			currGameType = this.rules.getGameType();
@@ -209,23 +244,18 @@ public class Game {
 			boolean isHoldemAnalyzer = true;
 			switch(currGameType){
 			case HOLDEM:
-				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-						new ArrayList<Player>(Arrays.asList(players)));
+				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 				break;
 			case PINEAPPLE:
-				//currHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-				//	new ArrayList<Player>(Arrays.asList(players)));
-				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-						new ArrayList<Player>(Arrays.asList(players)));
+				//currHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 				break;
 			case OMAHA:
-				currHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-						new ArrayList<Player>(Arrays.asList(players)));
+				currHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 				isHoldemAnalyzer = false;
 				break;
 			default:
-				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-						new ArrayList<Player>(Arrays.asList(players)));
+				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 			}
 			
 			System.out.println(currHand.toString());
@@ -242,27 +272,34 @@ public class Game {
 				System.out.println(p.toString());
 			}
 			
-			bettingRound(currHand, false);
-			currHand.dealFlop();
+            bettingRound(currHand, false);
+            if(stillBetting()) {
+                currHand.dealFlop();
+            }
 			
 			for(Player p : players) {
 				System.out.println(p.toString());
 			}
 			
 			bettingRound(currHand, true);
-			currHand.dealTurn();
+			if(stillBetting()) {
+                currHand.dealTurn();
+			}
 
 			bettingRound(currHand, true);
-			currHand.dealRiver();
+			if(stillBetting()) {
+                currHand.dealRiver();
+			}
 
 			bettingRound(currHand, true);
-			
-			currHand.dealInitialHand();
 			
 			currHand.payWinners(isHoldemAnalyzer);
 			
+			// Show cards
+			
 			for(Player p : players) {
 				System.out.println(p.toString());
+				p.resetStatus();
 			}
 			
 			removeBrokePlayers();
@@ -270,8 +307,13 @@ public class Game {
 			incrementDealerNum();
 			updateSmallBlindNum();
 			updateBigBlindNum();
+			this.playersInHand.clear();
 			count++;
+			System.out.println("Hand number: " + count);
 		}
+		
+		// Dead game
+		System.out.println("Dead Game");
 	}
 	
 }

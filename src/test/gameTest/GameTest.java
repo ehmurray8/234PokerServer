@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import game.Game;
@@ -15,7 +16,7 @@ import game.Rules.GameType;
 import model.player.Player;
 
 /**
- * @author Emmet Emmet
+ * @author Emmet
  */
 public class GameTest {
 
@@ -27,5 +28,6 @@ public class GameTest {
 		Rules rules = new Rules(2., 4., 1., 30, 2, GameType.MIXED);
 		Game game = new Game(players, rules);
 		game.startGame();
+		assertTrue(p1.getBalance() + p2.getBalance() == 1000.);
 	}
 }

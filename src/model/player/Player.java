@@ -1,6 +1,5 @@
 package model.player;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -19,9 +18,8 @@ import model.card.Card;
  * @version 1.0
  * @since 9/20/16
  */
-public class Player implements PlayerInterface, Serializable {
+public class Player implements PlayerInterface  {
 
-    private static final long serialVersionUID = 5950169519310163575L;
 
     /**
      * The options that each player has during their turn.
@@ -94,7 +92,7 @@ public class Player implements PlayerInterface, Serializable {
     /**
      * Creates a new representation of a player.
      */
-    private void resetStatus() {
+    public void resetStatus() {
         this.hand = new ArrayList<Card>();
         this.hasFolded = false;
         this.clearAmtThisTurn();
