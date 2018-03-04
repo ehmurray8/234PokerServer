@@ -122,22 +122,22 @@ public abstract class Hand implements HandInterface {
 
     @Override
     public final void dealFlop() {
-        this.deck.dealCard();
-        this.community.add(this.deck.dealCard());
-        this.community.add(this.deck.dealCard());
-        this.community.add(this.deck.dealCard());
+        this.dealCard();
+        this.community.add(this.dealCard());
+        this.community.add(this.dealCard());
+        this.community.add(this.dealCard());
     }
 
     @Override
     public final void dealTurn() {
-        this.deck.dealCard();
-        this.community.add(this.deck.dealCard());
+        this.dealCard();
+        this.community.add(this.dealCard());
     }
 
     @Override
     public final void dealRiver() {
         this.deck.dealCard();
-        this.community.add(this.deck.dealCard());
+        this.community.add(this.dealCard());
     }
 
     public final void chargeAmount(double amount, List<Player> playersToCharge) {
@@ -308,53 +308,73 @@ public abstract class Hand implements HandInterface {
     	HandAnalyzer analyzer;
     	List<Card> hand;
         Comparator<HandAnalyzer> hAC = new HandAnalyzer.HandAnalyzerComparator();
+        int numLeft = 0;
     	for(Pot pot : pots) {
             analyzers = new ArrayList<HandAnalyzer>();
     		for(Player player : pot.getPlayers()) {
                 hand = new ArrayList<Card>();
                 hand.addAll(player.getHand());
                 hand.addAll(this.getCommunityCards());
-                if(!player.hasFolded() && !player.isSittingOut()) {
-                    if(isHoldem) {
-                        analyzer = new HoldEmAnalyzer(hand);
-                        analyzer.analyze();
-                        analyzers.add(analyzer);
+                System.out.println("Paying Winners Check: " + player.toString() + ", Full hand: " + hand.toString());
+                if (this.getCommunityCards().size() == 5) {
+                    if(!player.hasFolded() && !player.isSittingOut()) {
+                        if(isHoldem) {
+                            analyzer = new HoldEmAnalyzer(hand);
+                            analyzer.analyze();
+                            analyzers.add(analyzer);
+                        } else {
+                            analyzer = new OmahaAnalyzer(hand);
+                            analyzer.analyze();
+                            analyzers.add(analyzer);
+                        }
+                        System.out.println(player.getName() + ": " + analyzer.toString());
                     } else {
-                        analyzer = new OmahaAnalyzer(hand);
-                        analyzer.analyze();
-                        analyzers.add(analyzer);
+                        analyzers.add(null);
                     }
-                    System.out.println(player.getName() + ": " + analyzer.toString());
-                } else {
-                	analyzers.add(null);
+                } else if(!player.hasFolded()) {
+                	numLeft++;
                 }
     		}
-    		List<Integer> potWinnerIdxs = new ArrayList<Integer>();
-    		//potWinnerIdxs.add(0);
-            for(int i = 0; i < pot.getPlayers().size(); i++) {
-            	if(analyzers.get(i) != null) {
-            		if(potWinnerIdxs.isEmpty()) {
-            			potWinnerIdxs.add(i);
-            		} else {
-            			if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) > 0) {
-                            potWinnerIdxs.clear();
+    		if(numLeft == 1) {
+                double winnings = pot.getAmount(); 
+                DecimalFormat df = new DecimalFormat(".##");
+                winnings = Double.parseDouble(df.format(winnings));
+                for(int i = 0; i < players.size(); i++) {
+                	if(!players.get(i).hasFolded() && !players.get(i).isSittingOut()) {
+                        System.out.println(pot.getPlayers().get(i).getName() + " has won " + winnings + "!");
+                        pot.getPlayers().get(i).updateBalance(winnings);
+                	}
+                }
+                pot.getPlayers().get(0).updateBalance(pot.getAmount() - winnings);
+                System.out.println("Left over: " + (pot.getAmount() - winnings));
+    		} else {
+                List<Integer> potWinnerIdxs = new ArrayList<Integer>();
+                //potWinnerIdxs.add(0);
+                for(int i = 0; i < pot.getPlayers().size(); i++) {
+                    if(analyzers.get(i) != null) {
+                        if(potWinnerIdxs.isEmpty()) {
                             potWinnerIdxs.add(i);
-                        } else if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) == 0) {
-                            potWinnerIdxs.add(i);
+                        } else {
+                            if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) > 0) {
+                                potWinnerIdxs.clear();
+                                potWinnerIdxs.add(i);
+                            } else if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) == 0) {
+                                potWinnerIdxs.add(i);
+                            }
                         }
-            		}
-            	}
-                
-            }
-            double winnings = pot.getAmount() / potWinnerIdxs.size();
-            DecimalFormat df = new DecimalFormat(".##");
-            winnings = Double.parseDouble(df.format(winnings));
-            for(int pwi : potWinnerIdxs) {
-                System.out.println(pot.getPlayers().get(pwi).getName() + " has won " + winnings + "!");
-                pot.getPlayers().get(pwi).updateBalance(winnings);
-            }
-            pot.getPlayers().get(0).updateBalance(pot.getAmount() - winnings);
-            System.out.println("Left over: " + (pot.getAmount() - winnings));
+                    }
+                    
+                }
+                double winnings = pot.getAmount() / potWinnerIdxs.size();
+                DecimalFormat df = new DecimalFormat(".##");
+                winnings = Double.parseDouble(df.format(winnings));
+                for(int pwi : potWinnerIdxs) {
+                    System.out.println(pot.getPlayers().get(pwi).getName() + " has won " + winnings + "!");
+                    pot.getPlayers().get(pwi).updateBalance(winnings);
+                }
+                pot.getPlayers().get(0).updateBalance(pot.getAmount() - winnings);
+                System.out.println("Left over: " + (pot.getAmount() - winnings));
+    		}
     	}
     }
     
@@ -365,7 +385,9 @@ public abstract class Hand implements HandInterface {
             for(Pot p : pots) {
                 numOwed += p.getAmountOwed();
             }
-            numOwed -= player.getAmountThisTurn();
+            if(player.getAmountThisTurn() != -1) {
+                numOwed -= player.getAmountThisTurn();
+            }
             if(numOwed == 0) {
                 options.add(new Option(Option.OptionType.CHECK, 0));
                 if(this.bigBlind < player.getBalance()) {

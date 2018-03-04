@@ -179,12 +179,13 @@ public class Game {
             Option option = askPlayerForOption(currOptions, player);
             currHand.executeOption(player, option);
             updateCurrentAction();
-            System.out.println(option.toString());
+            System.out.println(player.getName() + ": " + option.toString());
         }
 	}
 	
 	public Option askPlayerForOption(List<Option> options, Player player) {
         int randomNum = ThreadLocalRandom.current().nextInt(0, options.size());
+        randomNum = 1;
         return options.get(randomNum);
 	}
 	
@@ -280,16 +281,21 @@ public class Game {
 			for(Player p : players) {
 				System.out.println(p.toString());
 			}
+			System.out.println("Flop: " + currHand.getCommunityCards().toString());
 			
 			bettingRound(currHand, true);
 			if(stillBetting()) {
                 currHand.dealTurn();
 			}
+			
+			System.out.println("Turn: " + currHand.getCommunityCards().toString());
 
 			bettingRound(currHand, true);
 			if(stillBetting()) {
                 currHand.dealRiver();
 			}
+
+			System.out.println("River: " + currHand.getCommunityCards().toString());
 
 			bettingRound(currHand, true);
 			
