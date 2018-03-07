@@ -350,7 +350,6 @@ public abstract class Hand implements HandInterface {
                         pot.getPlayers().get(i).updateBalance(winnings);
                 	}
                 }
-                pot.getPlayers().get(0).updateBalance(pot.getAmount() - winnings);
                 System.out.println("Left over: " + (pot.getAmount() - winnings));
     		} else {
                 List<Integer> potWinnerIdxs = new ArrayList<Integer>();
