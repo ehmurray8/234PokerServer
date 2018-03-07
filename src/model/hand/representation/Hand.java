@@ -147,8 +147,13 @@ public abstract class Hand implements HandInterface {
                 if(p.addAmountThisTurn(amount)) {
                     for(Pot pot : pots) {
                         if(pot.getAmountOwed() != 0) {
-                            tempAmount -= pot.getAmountOwed();
-                            pot.addAmount(pot.getAmountOwed(), 1);
+                        	if(tempAmount >= pot.getAmountOwed()) {
+                                tempAmount -= pot.getAmountOwed();
+                                pot.addAmount(pot.getAmountOwed(), 1);
+                        	} else {
+                        		pot.addAmount(pot.getAmountOwed() - tempAmount, 1);
+                        		tempAmount = 0;
+                        	}
                         }
                     }
                     if(tempAmount > 0) {
