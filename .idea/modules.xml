@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/234PokerFx.iml" filepath="$PROJECT_DIR$/234PokerFx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/234PokerServer.iml" filepath="$PROJECT_DIR$/.idea/modules/234PokerServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/234PokerServer_main.iml" filepath="$PROJECT_DIR$/.idea/modules/234PokerServer_main.iml" group="234PokerServer" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/234PokerServer_test.iml" filepath="$PROJECT_DIR$/.idea/modules/234PokerServer_test.iml" group="234PokerServer" />
     </modules>
   </component>
 </project>
