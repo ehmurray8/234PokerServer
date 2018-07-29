@@ -15,40 +15,20 @@ import model.card.Card;
  */
 public class Player implements PlayerInterface  {
 
-    /** {@code CardComparator} object used throughout the class to compare {@code Card} objects.
-     */
     private static final Comparator<Card> CARD_COMPARATOR = new Card.CardComparator();
-
-    /** Name of the player. */
     private String name;
-
-    /** The player's balance. */
     private double balance;
-
-    /** The player's hand. */
     private ArrayList<Card> hand;
-
-    /** Whether or not the player has folded. */
     private boolean hasFolded;
-
     private double amountThisTurn;
-    
     private boolean isSittingOut;
 
-    /** Creates a new representation of a player. */
     public void resetStatus() {
-        this.hand = new ArrayList<>();
-        this.hasFolded = false;
-        this.clearAmtThisTurn();
+        hand = new ArrayList<>();
+        hasFolded = false;
+        clearAmtThisTurn();
     }
 
-    /**
-     * Player constructor accepts a starting balance and a name to set {@code balance} and {@code name} respectively,
-     * also initializes other variables used throughout the class.
-     *
-     * @param balance balance
-     * @param name Player's name
-     */
     public Player(double balance, String name) {
         this.balance = balance;
         this.name = name;
@@ -65,7 +45,7 @@ public class Player implements PlayerInterface  {
 	}
 
 	public double getAmountThisTurn() {
-        return this.amountThisTurn;
+        return amountThisTurn;
     }
 
     /**
@@ -88,26 +68,26 @@ public class Player implements PlayerInterface  {
     }
 
     public void clearAmtThisTurn() {
-        this.amountThisTurn = 0;
+        amountThisTurn = 0;
     }
     
     public void noActionThisTurn() {
-    	this.amountThisTurn = -1;
+    	amountThisTurn = -1;
     }
 
     @Override
     public final double getBalance() {
-        return this.balance;
+        return balance;
     }
 
     @Override
     public final void updateBalance(double amt) {
-        this.balance += amt;
+        balance += amt;
     }
 
     @Override
     public final ArrayList<Card> getHand() {
-        return this.hand;
+        return hand;
     }
 
     @Override
@@ -118,21 +98,21 @@ public class Player implements PlayerInterface  {
 
     @Override
     public final void fold() {
-        this.hasFolded = true;
+        hasFolded = true;
     }
     
     @Override
     public final boolean hasFolded() {
-        return this.hasFolded;
+        return hasFolded;
     }
 
     @Override
     public final String getName() {
-        return this.name;
+        return name;
     }
 
     @Override
     public final String toString() {
-        return this.name + ", Balance: " + this.balance + " " + this.hand.toString() + " Folded: " + this.hasFolded;
+        return name + ", Balance: " + balance + " " + hand.toString() + " Folded: " + hasFolded;
     }
 }

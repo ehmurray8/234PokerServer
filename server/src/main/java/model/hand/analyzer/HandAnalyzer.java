@@ -24,111 +24,72 @@ import model.card.Card.Suit;
  */
 public abstract class HandAnalyzer implements HandAnalyzerInterface {
 
-    /** Constants used for analyzing Hands. */
     private static final int PAIR = 2, TRIPS = 3, QUADS = 4, STRAIGHT = 5, BROADWAY = 6;
 
-    /** The different hand ranks for cards in poker. */
     public enum HandRank {
-        HIGH_CARD(1, "High Card"),
-        PAIR(2, "Pair"), TWO_PAIR(3, "Two Pair"),
-        THREE_OF_A_KIND(4, "Three of a Kind"),
-        STRAIGHT(5, "Straight"),
-        FLUSH(6, "Flush"),
-        FULL_HOUSE(7, "Full House"),
-        FOUR_OF_A_KIND(8, "Four of a Kind"),
+
+        HIGH_CARD(1, "High Card"), PAIR(2, "Pair"), TWO_PAIR(3, "Two Pair"), THREE_OF_A_KIND(4, "Three of a Kind"),
+        STRAIGHT(5, "Straight"), FLUSH(6, "Flush"), FULL_HOUSE(7, "Full House"), FOUR_OF_A_KIND(8, "Four of a Kind"),
         STRAIGHT_FLUSH(9, "Straight Flush"), ROYAL_FLUSH(10, "Royal Flush");
 
-        /**
-         * Number associated with the HandRank, used for comparing HandRanks.
-         */
-        private int handRankNum;
+        private int strength;
+        private String string;
 
-        private String str;
-
-        /**
-         * Constructor to create a HandRank object.
-         *
-         * @param handRankNum number to associate with the HandRank
-         * @param str string representation of this
-         */
-        HandRank(int handRankNum, String str) {
-            this.handRankNum = handRankNum;
-            this.str = str;
+        HandRank(int strength, String string) {
+            this.strength = strength;
+            this.string = string;
         }
 
-        /**
-         * Returns the number associated with the HandRank.
-         *
-         * @return the number associated with the HandRank
-         */
-        public int getHandRankNum() {
-            return this.handRankNum;
+        public int getStrength() {
+            return strength;
         }
 
         @Override
         public String toString() {
-            return this.str;
+            return string;
         }
 
-        /**
-         * Used to compare {@code HandRank}s to each other.
-         */
-        public static final class HandRankComparator
-                implements Comparator<HandRank> {
+        public static final class HandRankComparator implements Comparator<HandRank> {
 
             @Override
             public int compare(HandRank hr1, HandRank hr2) {
-                return hr1.getHandRankNum() - hr2.getHandRankNum();
+                return hr1.getStrength() - hr2.getStrength();
             }
         }
     }
 
-    /** The {@code HandRank} of the best five card Hand. */
     private HandRank topRank;
-
-    /** The best 5 card hand, sorted lowest to highest. */
-    private List<Rank> bestHand;
-
-    /** The {@code Rank}(s) of any pairs the hand contains. */
+    private List<Rank> bestHandRanks;
     private ArrayList<Rank> pairRanks;
-
-    /** The List of all the {@code Rank}s ranks in the full seven or nine card hand. */
     private List<Card> fullHand;
-
-    /** Ranks of the full house. */
     private ArrayList<Rank> fullHouseRanks;
 
-    /**
-     * Initializes the object by setting the instance variables to their default values.
-     *
-     * <p>
-     * The constructor constructs a new HandAnalyzer, but the analyze method must be called on it before any
-     * data can be accessed from this.
-     * </p>
-     *
-     * @param fullHand fullHand to analyze using the object
-     */
+
     public HandAnalyzer(List<Card> fullHand) {
-        this.topRank = HandRank.HIGH_CARD;
-        this.bestHand = new ArrayList<>();
-        this.pairRanks = new ArrayList<>();
-        this.fullHouseRanks = new ArrayList<>();
+        this();
         this.fullHand = fullHand;
+    }
+
+    private HandAnalyzer() {
+        topRank = HandRank.HIGH_CARD;
+        bestHandRanks = new ArrayList<>();
+        pairRanks = new ArrayList<>();
+        fullHouseRanks = new ArrayList<>();
     }
 
     @Override
     public final HandRank getTopRank() {
-        return this.topRank;
+        return topRank;
     }
 
     @Override
-    public final List<Rank> getBestHand() {
-        return this.bestHand;
+    public final List<Rank> getBestHandRanks() {
+        return bestHandRanks;
     }
 
     @Override
     public final String toString() {
-        return this.fullHand + " Best: " + this.bestHand + " " + this.topRank;
+        return fullHand + " Best: " + bestHandRanks + " " + topRank;
     }
 
     public abstract List<List<Card>> fiveCardCombinations(List<Card> fullHand);
@@ -175,7 +136,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
         }
 
         //Set the instance variables
-        this.bestHand = topHand.getBestHand();
+        this.bestHandRanks = topHand.getBestHandRanks();
         this.pairRanks = (ArrayList<Rank>) topHand.getPairRanks();
         Collections.sort(this.pairRanks);
         Collections.reverse(this.pairRanks);
@@ -190,7 +151,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
     final List<Rank> getNonPairRanks() {
         List<Rank> nonPairRanks = new ArrayList<>();
 
-        for (Rank aBestHand : this.bestHand) {
+        for (Rank aBestHand : this.bestHandRanks) {
             for (Rank pairRank : this.pairRanks) {
                 if (!aBestHand.equals(pairRank)) {
                     nonPairRanks.add(aBestHand);
@@ -208,7 +169,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
      * @return the full hand
      */
     final List<Card> getFullHand() {
-        return this.fullHand;
+        return fullHand;
     }
 
     /**
@@ -217,7 +178,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
      * @param rank to set topRank to
      */
     final void setTopRank(HandRank rank) {
-        this.topRank = rank;
+        topRank = rank;
     }
 
     /**
@@ -231,15 +192,15 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
         EnumMap<Rank, Integer> rankMap = new EnumMap<>(Rank.class);
         EnumMap<Suit, Integer> suitMap = new EnumMap<>(Suit.class);
 
-        this.handToEnumMaps(this.fullHand, rankMap, suitMap);
+        this.handToEnumMaps(fullHand, rankMap, suitMap);
 
         for (Entry<Rank, Integer> entry : rankMap.entrySet()) {
             if (entry.getValue() > 1) {
-                this.pairRanks.add(entry.getKey());
+                pairRanks.add(entry.getKey());
             }
         }
-        Collections.sort(this.pairRanks);
-        Collections.reverse(this.pairRanks);
+        Collections.sort(pairRanks);
+        Collections.reverse(pairRanks);
     }
 
     /**
@@ -253,7 +214,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
         EnumMap<Rank, Integer> rankMap = new EnumMap<>(Rank.class);
         EnumMap<Suit, Integer> suitMap = new EnumMap<>(Suit.class);
 
-        this.handToEnumMaps(this.fullHand, rankMap, suitMap);
+        this.handToEnumMaps(fullHand, rankMap, suitMap);
 
         Iterator<Entry<Rank, Integer>> entriesRank = rankMap.entrySet().iterator();
         Rank threeKindRank = null, pairRank = null;
@@ -271,26 +232,12 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
         }
     }
 
-    /**
-     * Method to find best hand in a Simple Analyzer.
-     *
-     * <p>
-     * Code was included in the abstract class to allow it access to private instance variables.
-     * </p>
-     */
     final void findBestHand() {
-        for (Card c : this.fullHand) {
-            this.bestHand.add(c.getRank());
-        }
+        fullHand.forEach(card -> bestHandRanks.add(card.getRank()));
     }
 
-    /**
-     * Returns the ranks of the pairs.
-     *
-     * @return any {@code Rank}s associated with a pair contained in the full hand
-     */
     final List<Rank> getPairRanks() {
-        return this.pairRanks;
+        return pairRanks;
     }
 
     /**
@@ -299,7 +246,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
      * @return the {@code Rank}s associated with a full house, otherwise {}
      */
     final List<Rank> getFullHouseRanks() {
-        return this.fullHouseRanks;
+        return fullHouseRanks;
     }
 
     /**
@@ -365,8 +312,8 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
             hasStraight = true;
             //Used hand size to only view the first five elements
             for (int i = 0; i < hand.size() - 1 && hasStraight; i++) {
-                if (rankList.get(i + 1).getRankNum()
-                        - rankList.get(i).getRankNum() != 1) {
+                if (rankList.get(i + 1).getStrength()
+                        - rankList.get(i).getStrength() != 1) {
                     hasStraight = false;
                 }
             }
@@ -374,8 +321,8 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
             if (!hasStraight && rankMap.size() == BROADWAY) {
                 hasBroadway = true;
                 for (int i = 1; i < rankMap.size() - 1 && hasBroadway; i++) {
-                    if (rankList.get(i + 1).getRankNum()
-                            - rankList.get(i).getRankNum() != 1) {
+                    if (rankList.get(i + 1).getStrength()
+                            - rankList.get(i).getStrength() != 1) {
                         hasBroadway = false;
                     }
                 }
@@ -458,12 +405,12 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
     public static final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
         @Override
         public int compare(HandAnalyzer hA1, HandAnalyzer hA2) {
-            int value = hA1.getTopRank().getHandRankNum() - hA2.getTopRank().getHandRankNum();
+            int value = hA1.getTopRank().getStrength() - hA2.getTopRank().getStrength();
             if (hA1.getTopRank().equals(HandRank.ROYAL_FLUSH)) {
                 return 0;
             } else if (value == 0) {
-                List<Rank> sortedHand1 = hA1.getBestHand();
-                List<Rank> sortedHand2 = hA2.getBestHand();
+                List<Rank> sortedHand1 = hA1.getBestHandRanks();
+                List<Rank> sortedHand2 = hA2.getBestHandRanks();
                 Collections.sort(sortedHand1);
                 Collections.sort(sortedHand2);
                 Collections.reverse(sortedHand1);
@@ -472,7 +419,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
                 if (rank.equals(HandRank.HIGH_CARD) || rank.equals(HandRank.FLUSH)) {
                     for (int i = 0; i < sortedHand1.size(); i++) {
                         if (!sortedHand1.get(i).equals(sortedHand2.get(i))) {
-                            return sortedHand1.get(i).getRankNum() - sortedHand2.get(i).getRankNum();
+                            return sortedHand1.get(i).getStrength() - sortedHand2.get(i).getStrength();
                         }
                     }
                 } else if (rank.equals(HandRank.STRAIGHT) || rank.equals(HandRank.STRAIGHT_FLUSH)) {
@@ -490,7 +437,7 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
                     } else {
                         for (int i = 0; i < sortedHand1.size(); i++) {
                             if (!sortedHand1.get(i).equals(sortedHand2.get(i))) {
-                                return sortedHand1.get(i).getRankNum() - sortedHand2.get(i).getRankNum();
+                                return sortedHand1.get(i).getStrength() - sortedHand2.get(i).getStrength();
                             }
                         }
                     }
@@ -498,21 +445,21 @@ public abstract class HandAnalyzer implements HandAnalyzerInterface {
                         || rank.equals(HandRank.THREE_OF_A_KIND) || rank.equals(HandRank.FOUR_OF_A_KIND)) {
                     for (int i = 0; i < hA1.getPairRanks().size(); i++) {
                         if (!hA1.getPairRanks().get(i).equals(hA2.getPairRanks().get(i))) {
-                            return hA1.getPairRanks().get(i).getRankNum() - hA2.getPairRanks().get(i).getRankNum();
+                            return hA1.getPairRanks().get(i).getStrength() - hA2.getPairRanks().get(i).getStrength();
                         }
                     }
                     List<Rank> nonPairRanks1 = hA1.getNonPairRanks();
                     List<Rank> nonPairRanks2 = hA2.getNonPairRanks();
                     for (int i = 0; i < nonPairRanks1.size(); i++) {
                         if (!nonPairRanks1.get(i).equals(nonPairRanks2.get(i))) {
-                            return nonPairRanks1.get(i).getRankNum() - nonPairRanks2.get(i).getRankNum();
+                            return nonPairRanks1.get(i).getStrength() - nonPairRanks2.get(i).getStrength();
                         }
                     }
                 } else if (rank.equals(HandRank.FULL_HOUSE)) {
                     for (int i = 0; i < hA1.getFullHouseRanks().size(); i++) {
                         if (!hA1.getFullHouseRanks().get(i).equals(hA2.getFullHouseRanks().get(i))) {
-                            return hA1.getFullHouseRanks().get(i).getRankNum()
-                                    - hA2.getFullHouseRanks().get(i).getRankNum();
+                            return hA1.getFullHouseRanks().get(i).getStrength()
+                                    - hA2.getFullHouseRanks().get(i).getStrength();
                         }
                     }
                 }

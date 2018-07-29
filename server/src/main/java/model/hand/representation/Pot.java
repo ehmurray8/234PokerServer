@@ -8,16 +8,17 @@ import model.player.Player;
 public class Pot {
 
 	private double amount;
-	
 	private List<Player> players;
-	
 	private double amountOwed;
-	
 	private int numPlayersPaid;
 	
 	Pot(List<Player> players) {
-		this.players = new ArrayList<>();
+	    this();
 		this.players.addAll(players);
+	}
+
+	private Pot() {
+		this.players = new ArrayList<>();
 		this.amount = 0;
 		this.amountOwed = 0;
 		this.numPlayersPaid = 0;
@@ -29,15 +30,15 @@ public class Pot {
 
 	void addAmount(double amount, int numPlayers) {
 		this.amount += amount;
-		this.numPlayersPaid += numPlayers;
+		numPlayersPaid += numPlayers;
 		if(numPlayersPaid == players.size()) {
-			this.amountOwed = 0;
-			this.numPlayersPaid = 0;
+			amountOwed = 0;
+			numPlayersPaid = 0;
 		}
 	}
 	
 	public int getNumPlayersPaid() {
-		return this.numPlayersPaid;
+		return numPlayersPaid;
 	}
 
 	public List<Player> getPlayers() {
@@ -45,27 +46,27 @@ public class Pot {
 	}
 
 	void removePlayer(Player p) {
-		this.players.remove(p);
+		players.remove(p);
 	}
 	
 	public double getAmountOwed() {
-		return this.amountOwed;
+		return amountOwed;
 	}
 	
 	double setAmountOwed(double amount) {
 		double amountOver = 0;
-		if(this.amountOwed < amount) {
-			amountOver = this.numPlayersPaid * (amount - this.amountOwed);
+		if(amountOwed < amount) {
+			amountOver = numPlayersPaid * (amount - amountOwed);
 			this.numPlayersPaid = 0;
 		} else {
-			amountOver = this.numPlayersPaid * (this.amountOwed - amount);
+			amountOver = numPlayersPaid * (amountOwed - amount);
 		}
-		this.amountOwed = amount;
+		amountOwed = amount;
 		return amountOver;
 	}
 	
 	void updatePot() {
-		this.amount = this.amountOwed * this.numPlayersPaid;
+		amount = amountOwed * numPlayersPaid;
 	}
 	
 	 @Override
@@ -74,7 +75,7 @@ public class Pot {
 		for(Player p : players) {
 			playerStr.append(" ").append(p.getName()).append(": ").append(p.getBalance());
 		}
-		return "Amount in pot: " + this.amount + ", Amount owed: " + this.amountOwed + ", Number of players paid: " + this.numPlayersPaid + 
-				", Players in pot: " + playerStr;
+		return "Amount in pot: " + amount + ", Amount owed: " + amountOwed + ", Number of players paid: " +
+				numPlayersPaid + ", Players in pot: " + playerStr;
 	}
 }

@@ -1,36 +1,20 @@
 package model.hand.representation;
 
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 import model.player.Player;
 
-/**
- * A hand extension that sets up and completes a hand of Pineapple Poker.
- */
 public class PineappleHand extends Hand {
 
-    /**
-     * Creates a Pineapple Hand representation, with the starting blinds specified by the {@code params}.
-     *
-     * @param smallBlind amount of the small blind
-     * @param bigBlind amount of the big blind
-     * @param ante amount of the ante
-     * @param players players in the current hand
-     */
     public PineappleHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
         super(smallBlind, bigBlind, ante, players);
     }
 
     @Override
     public final void dealInitialHand() {
-        for (Player player : players) {
-            player.addCard(super.dealCard());
-        }
-        for (Player player : players) {
-            player.addCard(super.dealCard());
-        }
-        for (Player player : players) {
-            player.addCard(super.dealCard());
-        }
+        IntStream.range(0, 3).forEach(iteration ->
+            players.forEach(player -> player.addCard(deck.pop()))
+        );
     }
 }

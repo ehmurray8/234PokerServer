@@ -2,6 +2,7 @@ package model.hand.representation;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.IntStream;
 
 import model.card.Card;
 import model.card.Deck;
@@ -16,26 +17,18 @@ import model.player.Player;
  * one full turn in a poker game.
  *
  * <p>
- * The class deals the community cards and allows for the players to make bets. The hand object runs through a
+ * The class deals the communityCards cards and allows for the players to make bets. The hand object runs through a
  * full poker hand, and decides its winner.
  * </p>
  */
 public abstract class Hand implements HandInterface {
 
-    /** The {@code Deck} used for this. */
-    private Deck deck;
-
-    /** The community cards dealt during the hand. */
-    private ArrayList<Card> community;
-
-    /** The amount of the current small blind. */
-    private double smallBlind;
-
-    /** The amount of the current big blind. */
-    private double bigBlind;
-    
-    /** The amount of the current ante. */
-    private double ante;
+    Deck deck;
+    private ArrayList<Card> communityCards;
+    private double smallBlindAmount;
+    private double bigBlindAmount;
+    private double anteAmount;
+    protected ArrayList<Player> players;
 
     /**	Pots that are currently opened, main pot is at index 0. */
     private List<Pot> pots;
@@ -43,29 +36,22 @@ public abstract class Hand implements HandInterface {
     /** All pots that have been opened during the hand. */
     private List<Pot> allPots;
 
-    protected ArrayList<Player> players;
-
-    /**
-     * The Hand constructor initializes an abstract hand representing one turn in a game of poker.
-     *
-     * @param smallBlind the amount of the small blind
-     * @param bigBlind the amount of the big blind
-     * @param ante amount of the ante
-     * @param players the players currently playing the hand
-     */
-    Hand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
-        this.deck = new Deck();
-        this.smallBlind = smallBlind;
-        this.bigBlind = bigBlind;
-        this.ante = ante;
-        this.community = new ArrayList<>();
-        this.pots = new ArrayList<>();
-        this.pots.add(new Pot(players));
-        this.allPots = new ArrayList<>();
+    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
+        this();
+        this.smallBlindAmount = smallBlindAmount;
+        this.bigBlindAmount = bigBlindAmount;
+        this.anteAmount = anteAmount;
         this.players = players;
     }
-    
-    
+
+    private Hand() {
+        deck = new Deck();
+        communityCards = new ArrayList<>();
+        pots = new ArrayList<>();
+        pots.add(new Pot(players));
+        allPots = new ArrayList<>();
+    }
+
     public List<Pot> getPots() {
     	return pots;
     }
@@ -75,42 +61,33 @@ public abstract class Hand implements HandInterface {
     }
 
     @Override
-    public final Card dealCard() {
-        return this.deck.dealCard();
-    }
-
-    @Override
     public final ArrayList<Card> getCommunityCards() {
-        return this.community;
+        return communityCards;
     }
 
     @Override
     public final String toString() {
-    	int amount = 0;
-    	for(Pot pot : pots) {
-    		amount += pot.getAmount();
-    	}
-        return this.community.toString() + " Pot: " + amount + " Big: " + this.bigBlind + " Small: " + this.smallBlind;
+        double totalAmountInPots = pots.stream().map(Pot::getAmount).reduce(0.0, (pot1, pot2) -> pot1 + pot2);
+        return communityCards.toString() + " Pot: " + totalAmountInPots + " Big: " +
+               bigBlindAmount + " Small: " + smallBlindAmount;
     }
 
     @Override
     public final void dealFlop() {
-        this.dealCard();
-        this.community.add(this.dealCard());
-        this.community.add(this.dealCard());
-        this.community.add(this.dealCard());
+        deck.pop();
+        IntStream.range(0, 3).forEach(iteration -> communityCards.add(deck.pop()));
     }
 
     @Override
     public final void dealTurn() {
-        this.dealCard();
-        this.community.add(this.dealCard());
+        deck.pop();
+        communityCards.add(deck.pop());
     }
 
     @Override
     public final void dealRiver() {
-        this.deck.dealCard();
-        this.community.add(this.dealCard());
+        deck.pop();
+        communityCards.add(deck.pop());
     }
 
     private void chargeAmount(double amount, List<Player> playersToCharge) {
@@ -183,8 +160,8 @@ public abstract class Hand implements HandInterface {
     }
 
     public final void chargeAntes() {
-    	this.pots.get(0).setAmountOwed(this.ante);
-    	chargeAmount(this.ante, this.players);
+    	this.pots.get(0).setAmountOwed(this.anteAmount);
+    	chargeAmount(this.anteAmount, this.players);
     	for(Player p : this.players) {
     		p.clearAmtThisTurn();
     	}
@@ -192,20 +169,20 @@ public abstract class Hand implements HandInterface {
     }
     
     public final void chargeBigBlind(int bigBlindPos) {
-    	double potNum = this.bigBlind;
+    	double potNum = this.bigBlindAmount;
     	if(this.pots.size() > 1) {
-    		potNum = this.bigBlind - this.pots.get(0).getAmountOwed();
+    		potNum = this.bigBlindAmount - this.pots.get(0).getAmountOwed();
     	}
     	this.pots.get(this.pots.size() - 1).setAmountOwed(potNum);
     	//this.pots.get(this.pots.size() - 1).
-        chargeAmount(this.bigBlind, Collections.singletonList(this.players.get(bigBlindPos)));
+        chargeAmount(this.bigBlindAmount, Collections.singletonList(this.players.get(bigBlindPos)));
     	removeBrokePlayers();
     	removeOldPots();
     }
     
     public final void chargeSmallBlind(int smallBlindPos) {
-    	this.pots.get(0).setAmountOwed(this.smallBlind);
-        chargeAmount(this.smallBlind, Collections.singletonList(this.players.get(smallBlindPos)));
+    	this.pots.get(0).setAmountOwed(this.smallBlindAmount);
+        chargeAmount(this.smallBlindAmount, Collections.singletonList(this.players.get(smallBlindPos)));
     }
     
     public void setupBetRound() {
@@ -356,15 +333,15 @@ public abstract class Hand implements HandInterface {
             }
             if(numOwed == 0) {
                 options.add(new Option(Option.OptionType.CHECK, 0));
-                if(this.bigBlind < player.getBalance()) {
-                    options.add(new Option(Option.OptionType.BET, this.bigBlind));
+                if(this.bigBlindAmount < player.getBalance()) {
+                    options.add(new Option(Option.OptionType.BET, this.bigBlindAmount));
                 }
             } else {
                 options.add(new Option(Option.OptionType.FOLD, 0));
                 if(numOwed < player.getBalance()) {
                     options.add(new Option(Option.OptionType.CALL, numOwed));
                 }
-                if(numOwed + this.bigBlind < player.getBalance()) {
+                if(numOwed + this.bigBlindAmount < player.getBalance()) {
                 	int count = 0;
                 	for(Player p : players) {
                 		if(p.getBalance() > 0 && !p.hasFolded() && !p.isSittingOut()) {
@@ -372,11 +349,11 @@ public abstract class Hand implements HandInterface {
                 		}
                 	}
                 	if(count > 1) {
-                        options.add(new Option(Option.OptionType.RAISE, this.bigBlind + numOwed));
+                        options.add(new Option(Option.OptionType.RAISE, this.bigBlindAmount + numOwed));
                 	}
                 }
             }
-            if(numOwed + this.bigBlind <= player.getBalance()) {
+            if(numOwed + this.bigBlindAmount <= player.getBalance()) {
                 options.add(new Option(Option.OptionType.ALLIN, player.getBalance()));
             }
     	}

@@ -5,10 +5,11 @@ import java.util.stream.IntStream;
 
 import model.player.Player;
 
-public class OmahaHand extends Hand {
+public class TexasHoldEmHand extends Hand {
 
-    public OmahaHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
-        super(smallBlind, bigBlind, ante, players);
+    public TexasHoldEmHand(double smallBlindAmount, double bigBlindAmount, double anteAmount,
+                           ArrayList<Player> players) {
+        super(smallBlindAmount, bigBlindAmount, anteAmount, players);
     }
 
     @Override

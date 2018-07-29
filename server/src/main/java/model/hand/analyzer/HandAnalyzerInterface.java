@@ -23,7 +23,7 @@ public interface HandAnalyzerInterface {
      *
      * @return the best {@code Rank}s of the best hand
      */
-    List<Rank> getBestHand();
+    List<Rank> getBestHandRanks();
 
     /**
      * Analyzes the hand, essentially the main method.

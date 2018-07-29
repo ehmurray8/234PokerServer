@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import model.player.Player;
 import model.hand.representation.Hand;
-import model.hand.representation.HoldEmHand;
+import model.hand.representation.TexasHoldEmHand;
 import model.hand.representation.Pot;
 
 
@@ -25,7 +25,7 @@ public class HandTest {
         ArrayList<Player> players = new ArrayList<>();
         players.add(p1);
         players.add(p2);
-        Hand hand = new HoldEmHand(25, 50, 0, players);
+        Hand hand = new TexasHoldEmHand(25, 50, 0, players);
         hand.dealInitialHand();
 
         assertEquals(2, p1.getHand().size());
@@ -50,21 +50,21 @@ public class HandTest {
 
     @Test
     public void testDealFlop() {
-        Hand hand = new HoldEmHand(25, 50, 0, new ArrayList<>());
+        Hand hand = new TexasHoldEmHand(25, 50, 0, new ArrayList<>());
         hand.dealFlop();
         assertEquals(hand.getCommunityCards().size(), 3);
     }
 
     @Test
     public void testDealTurn() {
-        Hand hand = new HoldEmHand(25, 50,0, new ArrayList<>());
+        Hand hand = new TexasHoldEmHand(25, 50,0, new ArrayList<>());
         hand.dealTurn();
         assertEquals(hand.getCommunityCards().size(), 1);
     }
 
     @Test
     public void testDealRiver() {
-        Hand hand = new HoldEmHand(25, 50,0, new ArrayList<>());
+        Hand hand = new TexasHoldEmHand(25, 50,0, new ArrayList<>());
         hand.dealRiver();
         assertEquals(hand.getCommunityCards().size(), 1);
     }
@@ -74,7 +74,7 @@ public class HandTest {
     	Player p1 = new Player(2000, "P1");
     	Player p2 = new Player(2000, "P2");
     	ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(p1, p2));
-    	Hand hand = new HoldEmHand(60, 120, 30, players);
+    	Hand hand = new TexasHoldEmHand(60, 120, 30, players);
     	hand.dealInitialHand();
     	hand.chargeAntes();
 
@@ -93,7 +93,7 @@ public class HandTest {
     	Player p5 = new Player(700, "P5");
     	Player p6 = new Player(100000, "P6");
     	ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-    	Hand hand = new HoldEmHand(60, 120, 30, players);
+    	Hand hand = new TexasHoldEmHand(60, 120, 30, players);
     	hand.dealInitialHand();
     	hand.chargeAntes();
     	assertTrue(p1.getBalance() == 4970);
@@ -110,7 +110,7 @@ public class HandTest {
         Player p1 = new Player(2000, "P1");
     	Player p2 = new Player(2000, "P2");
     	ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(p1, p2));
-    	Hand hand = new HoldEmHand(60, 120, 30, players);
+    	Hand hand = new TexasHoldEmHand(60, 120, 30, players);
     	hand.dealInitialHand();
     	hand.chargeSmallBlind(1);
     	hand.chargeBigBlind(0);
@@ -128,7 +128,7 @@ public class HandTest {
     	Player p5 = new Player(700, "P5");
     	Player p6 = new Player(100000, "P6");
     	ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-    	Hand hand = new HoldEmHand(60, 120, 30, players);
+    	Hand hand = new TexasHoldEmHand(60, 120, 30, players);
     	hand.dealInitialHand();
     	hand.chargeSmallBlind(1);
     	hand.chargeBigBlind(2);
@@ -150,7 +150,7 @@ public class HandTest {
     	Player p5 = new Player(7, "P5");
     	Player p6 = new Player(100, "P6");
     	ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-    	Hand hand = new HoldEmHand(60, 120, 30, players);
+    	Hand hand = new TexasHoldEmHand(60, 120, 30, players);
     	hand.dealInitialHand();
     	hand.chargeAntes();
     	assertTrue(hand.getAllPots().size() == 4);

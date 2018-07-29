@@ -39,7 +39,7 @@ public class DeckTest {
     public void testDealCard() {
         Deck deck = new Deck();
 
-        assertEquals(deck.lastElement(), deck.dealCard());
+        assertEquals(deck.lastElement(), deck.removeTopCard());
         assertEquals(51, deck.size());
     }
 }

@@ -275,18 +275,18 @@ public class Game {
 			boolean isHoldemAnalyzer = true;
 			switch(currGameType){
 			case HOLDEM:
-				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 				break;
 			case PINEAPPLE:
 				//currHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
-				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 				break;
 			case OMAHA:
 				currHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 				isHoldemAnalyzer = false;
 				break;
 			default:
-				currHand = new HoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 			}
 			
 			System.out.println(currHand.toString());
@@ -336,21 +336,16 @@ public class Game {
 			currHand.payWinners(isHoldemAnalyzer);
 			
 			// Show cards
-			
 			for(Player p : players) {
 				System.out.println(p.toString());
 				p.resetStatus();
 			}
 			
 			removeBrokePlayers();
-			
 			incrementDealerNum();
 			playersInHand.clear();
 		}
-		
 		// Dead game
 		System.out.println("Dead Game");
 	}
-
-
 }

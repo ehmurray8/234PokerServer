@@ -2,90 +2,44 @@ package model.card;
 
 import java.util.Comparator;
 
-/** This class describes a Card object, it has a suit and a rank to describe a playing card. */
 public class Card {
 
-    /** The ranks of playing cards. */
+    private Rank rank;
+    private Suit suit;
+
     public enum Rank {
-        /**
-         * One, used only for check for the straight ACE - FIVE.
-         */
-        ONE(1),
 
-        TWO(2), THREE(3), FOUR(4), FIVE(5), SIX(6), SEVEN(7), EIGHT(8), NINE(9), TEN(10),
-        JACK(11), QUEEN(12), KING(13),
+        ONE(1), TWO(2), THREE(3), FOUR(4), FIVE(5), SIX(6), SEVEN(7),
+        EIGHT(8), NINE(9), TEN(10), JACK(11), QUEEN(12), KING(13), ACE(14);
 
-        /**
-         * Ace, used for determining high card.
-         */
-        ACE(14);
+        private int strength;
 
-        /**
-         * The number associated with the Rank, used for comparison.
-         */
-        private int rankNum;
-
-        /**
-         * Constructs a Rank enum value.
-         *
-         * @param rankNum the number associated with the enum value
-         */
-        Rank(int rankNum) {
-            this.rankNum = rankNum;
+        Rank(int strength) {
+            this.strength = strength;
         }
 
-        /**
-         * Returns the number associated with the enum value.
-         *
-         * @return the number associated with the enum value
-         */
-        public int getRankNum() {
-            return this.rankNum;
+        public int getStrength() {
+            return strength;
         }
     }
 
-    /** The suits of playing cards. */
     public enum Suit {
         HEARTS, DIAMONDS, CLUBS, SPADES
     }
 
-    /** The {@code Rank} of {@code this}. */
-    private Rank rank;
-
-    /** The {@code Suit} of {@code this}. */
-    private Suit suit;
-
-    /**
-     * Card constructor accepts a Rank and a Suit and stores them in the rank
-     * and suit instance variables when the card is created.
-     *
-     * @param rank rank to give
-     * @param suit suit of (@code this}
-     */
     public Card(Rank rank, Suit suit) {
         this.rank = rank;
         this.suit = suit;
     }
 
-    /**
-     * Rank getter method.
-     *
-     * @return Card's rank
-     */
     public final Rank getRank() {
-        return this.rank;
+        return rank;
     }
 
-    /**
-     * Suit getter method.
-     *
-     * @return Card's suit
-     */
     public final Suit getSuit() {
-        return this.suit;
+        return suit;
     }
 
-    /** {@inheritDoc} */
     @Override
     public final boolean equals(Object obj) {
         try {
@@ -102,21 +56,19 @@ public class Card {
     @Override
     public final int hashCode() {
         final int OFF_SET = 100;
-        return this.rank.getRankNum() + (this.suit.ordinal() * OFF_SET);
+        return this.rank.getStrength() + (this.suit.ordinal() * OFF_SET);
     }
 
     @Override
     public final String toString() {
-        return "{" + this.rank + ", " + this.suit + "}";
+        return "{" + rank + ", " + suit + "}";
     }
     
-    /** Compares {@code c1} and {@code c2} solely by rank. */
     public static final class CardComparator implements Comparator<Card> {
 
-        /** {@inheritDoc} */
         @Override
         public int compare(Card c1, Card c2) {
-            return c1.getRank().getRankNum() - c2.getRank().getRankNum();
+            return c1.getRank().getStrength() - c2.getRank().getStrength();
         }
     }
 }
