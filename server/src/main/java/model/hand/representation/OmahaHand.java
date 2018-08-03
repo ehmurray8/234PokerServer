@@ -13,7 +13,7 @@ public class OmahaHand extends Hand {
 
     @Override
     public final void dealInitialHand() {
-        IntStream.range(0, 2).forEach(iteration ->
+        IntStream.range(0, 4).forEach(iteration ->
             players.forEach(player -> player.addCard(deck.pop()))
         );
     }

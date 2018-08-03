@@ -42,13 +42,13 @@ public abstract class Hand implements HandInterface {
         this.bigBlindAmount = bigBlindAmount;
         this.anteAmount = anteAmount;
         this.players = players;
+        pots.add(new Pot(this.players));
     }
 
     private Hand() {
         deck = new Deck();
         communityCards = new ArrayList<>();
         pots = new ArrayList<>();
-        pots.add(new Pot(players));
         allPots = new ArrayList<>();
     }
 

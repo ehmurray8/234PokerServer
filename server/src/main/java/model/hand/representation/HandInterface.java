@@ -17,13 +17,6 @@ import model.card.Card;
 public interface HandInterface {
 
     /**
-     * Deals the top card from {@code deck}.
-     *
-     * @return the {@code Card} dealt
-     */
-    Card dealCard();
-
-    /**
      * Community card getter method to return the ArrayList of the {@code Card}s.
      *
      * @return the community cards represented as an ArrayList
