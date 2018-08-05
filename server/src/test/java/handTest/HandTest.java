@@ -80,7 +80,7 @@ public class HandTest {
 
     	assertTrue(p1.getBalance() == 1970.);
     	assertTrue(p2.getBalance() == 1970.);
-    	assertTrue(hand.getPots().get(0).getAmount() == 60.);
+    	assertEquals(60., hand.getPots().get(0).getAmount(), .001);
     }
     
     

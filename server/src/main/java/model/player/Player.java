@@ -5,15 +5,7 @@ import java.util.Comparator;
 
 import model.card.Card;
 
-/**
- * This class defines a Player playing in the poker game.
- *
- * <p>
- * The player is defined by a name, their current balance, a list of {@code Card} objects,
- * and a boolean value to determine whether they've folded.
- * </p>
- */
-public class Player implements PlayerInterface  {
+public class Player  {
 
     private static final Comparator<Card> CARD_COMPARATOR = new Card.CardComparator();
     private String name;
@@ -56,11 +48,11 @@ public class Player implements PlayerInterface  {
      */
     public boolean addAmountThisTurn(double addAmt) {
     	if(addAmt <= this.balance) { 
-    		if(this.amountThisTurn == -1) {
-    			this.amountThisTurn = 0;
+    		if(amountThisTurn == -1) {
+    			amountThisTurn = 0;
     		}
-            this.amountThisTurn += addAmt;
-            this.updateBalance(-1 * addAmt);
+            amountThisTurn += addAmt;
+            updateBalance(-1 * addAmt);
             return true;
     	} else {
     		return false;
@@ -75,44 +67,37 @@ public class Player implements PlayerInterface  {
     	amountThisTurn = -1;
     }
 
-    @Override
     public final double getBalance() {
         return balance;
     }
 
-    @Override
     public final void updateBalance(double amt) {
         balance += amt;
     }
 
-    @Override
     public final ArrayList<Card> getHand() {
         return hand;
     }
 
-    @Override
     public final void addCard(Card card) {
         this.hand.add(card);
         this.hand.sort(CARD_COMPARATOR);
     }
 
-    @Override
     public final void fold() {
         hasFolded = true;
     }
     
-    @Override
     public final boolean hasFolded() {
         return hasFolded;
     }
 
-    @Override
     public final String getName() {
         return name;
     }
 
     @Override
     public final String toString() {
-        return name + ", Balance: " + balance + " " + hand.toString() + " Folded: " + hasFolded;
+        return String.format("%s Balance: %s %s Folded: %s", name, balance, hand.toString(), hasFolded);
     }
 }

@@ -68,7 +68,7 @@ public class Pot {
 	void updatePot() {
 		amount = amountOwed * numPlayersPaid;
 	}
-	
+
 	 @Override
 	public String toString() {
 		StringBuilder playerStr = new StringBuilder();

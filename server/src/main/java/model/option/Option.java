@@ -1,6 +1,3 @@
-/**
- *
- */
 package model.option;
 
 public class Option {
@@ -8,15 +5,6 @@ public class Option {
     private OptionType type;
     private double amount;
 
-    /**
-     * The different kinds of options the player can perform on their turn.
-     *
-     * <p>
-     * Only four kinds, because on a specific turn a player doesn't have the
-     * option to check or call, and the player doesn't have the option to raise
-     * or bet. The player only has four possible options on each turn.
-     * </p>
-     */
     public enum OptionKind {
         FOLD, CHECK_CALL, RAISE_BET, ALLIN
     }
