@@ -32,25 +32,23 @@ public class Card {
         this.suit = suit;
     }
 
-    public final Rank getRank() {
+    public Rank getRank() {
         return rank;
     }
 
-    public final Suit getSuit() {
+    public Suit getSuit() {
         return suit;
     }
 
     @Override
     public final boolean equals(Object obj) {
         try {
-            if (!obj.getClass().isAssignableFrom(this.getClass())) {
-                return false;
+            if (obj.getClass().isAssignableFrom(this.getClass())) {
+                final Card otherCard = (Card) obj;
+                return this.getRank().equals(otherCard.getRank()) && this.getSuit().equals(otherCard.getSuit());
             }
-            final Card otherCard = (Card) obj;
-            return this.getRank().equals(otherCard.getRank()) && this.getSuit().equals(otherCard.getSuit());
-        } catch (NullPointerException npe) {
-            return false;
-        }
+        } catch (NullPointerException npe) { }
+        return false;
     }
 
     @Override
@@ -61,7 +59,7 @@ public class Card {
 
     @Override
     public final String toString() {
-        return "{" + rank + ", " + suit + "}";
+        return String.format("{%s, %s}", rank, suit);
     }
     
     public static final class CardComparator implements Comparator<Card> {

@@ -4,9 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
+import model.hand.representation.Hand;
+import model.hand.representation.HandRank;
 import org.junit.Test;
 
-import model.hand.analyzer.HandAnalyzer.HandRank;
 import model.hand.analyzer.HoldEmAnalyzer;
 import model.card.Card;
 import model.card.Card.Rank;
@@ -26,7 +27,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.HIGH_CARD);
     }
 
@@ -43,7 +43,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.PAIR);
     }
 
@@ -60,7 +59,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.TWO_PAIR);
     }
 
@@ -77,7 +75,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.THREE_OF_A_KIND);
     }
 
@@ -94,7 +91,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.FULL_HOUSE);
     }
 
@@ -111,7 +107,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.FOUR_OF_A_KIND);
     }
 
@@ -128,7 +123,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.STRAIGHT);
     }
 
@@ -145,7 +139,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.STRAIGHT_FLUSH);
     }
 
@@ -162,7 +155,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.ROYAL_FLUSH);
     }
 
@@ -179,7 +171,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.FLUSH);
     }
 
@@ -196,7 +187,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.STRAIGHT);
     }
 
@@ -213,7 +203,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.FLUSH);
     }
 
@@ -230,7 +219,6 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.STRAIGHT_FLUSH);
     }
 
@@ -247,7 +235,38 @@ public class HoldEmAnalyzerTest {
         Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
 
         HoldEmAnalyzer hA = new HoldEmAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.ROYAL_FLUSH);
+    }
+
+    @Test
+    public void testStraightAndFlush() {
+        Card card1 = new Card(Rank.ACE, Suit.CLUBS);
+        Card card2 = new Card(Rank.TWO, Suit.CLUBS);
+        Card card3 = new Card(Rank.THREE, Suit.CLUBS);
+        Card card4 = new Card(Rank.FOUR, Suit.CLUBS);
+        Card card5 = new Card(Rank.FIVE, Suit.HEARTS);
+        Card card6 = new Card(Rank.TEN, Suit.CLUBS);
+        Card card7 = new Card(Rank.ACE, Suit.HEARTS);
+
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
+
+        HoldEmAnalyzer holdEmAnalyzer = new HoldEmAnalyzer(Arrays.asList(cards));
+        assertEquals(holdEmAnalyzer.getTopRank(), HandRank.FLUSH);
+    }
+
+    @Test
+    public void testBroadwayStraight() {
+        Card card1 = new Card(Rank.ACE, Suit.CLUBS);
+        Card card2 = new Card(Rank.KING, Suit.CLUBS);
+        Card card3 = new Card(Rank.QUEEN, Suit.CLUBS);
+        Card card4 = new Card(Rank.JACK, Suit.CLUBS);
+        Card card5 = new Card(Rank.TEN, Suit.HEARTS);
+        Card card6 = new Card(Rank.NINE, Suit.HEARTS);
+        Card card7 = new Card(Rank.EIGHT, Suit.HEARTS);
+
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7 };
+
+        HoldEmAnalyzer holdEmAnalyzer = new HoldEmAnalyzer(Arrays.asList(cards));
+        assertEquals(holdEmAnalyzer.getTopRank(), HandRank.STRAIGHT);
     }
 }

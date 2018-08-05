@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
+import model.hand.representation.HandRank;
 import org.junit.Test;
 
 import model.hand.analyzer.HandAnalyzer;
-import model.hand.analyzer.HandAnalyzer.HandRank;
 import model.hand.analyzer.OmahaAnalyzer;
 import model.card.Card;
 import model.card.Card.Rank;
@@ -33,11 +33,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.HIGH_CARD);
     }
 
@@ -54,11 +52,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.PAIR);
     }
 
@@ -75,11 +71,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.PAIR);
     }
 
@@ -96,11 +90,8 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.KING, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
-
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.TWO_PAIR);
     }
 
@@ -117,11 +108,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.PAIR);
     }
 
@@ -138,11 +127,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.THREE_OF_A_KIND);
     }
 
@@ -159,11 +146,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.ACE, Suit.SPADES);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.FULL_HOUSE);
     }
 
@@ -180,11 +165,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.FOUR_OF_A_KIND);
     }
 
@@ -201,11 +184,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.THREE, Suit.SPADES);
         Card card9 = new Card(Rank.FOUR, Suit.HEARTS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.HIGH_CARD);
     }
 
@@ -222,11 +203,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.THREE, Suit.SPADES);
         Card card9 = new Card(Rank.FOUR, Suit.HEARTS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.STRAIGHT);
     }
 
@@ -243,11 +222,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.STRAIGHT_FLUSH);
     }
 
@@ -264,11 +241,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.JACK, Suit.CLUBS);
         Card card9 = new Card(Rank.QUEEN, Suit.CLUBS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.ROYAL_FLUSH);
     }
 
@@ -285,11 +260,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.FLUSH);
     }
 
@@ -306,11 +279,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.THREE, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.STRAIGHT);
     }
 
@@ -327,11 +298,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.FLUSH);
     }
 
@@ -348,11 +317,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.FOUR, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.DIAMONDS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.STRAIGHT_FLUSH);
     }
 
@@ -369,11 +336,9 @@ public class OmahaAnalyzerTest extends HandAnalyzerTest {
         Card card8 = new Card(Rank.QUEEN, Suit.CLUBS);
         Card card9 = new Card(Rank.KING, Suit.CLUBS);
 
-        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8,
-                card9 };
+        Card[] cards = { card1, card2, card3, card4, card5, card6, card7, card8, card9 };
 
         HandAnalyzer hA = new OmahaAnalyzer(Arrays.asList(cards));
-        hA.analyze();
         assertEquals(hA.getTopRank(), HandRank.ROYAL_FLUSH);
     }
 }

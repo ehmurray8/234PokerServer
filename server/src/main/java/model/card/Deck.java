@@ -18,7 +18,8 @@ public class Deck extends Stack<Card> {
 
     private void addAllCards() {
         for (Suit suit : Suit.values()) {
-            for (Rank rank : Arrays.stream(Rank.values()).filter(rank -> rank != Rank.ONE).collect(Collectors.toList())) {
+            for (Rank rank :
+                    Arrays.stream(Rank.values()).filter(rank -> rank != Rank.ONE).collect(Collectors.toList())) {
                 Card card = new Card(rank, suit);
                 push(card);
             }

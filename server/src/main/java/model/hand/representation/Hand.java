@@ -7,6 +7,7 @@ import java.util.stream.IntStream;
 import model.card.Card;
 import model.card.Deck;
 import model.hand.analyzer.HandAnalyzer;
+import model.hand.analyzer.HandAnalyzerComparator;
 import model.hand.analyzer.HoldEmAnalyzer;
 import model.hand.analyzer.OmahaAnalyzer;
 import model.option.Option;
@@ -251,7 +252,7 @@ public abstract class Hand implements HandInterface {
     	List<HandAnalyzer> analyzers;
     	HandAnalyzer analyzer;
     	List<Card> hand;
-        Comparator<HandAnalyzer> hAC = new HandAnalyzer.HandAnalyzerComparator();
+        Comparator<HandAnalyzer> hAC = new HandAnalyzerComparator();
         int numLeft = 0;
     	for(Pot pot : pots) {
             analyzers = new ArrayList<>();
@@ -264,11 +265,9 @@ public abstract class Hand implements HandInterface {
                     if(!player.hasFolded() && !player.isSittingOut()) {
                         if(isHoldem) {
                             analyzer = new HoldEmAnalyzer(hand);
-                            analyzer.analyze();
                             analyzers.add(analyzer);
                         } else {
                             analyzer = new OmahaAnalyzer(hand);
-                            analyzer.analyze();
                             analyzers.add(analyzer);
                         }
                         System.out.println(player.getName() + ": " + analyzer.toString());
