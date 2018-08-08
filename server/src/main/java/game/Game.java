@@ -312,7 +312,7 @@ public class Game {
 				System.out.println(p.toString());
 			}
 			System.out.println("Flop: " + currHand.getCommunityCards().toString());
-			System.out.println("Pot: " + currHand.getPots().get(0).getAmount());
+			System.out.println("Pot: " + currHand.getOpenPots().get(0).getAmount());
 			
 			bettingRound(currHand, true);
 			if(stillBetting()) {
@@ -320,7 +320,7 @@ public class Game {
 			}
 			
 			System.out.println("Turn: " + currHand.getCommunityCards().toString());
-			System.out.println("Pot: " + currHand.getPots().get(0).getAmount());
+			System.out.println("Pot: " + currHand.getOpenPots().get(0).getAmount());
 
 			bettingRound(currHand, true);
 			if(stillBetting()) {
@@ -328,11 +328,11 @@ public class Game {
 			}
 
 			System.out.println("River: " + currHand.getCommunityCards().toString());
-			System.out.println("Pot: " + currHand.getPots().get(0).getAmount());
+			System.out.println("Pot: " + currHand.getOpenPots().get(0).getAmount());
 
 			bettingRound(currHand, true);
 			
-			System.out.println("Pot: " + currHand.getPots().get(0).getAmount());
+			System.out.println("Pot: " + currHand.getOpenPots().get(0).getAmount());
 			currHand.payWinners(isHoldemAnalyzer);
 			
 			// Show cards

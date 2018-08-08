@@ -32,9 +32,9 @@ public abstract class Hand implements HandInterface {
     protected ArrayList<Player> players;
 
     /**	Pots that are currently opened, main pot is at index 0. */
-    private List<Pot> pots;
+    private List<Pot> openPots;
     
-    /** All pots that have been opened during the hand. */
+    /** All openPots that have been opened during the hand. */
     private List<Pot> allPots;
 
     Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
@@ -43,18 +43,18 @@ public abstract class Hand implements HandInterface {
         this.bigBlindAmount = bigBlindAmount;
         this.anteAmount = anteAmount;
         this.players = players;
-        pots.add(new Pot(this.players));
+        openPots.add(new Pot(this.players));
     }
 
     private Hand() {
         deck = new Deck();
         communityCards = new ArrayList<>();
-        pots = new ArrayList<>();
+        openPots = new ArrayList<>();
         allPots = new ArrayList<>();
     }
 
-    public List<Pot> getPots() {
-    	return pots;
+    public List<Pot> getOpenPots() {
+    	return openPots;
     }
     
     public List<Pot> getAllPots() {
@@ -68,7 +68,7 @@ public abstract class Hand implements HandInterface {
 
     @Override
     public final String toString() {
-        double totalAmountInPots = pots.stream().map(Pot::getAmount).reduce(0.0, (pot1, pot2) -> pot1 + pot2);
+        double totalAmountInPots = openPots.stream().map(Pot::getAmount).reduce(0.0, (pot1, pot2) -> pot1 + pot2);
         return communityCards.toString() + " Pot: " + totalAmountInPots + " Big: " +
                bigBlindAmount + " Small: " + smallBlindAmount;
     }
@@ -91,77 +91,85 @@ public abstract class Hand implements HandInterface {
         communityCards.add(deck.pop());
     }
 
+
+
     private void chargeAmount(double amount, List<Player> playersToCharge) {
-    	for(Player p : playersToCharge) {
-    		if(p.getBalance() > 0) {
-    			double tempAmount = amount;
-                if(p.addAmountThisTurn(amount)) {
-                    for(Pot pot : pots) {
-                        if(pot.getAmountOwed() != 0) {
-                        	if(tempAmount >= pot.getAmountOwed()) {
-                                tempAmount -= pot.getAmountOwed();
-                                pot.addAmount(pot.getAmountOwed(), 1);
-                        	} else {
-                        		pot.addAmount(pot.getAmountOwed() - tempAmount, 1);
-                        		tempAmount = 0;
-                        	}
-                        }
-                    }
-                    if(tempAmount > 0) {
-                    	Pot currPot = pots.get(pots.size() - 1);
-                    	currPot.setAmountOwed(currPot.getAmountOwed() + tempAmount);
-                    	currPot.addAmount(tempAmount, 1);
-                    }
+        playersToCharge.stream().filter(player -> player.getBalance() > 0)
+                .forEach(player -> chargePlayerAmount(player, amount));
+    }
+
+    private void chargePlayerAmount(Player player, double amount) {
+        if(player.addAmountThisTurn(amount)) {
+            playerPaidFullAmount(amount);
+        } else {
+            chargePlayerRemainingBalance(player, amount);
+        }
+    }
+
+    private void playerPaidFullAmount(double amountPaid) {
+        for(Pot pot : openPots) {
+            if(pot.getAmountOwed() != 0) {
+                if(amountPaid >= pot.getAmountOwed()) {
+                    amountPaid -= pot.getAmountOwed();
+                    pot.addAmount(pot.getAmountOwed(), 1);
                 } else {
-                    int numPotsPaid = 0;
-                    double startBalance = p.getBalance();
-                    for(Pot pot : pots) {
-                        if(pot.getAmountOwed() == 0 || !p.addAmountThisTurn(pot.getAmountOwed())) {
-                            break;
-                        }
-                        pot.addAmount(pot.getAmountOwed(), 1);
-                        numPotsPaid++;
-                    }
-                    double nextPotAmt = 0;
-                    if(numPotsPaid + 1 < pots.size()) {
-                        nextPotAmt = pots.get(numPotsPaid).getAmountOwed();
-                    }
-                    pots.add(numPotsPaid + 1, new Pot(pots.get(numPotsPaid).getPlayers()));
-                    pots.get(numPotsPaid + 1).removePlayer(p);
-                    pots.get(numPotsPaid + 1).setAmountOwed(amount - startBalance);
-                    double carryOver = pots.get(numPotsPaid).setAmountOwed(p.getBalance());
-                    int numPaid = pots.get(numPotsPaid).getNumPlayersPaid();
-                    pots.get(numPotsPaid + 1).addAmount(carryOver, numPaid);
-                    pots.get(numPotsPaid).addAmount(p.getBalance(), 1);
-                    if(numPotsPaid + 2 < pots.size()) {
-                        pots.get(numPotsPaid + 1).setAmountOwed(nextPotAmt - pots.get(numPotsPaid).getAmountOwed());
-                        pots.get(numPotsPaid).updatePot();
-                    }
-                    for(int i = pots.size() - 1; i > numPotsPaid; i--){
-                        pots.get(i).getPlayers().remove(p);
-                    }
-                    p.addAmountThisTurn(p.getBalance());
+                    pot.addAmount(pot.getAmountOwed() - amountPaid, 1);
+                    amountPaid = 0;
                 }
-    		}
-    	}
+            }
+        }
+        if(amountPaid > 0) {
+            Pot currPot = openPots.get(openPots.size() - 1);
+            currPot.setAmountOwed(currPot.getAmountOwed() + amountPaid);
+            currPot.addAmount(amountPaid, 1);
+        }
+    }
+
+    private void chargePlayerRemainingBalance(Player player, double fullAmount) {
+        int numPotsPaid = 0;
+            double startBalance = player.getBalance();
+            for(Pot pot : openPots) {
+                if(pot.getAmountOwed() == 0 || !player.addAmountThisTurn(pot.getAmountOwed())) {
+                    break;
+                }
+                pot.addAmount(pot.getAmountOwed(), 1);
+                numPotsPaid++;
+            }
+            double nextPotAmt = 0;
+            if(numPotsPaid + 1 < openPots.size()) {
+                nextPotAmt = openPots.get(numPotsPaid).getAmountOwed();
+            }
+            openPots.add(numPotsPaid + 1, new Pot(openPots.get(numPotsPaid).getPlayers()));
+            openPots.get(numPotsPaid + 1).removePlayer(player);
+            openPots.get(numPotsPaid + 1).setAmountOwed(fullAmount - startBalance);
+            double carryOver = openPots.get(numPotsPaid).setAmountOwed(player.getBalance());
+            int numPaid = openPots.get(numPotsPaid).getNumPlayersPaid();
+            openPots.get(numPotsPaid + 1).addAmount(carryOver, numPaid);
+            openPots.get(numPotsPaid).addAmount(player.getBalance(), 1);
+            if(numPotsPaid + 2 < openPots.size()) {
+                openPots.get(numPotsPaid + 1).setAmountOwed(nextPotAmt - openPots.get(numPotsPaid).getAmountOwed());
+                openPots.get(numPotsPaid).updatePot();
+            }
+            for(int i = openPots.size() - 1; i > numPotsPaid; i--){
+                openPots.get(i).getPlayers().remove(player);
+            }
+            player.addAmountThisTurn(player.getBalance());
     }
     
     private void removeBrokePlayers() {
-    	for(int i = players.size() - 1; i >= 0; i--) {
-    		if(players.get(i).getBalance() == 0) {
-    			players.remove(i);
-    		}
-    	}
+        IntStream.rangeClosed(players.size() - 1, 0).filter(i -> players.get(i).getBalance() == 0).forEach(i ->
+                players.remove(i)
+        );
     }
     
     private void removeOldPots() {
-    	for(int i = this.pots.size() - 2; i >= 0; i--) {
-            this.allPots.add(0, this.pots.remove(i));
+    	for(int i = this.openPots.size() - 2; i >= 0; i--) {
+            this.allPots.add(0, this.openPots.remove(i));
     	}
     }
 
     public final void chargeAntes() {
-    	this.pots.get(0).setAmountOwed(this.anteAmount);
+    	this.openPots.get(0).setAmountOwed(this.anteAmount);
     	chargeAmount(this.anteAmount, this.players);
     	for(Player p : this.players) {
     		p.clearAmtThisTurn();
@@ -171,18 +179,17 @@ public abstract class Hand implements HandInterface {
     
     public final void chargeBigBlind(int bigBlindPos) {
     	double potNum = this.bigBlindAmount;
-    	if(this.pots.size() > 1) {
-    		potNum = this.bigBlindAmount - this.pots.get(0).getAmountOwed();
+    	if(this.openPots.size() > 1) {
+    		potNum = this.bigBlindAmount - this.openPots.get(0).getAmountOwed();
     	}
-    	this.pots.get(this.pots.size() - 1).setAmountOwed(potNum);
-    	//this.pots.get(this.pots.size() - 1).
+    	this.openPots.get(this.openPots.size() - 1).setAmountOwed(potNum);
         chargeAmount(this.bigBlindAmount, Collections.singletonList(this.players.get(bigBlindPos)));
     	removeBrokePlayers();
     	removeOldPots();
     }
     
     public final void chargeSmallBlind(int smallBlindPos) {
-    	this.pots.get(0).setAmountOwed(this.smallBlindAmount);
+    	this.openPots.get(0).setAmountOwed(this.smallBlindAmount);
         chargeAmount(this.smallBlindAmount, Collections.singletonList(this.players.get(smallBlindPos)));
     }
     
@@ -211,7 +218,7 @@ public abstract class Hand implements HandInterface {
             return false;
         }
 
-        for (Pot p : pots) {
+        for (Pot p : openPots) {
             amountOwed += p.getAmountOwed();
         }
 
@@ -238,7 +245,7 @@ public abstract class Hand implements HandInterface {
     	case RAISE:
     	case BET:
     	case ALLIN:
-    		this.pots.get(this.pots.size()-1).setAmountOwed(this.pots.get(this.pots.size()-1).getAmountOwed() 
+    		this.openPots.get(this.openPots.size()-1).setAmountOwed(this.openPots.get(this.openPots.size()-1).getAmountOwed()
     				+ option.getAmount());
     	case CALL:
     		chargeAmount(option.getAmount(), Collections.singletonList(player));
@@ -254,7 +261,7 @@ public abstract class Hand implements HandInterface {
     	List<Card> hand;
         Comparator<HandAnalyzer> hAC = new HandAnalyzerComparator();
         int numLeft = 0;
-    	for(Pot pot : pots) {
+    	for(Pot pot : openPots) {
             analyzers = new ArrayList<>();
     		for(Player player : pot.getPlayers()) {
                 hand = new ArrayList<>();
@@ -324,7 +331,7 @@ public abstract class Hand implements HandInterface {
     	double numOwed  = 0;
     	List<Option> options = new ArrayList<>();
     	if(player.getBalance() > 0) {
-            for(Pot p : pots) {
+            for(Pot p : openPots) {
                 numOwed += p.getAmountOwed();
             }
             if(player.getAmountThisTurn() != -1) {
