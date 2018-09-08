@@ -137,7 +137,7 @@ public abstract class HandAnalyzer {
 
     private void addFullHouseRankKey(Rank rank, int count) {
         if (count == TRIPS_FREQUENCY) {
-            fullHouseRanks.add(rank);
+            fullHouseRanks.add(0, rank);
         } else if (count == PAIR_FREQUENCY) {
             fullHouseRanks.add(rank);
         }
