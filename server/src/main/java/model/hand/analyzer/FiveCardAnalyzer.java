@@ -33,7 +33,9 @@ class FiveCardAnalyzer  {
         checkPairs();
         checkFullHouse();
         checkFlush();
-        checkStraight();
+        if (rankMap.size() == STRAIGHT_LENGTH) {
+            checkStraight();
+        }
     }
 
     private void checkPairs() {
@@ -80,17 +82,15 @@ class FiveCardAnalyzer  {
     }
 
     private void checkStraight() {
-        if (rankMap.size() == STRAIGHT_LENGTH) {
-            addRankOne();
-            ArrayList<Card.Rank> rankList = createSortedRankList();
-            checkCardsAreSequential(rankList);
-            if (rankMap.size() == BROADWAY_LENGTH) {
-                handleAceStraight(rankList);
-            } else {
-                rankMap.remove(Card.Rank.ONE);
-            }
-            setStraightRank();
+        addRankOne();
+        ArrayList<Card.Rank> rankList = createSortedRankList();
+        checkCardsAreSequential(rankList);
+        if (rankMap.size() == BROADWAY_LENGTH) {
+            handleAceStraight(rankList);
+        } else {
+            rankMap.remove(Card.Rank.ONE);
         }
+        setStraightRank();
     }
 
     private void addRankOne() {

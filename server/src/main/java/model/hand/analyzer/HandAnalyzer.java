@@ -104,12 +104,8 @@ public abstract class HandAnalyzer {
     }
 
     final List<Rank> getNonPairRanks() {
-        List<Rank> nonPairRanks = new ArrayList<>();
-        bestHandRanks.forEach(rank -> {
-            if(!pairRanks.contains(rank)) {
-                nonPairRanks.add(rank);
-            }
-        });
+        List<Rank> nonPairRanks = nonPairRanks = bestHandRanks.stream().filter(rank -> !pairRanks.contains(rank))
+                .collect(Collectors.toList());
         reverseList(nonPairRanks);
         return nonPairRanks;
     }
