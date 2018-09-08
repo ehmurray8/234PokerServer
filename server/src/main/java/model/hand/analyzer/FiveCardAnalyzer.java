@@ -37,16 +37,18 @@ public class FiveCardAnalyzer  {
     }
 
     private void checkPairs() {
-        rankMap.entrySet().stream().filter(entry -> entry.getValue() > 1).forEach(entry -> {
-            pairRanks.add(entry.getKey());
-            if (entry.getValue().equals(TRIPS_FREQUENCY)) {
-                setTrips();
-            } else if (entry.getValue().equals(QUADS_FREQUENCY)) {
-                setQuads();
-            }
-        });
+        rankMap.entrySet().stream().filter(entry -> entry.getValue() > 1).forEach(this::checkTripsAndQuads);
         if (!has3Kind && !has4Kind && pairRanks.size() > 0) {
             checkPairAndTwoPair();
+        }
+    }
+
+    private void checkTripsAndQuads(Map.Entry<Card.Rank, Integer> rankIntegerEntry) {
+        pairRanks.add(rankIntegerEntry.getKey());
+        if (rankIntegerEntry.getValue().equals(TRIPS_FREQUENCY)) {
+            setTrips();
+        } else if (rankIntegerEntry.getValue().equals(QUADS_FREQUENCY)) {
+            setQuads();
         }
     }
 

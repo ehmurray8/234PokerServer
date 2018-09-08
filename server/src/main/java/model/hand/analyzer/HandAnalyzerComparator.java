@@ -56,19 +56,19 @@ public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
     }
 
     private int compareStraight() {
-        boolean hasWheelStraight = false, otherHasWheelStraight = false;
-        if (sortedHand.contains(Card.Rank.ACE) && sortedHand.contains(Card.Rank.TWO)) {
-            hasWheelStraight = true;
-        }
-        if (otherSortedHand.contains(Card.Rank.ACE) && otherSortedHand.contains(Card.Rank.TWO)) {
-            otherHasWheelStraight = true;
-        }
+        boolean hasWheelStraight = checkForWheelStraight(sortedHand);
+        boolean otherHasWheelStraight = checkForWheelStraight(otherSortedHand);
+
         if (hasWheelStraight && !otherHasWheelStraight) {
             return -1;
         } else if (otherHasWheelStraight && !hasWheelStraight) {
             return 1;
         }
         return compareCardsDescending();
+    }
+
+    private boolean checkForWheelStraight(List<Card.Rank> hand) {
+        return hand.contains(Card.Rank.ACE) && hand.contains(Card.Rank.TWO);
     }
 
     private int compareCardsDescending() {
