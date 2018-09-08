@@ -2,10 +2,10 @@ package model.hand.analyzer;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import model.card.Card;
 import model.card.Card.Rank;
-import model.card.Card.Suit;
 import model.hand.representation.HandRank;
 
 import static extensions.ListExtensions.reverseList;
@@ -17,18 +17,23 @@ import static model.hand.analyzer.AnalyzerHelpers.*;
  */
 public abstract class HandAnalyzer {
 
+    private static HandRank.HandRankComparator HAND_RANK_COMPARATOR = new HandRank.HandRankComparator();
+    private static HandAnalyzerComparator HAND_ANALYZER_COMPARATOR = new HandAnalyzerComparator();
+
     private HandRank topRank;
     private SimpleAnalyzer topHandAnalyzer;
     private List<Rank> bestHandRanks;
-    private ArrayList<Rank> pairRanks;
+    private List<Rank> pairRanks;
     List<Card> fullHand;
     private ArrayList<Rank> fullHouseRanks;
     private List<List<Card>> allHands;
+    private Map<Rank, Integer> rankMap;
 
 
     HandAnalyzer(List<Card> fullHand) {
         this();
         this.fullHand = fullHand;
+        rankMap = handToRankMap(fullHand);
         analyze();
     }
 
@@ -59,7 +64,7 @@ public abstract class HandAnalyzer {
         findTopRank();
         List<SimpleAnalyzer> topRankAnalyzers = createAnalyzersForTopRankHands();
         findTopHand(topRankAnalyzers);
-        pairRanks = (ArrayList<Rank>) topHandAnalyzer.getPairRanks();
+        pairRanks = topHandAnalyzer.getPairRanks();
         reverseList(pairRanks);
         fullHouseRanks = (ArrayList<Rank>) topHandAnalyzer.getFullHouseRanks();
     }
@@ -67,50 +72,44 @@ public abstract class HandAnalyzer {
     private void findTopRank() {
         FiveCardAnalyzer analyzer = new FiveCardAnalyzer(allHands.get(0));
         topRank = analyzer.getRank();
-        for (int i = 1; i < allHands.size(); i++) {
-            HandRank.HandRankComparator hRC = new HandRank.HandRankComparator();
-            FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(allHands.get(i));
-            HandRank rankCheck = fiveCardAnalyzer.getRank();
-            if (hRC.compare(rankCheck, topRank) > 0) {
-                topRank = rankCheck;
-            }
+        allHands.forEach(this::compareTopRank);
+    }
+
+    private void compareTopRank(List<Card> hand) {
+        FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(hand);
+        HandRank rankCheck = fiveCardAnalyzer.getRank();
+        if (HAND_RANK_COMPARATOR.compare(rankCheck, topRank) > 0) {
+            topRank = rankCheck;
         }
     }
 
     private List<SimpleAnalyzer> createAnalyzersForTopRankHands() {
         List<SimpleAnalyzer> topRankAnalyzers = new ArrayList<>();
-        HandRank.HandRankComparator handRankComparator = new HandRank.HandRankComparator();
-        for (List<Card> hand : allHands) {
-            FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(hand);
-            HandRank rankCheck = fiveCardAnalyzer.getRank();
-            if (handRankComparator.compare(rankCheck, topRank) == 0) {
-                SimpleAnalyzer analyzer = new SimpleAnalyzer(hand);
-                topRankAnalyzers.add(analyzer);
-            }
-        }
+        allHands.forEach(hand -> addTopRankAnalyzers(hand, topRankAnalyzers));
         return topRankAnalyzers;
     }
 
-    private void findTopHand(List<SimpleAnalyzer> topRankAnalyzers) {
-        topHandAnalyzer = topRankAnalyzers.get(0);
-        HandAnalyzerComparator handAnalyzerComparator = new HandAnalyzerComparator();
-        for (int i = 1; i < topRankAnalyzers.size(); i++) {
-            if (handAnalyzerComparator.compare(topRankAnalyzers.get(i), topHandAnalyzer) > 0) {
-                topHandAnalyzer = topRankAnalyzers.get(i);
-            }
+    private void addTopRankAnalyzers(List<Card> hand, List<SimpleAnalyzer> topRankAnalyzers) {
+        FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(hand);
+        HandRank rankCheck = fiveCardAnalyzer.getRank();
+        if (HAND_RANK_COMPARATOR.compare(rankCheck, topRank) == 0) {
+            SimpleAnalyzer analyzer = new SimpleAnalyzer(hand);
+            topRankAnalyzers.add(analyzer);
         }
+    }
+
+    private void findTopHand(List<SimpleAnalyzer> topRankAnalyzers) {
+        topHandAnalyzer = Collections.max(topRankAnalyzers, HAND_ANALYZER_COMPARATOR);
         bestHandRanks = topHandAnalyzer.getBestHandRanks();
     }
 
     final List<Rank> getNonPairRanks() {
         List<Rank> nonPairRanks = new ArrayList<>();
-        for (Rank aBestHand : this.bestHandRanks) {
-            for (Rank pairRank : this.pairRanks) {
-                if (!aBestHand.equals(pairRank)) {
-                    nonPairRanks.add(aBestHand);
-                }
+        bestHandRanks.forEach(rank -> {
+            if(!pairRanks.contains(rank)) {
+                nonPairRanks.add(rank);
             }
-        }
+        });
         reverseList(nonPairRanks);
         return nonPairRanks;
     }
@@ -124,32 +123,23 @@ public abstract class HandAnalyzer {
     }
 
     final void findPairRanks() {
-        Map<Rank, Integer> rankMap = handToRankMap(fullHand);
-
-        for (Entry<Rank, Integer> entry : rankMap.entrySet()) {
-            if (entry.getValue() > 1) {
-                pairRanks.add(entry.getKey());
-            }
-        }
+        pairRanks = rankMap.entrySet().stream().filter(entry -> entry.getValue() > 1).map(Entry::getKey)
+                .collect(Collectors.toList());
         reverseList(pairRanks);
     }
 
     final void findFullHouseRanks() {
-        Map<Rank, Integer> rankMap = handToRankMap(fullHand);
-
-        Iterator<Entry<Rank, Integer>> entriesRank = rankMap.entrySet().iterator();
-        Rank threeKindRank = null, pairRank = null;
-        while (entriesRank.hasNext()) {
-            Entry<Rank, Integer> entry = entriesRank.next();
-            if (entry.getValue() == TRIPS_FREQUENCY) {
-                threeKindRank = entry.getKey();
-            } else if (entry.getValue() == PAIR_FREQUENCY) {
-                pairRank = entry.getKey();
-            }
+        rankMap.forEach(this::addFullHouseRankKey);
+        if(fullHouseRanks.size() != 2) {
+            fullHouseRanks.clear();
         }
-        if (threeKindRank != null && pairRank != null) {
-            fullHouseRanks.add(threeKindRank);
-            fullHouseRanks.add(pairRank);
+    }
+
+    private void addFullHouseRankKey(Rank rank, int count) {
+        if (count == TRIPS_FREQUENCY) {
+            fullHouseRanks.add(rank);
+        } else if (count == PAIR_FREQUENCY) {
+            fullHouseRanks.add(rank);
         }
     }
 

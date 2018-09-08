@@ -23,16 +23,7 @@ public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
         if (value == 0 && !handAnalyzer.getTopRank().equals(HandRank.ROYAL_FLUSH)) {
             initSortedHands();
             HandRank rank = handAnalyzer.getTopRank();
-            if (rank.equals(HandRank.HIGH_CARD) || rank.equals(HandRank.FLUSH)) {
-                return compareHighCardOrFlush();
-            } else if (rank.equals(HandRank.STRAIGHT) || rank.equals(HandRank.STRAIGHT_FLUSH)) {
-                return compareStraight();
-            } else if (rank.equals(HandRank.PAIR) || rank.equals(HandRank.TWO_PAIR)
-                    || rank.equals(HandRank.THREE_OF_A_KIND) || rank.equals(HandRank.FOUR_OF_A_KIND)) {
-                return comparePairs();
-            } else if (rank.equals(HandRank.FULL_HOUSE)) {
-                return compareFullHouse();
-            }
+            return compareEqualRanks(rank);
         }
         return value;
     }
@@ -44,7 +35,43 @@ public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
         reverseList(otherSortedHand);
     }
 
-    private int compareHighCardOrFlush() {
+    private int compareEqualRanks(HandRank rank) {
+        switch (rank) {
+            case HIGH_CARD:
+            case FLUSH:
+                return compareCardsDescending();
+            case STRAIGHT:
+            case STRAIGHT_FLUSH:
+                return compareStraight();
+            case PAIR:
+            case TWO_PAIR:
+            case THREE_OF_A_KIND:
+            case FOUR_OF_A_KIND:
+                return comparePairs();
+            case FULL_HOUSE:
+                return compareFullHouse();
+            default:
+                return 0;
+        }
+    }
+
+    private int compareStraight() {
+        boolean hasWheelStraight = false, otherHasWheelStraight = false;
+        if (sortedHand.contains(Card.Rank.ACE) && sortedHand.contains(Card.Rank.TWO)) {
+            hasWheelStraight = true;
+        }
+        if (otherSortedHand.contains(Card.Rank.ACE) && otherSortedHand.contains(Card.Rank.TWO)) {
+            otherHasWheelStraight = true;
+        }
+        if (hasWheelStraight && !otherHasWheelStraight) {
+            return -1;
+        } else if (otherHasWheelStraight && !hasWheelStraight) {
+            return 1;
+        }
+        return compareCardsDescending();
+    }
+
+    private int compareCardsDescending() {
         for (int i = 0; i < sortedHand.size(); i++) {
             if (!sortedHand.get(i).equals(otherSortedHand.get(i))) {
                 return sortedHand.get(i).getStrength() - otherSortedHand.get(i).getStrength();
@@ -53,33 +80,10 @@ public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
         return 0;
     }
 
-    private int compareStraight() {
-        boolean hasLowAceStraight1 = false, hasLowAceStraight2 = false;
-        if (sortedHand.contains(Card.Rank.ACE) && sortedHand.contains(Card.Rank.TWO)) {
-            hasLowAceStraight1 = true;
-        }
-        if (otherSortedHand.contains(Card.Rank.ACE) && otherSortedHand.contains(Card.Rank.TWO)) {
-            hasLowAceStraight2 = true;
-        }
-        if (hasLowAceStraight1 && !hasLowAceStraight2) {
-            return -1;
-        } else if (hasLowAceStraight2 && !hasLowAceStraight1) {
-            return 1;
-        } else {
-            for (int i = 0; i < sortedHand.size(); i++) {
-                if (!sortedHand.get(i).equals(otherSortedHand.get(i))) {
-                    return sortedHand.get(i).getStrength() - otherSortedHand.get(i).getStrength();
-                }
-            }
-        }
-        return 0;
-    }
-
     private int comparePairs() {
-        for (int i = 0; i < handAnalyzer.getPairRanks().size(); i++) {
-            if (!handAnalyzer.getPairRanks().get(i).equals(otherHandAnalyzer.getPairRanks().get(i))) {
-                return handAnalyzer.getPairRanks().get(i).getStrength() - otherHandAnalyzer.getPairRanks().get(i).getStrength();
-            }
+        int comparison = compareCardsDescending();
+        if(comparison != 0) {
+            return comparison;
         }
         List<Card.Rank> nonPairRanks1 = handAnalyzer.getNonPairRanks();
         List<Card.Rank> nonPairRanks2 = otherHandAnalyzer.getNonPairRanks();
