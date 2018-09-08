@@ -3,30 +3,21 @@ package model.hand.analyzer;
 import model.card.Card;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class AnalyzerHelpers {
-    public static final int PAIR_FREQUENCY = 2, TRIPS_FREQUENCY = 3, QUADS_FREQUENCY = 4,
-                            STRAIGHT_LENGTH = 5, BROADWAY_LENGTH = 6;
 
-    public static void handToEnumMaps(List<Card> hand, EnumMap<Card.Rank, Integer> rankMap,
-                                      EnumMap<Card.Suit, Integer> suitMap) {
-        for (Card card : hand) {
-            if (rankMap.size() > 0 && rankMap.containsKey(card.getRank())) {
-                Integer oldValue = rankMap.remove(card.getRank());
-                rankMap.put(card.getRank(), oldValue + 1);
-            } else {
-                rankMap.put(card.getRank(), 1);
-            }
+class AnalyzerHelpers {
+    static final int PAIR_FREQUENCY = 2, TRIPS_FREQUENCY = 3, QUADS_FREQUENCY = 4;
+    static final int STRAIGHT_LENGTH = 5, BROADWAY_LENGTH = 6;
 
-            if (suitMap.size() > 0 && suitMap.containsKey(card.getSuit())) {
-                Integer oldValue = suitMap.remove(card.getSuit());
-                suitMap.put(card.getSuit(), oldValue + 1);
-            } else {
-                suitMap.put(card.getSuit(), 1);
-            }
-        }
+    static Map<Card.Rank, Integer> handToRankMap(List<Card> hand) {
+         return hand.stream().collect(Collectors.toMap(Card::getRank, s -> 1, Integer::sum));
+    }
+
+    static Map<Card.Suit, Integer> handToSuitMap(List<Card> hand) {
+        return hand.stream().collect(Collectors.toMap(Card::getSuit, s -> 1, Integer::sum));
     }
 
     /**
@@ -36,7 +27,7 @@ public class AnalyzerHelpers {
      * @param k size of the combinations
      * @return all the combinations of size k
      */
-    public static List<List<Card>> recurseCombinations(List<Card> fullHand, int k) {
+    static List<List<Card>> recurseCombinations(List<Card> fullHand, int k) {
         List<List<Card>> allCombos = new ArrayList<>();
         if (k == 0) {
             allCombos.add(new ArrayList<>());
@@ -46,16 +37,16 @@ public class AnalyzerHelpers {
             return allCombos;
         }
 
-        List<Card> groupWithoutC = new ArrayList<>(fullHand);
-        Card c = groupWithoutC.remove(groupWithoutC.size() - 1);
+        List<Card> cards = new ArrayList<>(fullHand);
+        Card lastCard = cards.remove(cards.size() - 1);
 
-        List<List<Card>> combosWithoutC = recurseCombinations(groupWithoutC, k);
-        List<List<Card>> combosWithC = recurseCombinations(groupWithoutC, k - 1);
-        for (List<Card> combo : combosWithC) {
-            combo.add(c);
+        List<List<Card>> combosWithoutLastCard = recurseCombinations(cards, k);
+        List<List<Card>> combos = recurseCombinations(cards, k - 1);
+        for (List<Card> combo : combos) {
+            combo.add(lastCard);
         }
-        allCombos.addAll(combosWithoutC);
-        allCombos.addAll(combosWithC);
+        allCombos.addAll(combosWithoutLastCard);
+        allCombos.addAll(combos);
         return allCombos;
     }
 }

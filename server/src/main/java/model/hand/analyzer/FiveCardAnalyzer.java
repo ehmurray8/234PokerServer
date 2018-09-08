@@ -10,8 +10,8 @@ import static model.hand.analyzer.AnalyzerHelpers.*;
 public class FiveCardAnalyzer  {
 
     private HandRank rank;
-    private EnumMap<Card.Rank, Integer> rankMap;
-    private EnumMap<Card.Suit, Integer> suitMap;
+    private Map<Card.Rank, Integer> rankMap;
+    private Map<Card.Suit, Integer> suitMap;
     private List<Card> hand;
     private ArrayList<Card.Rank> pairRanks;
     private boolean hasStraight, has3Kind = false, has4Kind = false, hasFlush = false, hasBroadway = false;
@@ -20,14 +20,12 @@ public class FiveCardAnalyzer  {
         return rank;
     }
 
-    public FiveCardAnalyzer(List<Card> hand) {
+    FiveCardAnalyzer(List<Card> hand) {
         this.hand = hand;
         rank = HandRank.HIGH_CARD;
-        rankMap = new EnumMap<>(Card.Rank.class);
-        suitMap = new EnumMap<>(Card.Suit.class);
+        rankMap = handToRankMap(hand);
+        suitMap =  handToSuitMap(hand);
         pairRanks = new ArrayList<>();
-
-        handToEnumMaps(hand, rankMap, suitMap);
 
         checkTripsAndQuads();
         checkPair();

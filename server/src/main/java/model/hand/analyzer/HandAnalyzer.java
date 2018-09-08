@@ -1,10 +1,6 @@
 package model.hand.analyzer;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 import model.card.Card;
@@ -128,9 +124,7 @@ public abstract class HandAnalyzer {
     }
 
     final void findPairRanks() {
-        EnumMap<Rank, Integer> rankMap = new EnumMap<>(Rank.class);
-        EnumMap<Suit, Integer> suitMap = new EnumMap<>(Suit.class);
-        handToEnumMaps(fullHand, rankMap, suitMap);
+        Map<Rank, Integer> rankMap = handToRankMap(fullHand);
 
         for (Entry<Rank, Integer> entry : rankMap.entrySet()) {
             if (entry.getValue() > 1) {
@@ -141,9 +135,7 @@ public abstract class HandAnalyzer {
     }
 
     final void findFullHouseRanks() {
-        EnumMap<Rank, Integer> rankMap = new EnumMap<>(Rank.class);
-        EnumMap<Suit, Integer> suitMap = new EnumMap<>(Suit.class);
-        handToEnumMaps(fullHand, rankMap, suitMap);
+        Map<Rank, Integer> rankMap = handToRankMap(fullHand);
 
         Iterator<Entry<Rank, Integer>> entriesRank = rankMap.entrySet().iterator();
         Rank threeKindRank = null, pairRank = null;
