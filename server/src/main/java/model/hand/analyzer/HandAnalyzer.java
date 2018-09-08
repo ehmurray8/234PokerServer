@@ -21,12 +21,12 @@ public abstract class HandAnalyzer {
     private SimpleAnalyzer topHandAnalyzer;
     private List<Rank> bestHandRanks;
     private ArrayList<Rank> pairRanks;
-    protected List<Card> fullHand;
+    List<Card> fullHand;
     private ArrayList<Rank> fullHouseRanks;
     private List<List<Card>> allHands;
 
 
-    public HandAnalyzer(List<Card> fullHand) {
+    HandAnalyzer(List<Card> fullHand) {
         this();
         this.fullHand = fullHand;
         analyze();
@@ -43,7 +43,7 @@ public abstract class HandAnalyzer {
         return topRank;
     }
 
-    public final List<Rank> getBestHandRanks() {
+    final List<Rank> getBestHandRanks() {
         return bestHandRanks;
     }
 

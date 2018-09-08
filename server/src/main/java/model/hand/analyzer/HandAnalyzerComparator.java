@@ -14,7 +14,6 @@ public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
     private List<Card.Rank> otherSortedHand;
     private HandAnalyzer handAnalyzer;
     private HandAnalyzer otherHandAnalyzer;
-    private HandRank rank;
 
     @Override
     public int compare(HandAnalyzer ha1, HandAnalyzer ha2) {
@@ -23,7 +22,7 @@ public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
         int value = handAnalyzer.getTopRank().getStrength() - otherHandAnalyzer.getTopRank().getStrength();
         if (value == 0 && !handAnalyzer.getTopRank().equals(HandRank.ROYAL_FLUSH)) {
             initSortedHands();
-            rank = handAnalyzer.getTopRank();
+            HandRank rank = handAnalyzer.getTopRank();
             if (rank.equals(HandRank.HIGH_CARD) || rank.equals(HandRank.FLUSH)) {
                 return compareHighCardOrFlush();
             } else if (rank.equals(HandRank.STRAIGHT) || rank.equals(HandRank.STRAIGHT_FLUSH)) {

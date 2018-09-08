@@ -26,37 +26,42 @@ public class FiveCardAnalyzer  {
         rankMap = handToRankMap(hand);
         suitMap =  handToSuitMap(hand);
         pairRanks = new ArrayList<>();
+        analyze();
+    }
 
-        checkTripsAndQuads();
-        checkPair();
-        checkFlush();
+    private void analyze() {
+        checkPairs();
         checkFullHouse();
+        checkFlush();
         checkStraight();
     }
 
-    private void checkTripsAndQuads() {
-        for (Map.Entry<Card.Rank, Integer> entry : rankMap.entrySet()) {
-            if (entry.getValue() > 1) {
-                pairRanks.add(entry.getKey());
-                if (entry.getValue().equals(TRIPS_FREQUENCY)) {
-                    has3Kind = true;
-                    rank = HandRank.THREE_OF_A_KIND;
-                } else if (entry.getValue().equals(QUADS_FREQUENCY)) {
-                    has4Kind = true;
-                    rank = HandRank.FOUR_OF_A_KIND;
-                }
+    private void checkPairs() {
+        rankMap.entrySet().stream().filter(entry -> entry.getValue() > 1).forEach(entry -> {
+            pairRanks.add(entry.getKey());
+            if (entry.getValue().equals(TRIPS_FREQUENCY)) {
+                setTrips();
+            } else if (entry.getValue().equals(QUADS_FREQUENCY)) {
+                setQuads();
             }
+        });
+        if (!has3Kind && !has4Kind && pairRanks.size() > 0) {
+            checkPairAndTwoPair();
         }
     }
 
-    private void checkPair() {
-        if (!has3Kind && !has4Kind && pairRanks.size() > 0) {
-            if (pairRanks.size() == 1) {
-                rank = HandRank.PAIR;
-            } else {
-                rank = HandRank.TWO_PAIR;
-            }
-        }
+    private void setTrips() {
+        has3Kind = true;
+        rank = HandRank.THREE_OF_A_KIND;
+    }
+
+    private void setQuads() {
+        has4Kind = true;
+        rank = HandRank.FOUR_OF_A_KIND;
+    }
+
+    private void checkPairAndTwoPair() {
+        rank = pairRanks.size() == 1 ? HandRank.PAIR : HandRank.TWO_PAIR;
     }
 
     private void checkFlush() {
@@ -74,50 +79,55 @@ public class FiveCardAnalyzer  {
 
     private void checkStraight() {
         if (rankMap.size() == STRAIGHT_LENGTH) {
-            if (rankMap.containsKey(Card.Rank.ACE)) {
-                rankMap.put(Card.Rank.ONE, 1);
-            }
+            addRankOne();
             ArrayList<Card.Rank> rankList = createSortedRankList();
-
-            hasStraight = true;
-            for (int i = 0; i < hand.size() - 1 && hasStraight; i++) {
-                if (rankList.get(i + 1).getStrength() - rankList.get(i).getStrength() != 1) {
-                    hasStraight = false;
-                }
+            checkCardsAreSequential(rankList);
+            if (rankMap.size() == BROADWAY_LENGTH) {
+                checkBroadwayStraight(rankList);
+            } else {
+                rankMap.remove(Card.Rank.ONE);
             }
-            checkBroadwayStraight(rankList);
             setStraightRank();
         }
     }
 
-    private void checkBroadwayStraight(List<Card.Rank> rankList) {
-        if (rankMap.size() == BROADWAY_LENGTH) {
-            if (!hasStraight) {
-                hasBroadway = true;
-                for (int i = 1; i < rankMap.size() - 1 && hasBroadway; i++) {
-                    if (rankList.get(i + 1).getStrength() - rankList.get(i).getStrength() != 1) {
-                        hasBroadway = false;
-                    }
-                }
-                rankList.remove(Card.Rank.ONE);
-            } else {
-                rankList.remove(Card.Rank.ACE);
+    private void addRankOne() {
+        if (rankMap.containsKey(Card.Rank.ACE)) {
+            rankMap.put(Card.Rank.ONE, 1);
+        }
+    }
+
+    private void checkCardsAreSequential(List<Card.Rank> rankList) {
+        hasStraight = true;
+        for (int i = 0; i < hand.size() - 1 && hasStraight; i++) {
+            if (rankList.get(i + 1).getStrength() - rankList.get(i).getStrength() != 1) {
+                hasStraight = false;
             }
+        }
+    }
+
+    private void checkBroadwayStraight(List<Card.Rank> rankList) {
+        if (!hasStraight) {
+            hasBroadway = true;
+            for (int i = 1; i < rankMap.size() - 1 && hasBroadway; i++) {
+                if (rankList.get(i + 1).getStrength() - rankList.get(i).getStrength() != 1) {
+                    hasBroadway = false;
+                }
+            }
+            rankList.remove(Card.Rank.ONE);
+        } else {
+            rankList.remove(Card.Rank.ACE);
         }
     }
 
     private void setStraightRank() {
-        if ((hasStraight || hasBroadway) && hasFlush) {
-            if (hasBroadway) {
-                rank = HandRank.ROYAL_FLUSH;
-            } else {
-                rank = HandRank.STRAIGHT_FLUSH;
-            }
-        } else if (hasStraight || hasBroadway) {
+        if(hasStraight || hasBroadway) {
             rank = HandRank.STRAIGHT;
+            if(hasFlush) {
+                rank = hasBroadway ? HandRank.ROYAL_FLUSH : HandRank.STRAIGHT_FLUSH;
+            }
         }
     }
-
 
     private ArrayList<Card.Rank> createSortedRankList() {
         ArrayList<Card.Rank> rankList = new ArrayList<>(Arrays.asList(Arrays.copyOf(rankMap.keySet().toArray(),
