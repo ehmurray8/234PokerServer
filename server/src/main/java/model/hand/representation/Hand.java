@@ -24,18 +24,18 @@ import model.player.Player;
  */
 public abstract class Hand implements HandInterface {
 
-    Deck deck;
-    private ArrayList<Card> communityCards;
+    final Deck deck;
+    private final ArrayList<Card> communityCards;
     private double smallBlindAmount;
     private double bigBlindAmount;
     private double anteAmount;
-    protected ArrayList<Player> players;
+    ArrayList<Player> players;
 
     /**	Pots that are currently opened, main pot is at index 0. */
-    private List<Pot> openPots;
+    private final List<Pot> openPots;
     
     /** All openPots that have been opened during the hand. */
-    private List<Pot> allPots;
+    private final List<Pot> allPots;
 
     Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
         this();
@@ -297,27 +297,26 @@ public abstract class Hand implements HandInterface {
                 }
                 System.out.println("Left over: " + (pot.getAmount() - winnings));
     		} else {
-                List<Integer> potWinnerIdxs = new ArrayList<>();
-                //potWinnerIdxs.add(0);
+                List<Integer> potWinnerIndexes = new ArrayList<>();
                 for(int i = 0; i < pot.getPlayers().size(); i++) {
                     if(analyzers.get(i) != null) {
-                        if(potWinnerIdxs.isEmpty()) {
-                            potWinnerIdxs.add(i);
+                        if(potWinnerIndexes.isEmpty()) {
+                            potWinnerIndexes.add(i);
                         } else {
-                            if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) > 0) {
-                                potWinnerIdxs.clear();
-                                potWinnerIdxs.add(i);
-                            } else if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIdxs.get(0))) == 0) {
-                                potWinnerIdxs.add(i);
+                            if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIndexes.get(0))) > 0) {
+                                potWinnerIndexes.clear();
+                                potWinnerIndexes.add(i);
+                            } else if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIndexes.get(0))) == 0) {
+                                potWinnerIndexes.add(i);
                             }
                         }
                     }
                     
                 }
-                double winnings = pot.getAmount() / potWinnerIdxs.size();
+                double winnings = pot.getAmount() / potWinnerIndexes.size();
                 DecimalFormat df = new DecimalFormat(".##");
                 winnings = Double.parseDouble(df.format(winnings));
-                for(int pwi : potWinnerIdxs) {
+                for(int pwi : potWinnerIndexes) {
                     System.out.println(pot.getPlayers().get(pwi).getName() + " has won " + winnings + "!");
                     pot.getPlayers().get(pwi).updateBalance(winnings);
                 }

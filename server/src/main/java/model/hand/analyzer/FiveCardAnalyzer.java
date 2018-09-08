@@ -7,13 +7,13 @@ import java.util.*;
 
 import static model.hand.analyzer.AnalyzerHelpers.*;
 
-public class FiveCardAnalyzer  {
+class FiveCardAnalyzer  {
 
     private HandRank rank;
-    private Map<Card.Rank, Integer> rankMap;
-    private Map<Card.Suit, Integer> suitMap;
-    private List<Card> hand;
-    private ArrayList<Card.Rank> pairRanks;
+    private final Map<Card.Rank, Integer> rankMap;
+    private final Map<Card.Suit, Integer> suitMap;
+    private final List<Card> hand;
+    private final ArrayList<Card.Rank> pairRanks;
     private boolean hasStraight, has3Kind = false, has4Kind = false, hasFlush = false, hasBroadway = false;
 
     public HandRank getRank() {
@@ -85,7 +85,7 @@ public class FiveCardAnalyzer  {
             ArrayList<Card.Rank> rankList = createSortedRankList();
             checkCardsAreSequential(rankList);
             if (rankMap.size() == BROADWAY_LENGTH) {
-                checkBroadwayStraight(rankList);
+                handleAceStraight(rankList);
             } else {
                 rankMap.remove(Card.Rank.ONE);
             }
@@ -108,18 +108,22 @@ public class FiveCardAnalyzer  {
         }
     }
 
-    private void checkBroadwayStraight(List<Card.Rank> rankList) {
+    private void handleAceStraight(List<Card.Rank> rankList) {
         if (!hasStraight) {
-            hasBroadway = true;
-            for (int i = 1; i < rankMap.size() - 1 && hasBroadway; i++) {
-                if (rankList.get(i + 1).getStrength() - rankList.get(i).getStrength() != 1) {
-                    hasBroadway = false;
-                }
-            }
-            rankList.remove(Card.Rank.ONE);
+            checkBroadwayStraight(rankList);
         } else {
             rankList.remove(Card.Rank.ACE);
         }
+    }
+
+    private void checkBroadwayStraight(List<Card.Rank> rankList) {
+        hasBroadway = true;
+        for (int i = 1; i < rankMap.size() - 1 && hasBroadway; i++) {
+            if (rankList.get(i + 1).getStrength() - rankList.get(i).getStrength() != 1) {
+                hasBroadway = false;
+            }
+        }
+        rankList.remove(Card.Rank.ONE);
     }
 
     private void setStraightRank() {

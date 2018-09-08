@@ -73,13 +73,13 @@ public class HandTest {
 	public void testChargeAntesBasic() {
 		Player p1 = new Player(2000, "P1");
 		Player p2 = new Player(2000, "P2");
-		ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(p1, p2));
+		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2));
 		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
 		hand.dealInitialHand();
 		hand.chargeAntes();
 
-		assertTrue(p1.getBalance() == 1970.);
-		assertTrue(p2.getBalance() == 1970.);
+        assertEquals(1970., p1.getBalance(), 0.0);
+        assertEquals(1970., p2.getBalance(), 0.0);
 		assertEquals(60., hand.getOpenPots().get(0).getAmount(), .001);
 	}
 
@@ -92,31 +92,31 @@ public class HandTest {
 		Player p4 = new Player(5000, "P4");
 		Player p5 = new Player(700, "P5");
 		Player p6 = new Player(100000, "P6");
-		ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(p1, p2, p3, p4, p5, p6));
+		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
 		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
 		hand.dealInitialHand();
 		hand.chargeAntes();
-		assertTrue(p1.getBalance() == 4970);
-		assertTrue(p2.getBalance() == 10970);
-		assertTrue(p3.getBalance() == 2070);
-		assertTrue(p4.getBalance() == 4970);
-		assertTrue(p5.getBalance() == 670);
-		assertTrue(p6.getBalance() == 99970);
-		assertTrue(hand.getOpenPots().get(0).getAmount() == 180);
+        assertEquals(4970, p1.getBalance(), 0.0);
+        assertEquals(10970, p2.getBalance(), 0.0);
+        assertEquals(2070, p3.getBalance(), 0.0);
+        assertEquals(4970, p4.getBalance(), 0.0);
+        assertEquals(670, p5.getBalance(), 0.0);
+        assertEquals(99970, p6.getBalance(), 0.0);
+        assertEquals(180, hand.getOpenPots().get(0).getAmount(), 0.0);
 	}
 
 	@Test
 	public void testBlindsBasic() {
 		Player p1 = new Player(2000, "P1");
 		Player p2 = new Player(2000, "P2");
-		ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(p1, p2));
+		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2));
 		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
 		hand.dealInitialHand();
 		hand.chargeSmallBlind(1);
 		hand.chargeBigBlind(0);
-		assertTrue(p1.getBalance() == 1880.);
-		assertTrue(p2.getBalance() == 1940.);
-		assertTrue(hand.getOpenPots().get(0).getAmount() == 180.);
+        assertEquals(1880., p1.getBalance(), 0.0);
+        assertEquals(1940., p2.getBalance(), 0.0);
+        assertEquals(180., hand.getOpenPots().get(0).getAmount(), 0.0);
 	}
 
 	@Test
@@ -127,18 +127,18 @@ public class HandTest {
 		Player p4 = new Player(5000, "P4");
 		Player p5 = new Player(700, "P5");
 		Player p6 = new Player(100000, "P6");
-		ArrayList<Player> players = new ArrayList<Player>(Arrays.asList(p1, p2, p3, p4, p5, p6));
+		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
 		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
 		hand.dealInitialHand();
 		hand.chargeSmallBlind(1);
 		hand.chargeBigBlind(2);
-		assertTrue(p1.getBalance() == 5000);
-		assertTrue(p2.getBalance() == 10940);
-		assertTrue(p3.getBalance() == 1980);
-		assertTrue(p4.getBalance() == 5000);
-		assertTrue(p5.getBalance() == 700);
-		assertTrue(p6.getBalance() == 100000);
-		assertTrue(hand.getOpenPots().get(0).getAmount() == 180);
+        assertEquals(5000, p1.getBalance(), 0.0);
+        assertEquals(10940, p2.getBalance(), 0.0);
+        assertEquals(1980, p3.getBalance(), 0.0);
+        assertEquals(5000, p4.getBalance(), 0.0);
+        assertEquals(700, p5.getBalance(), 0.0);
+        assertEquals(100000, p6.getBalance(), 0.0);
+        assertEquals(180, hand.getOpenPots().get(0).getAmount(), 0.0);
 	}
 
 	@Test
@@ -153,29 +153,29 @@ public class HandTest {
 		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
 		hand.dealInitialHand();
 		hand.chargeAntes();
-		assertTrue(hand.getAllPots().size() == 4);
-		assertTrue(hand.getAllPots().get(0).getAmount() == 30);
-		assertTrue(hand.getAllPots().get(1).getAmount() == 10);
-		assertTrue(hand.getAllPots().get(2).getAmount() == 16);
-		assertTrue(hand.getAllPots().get(3).getAmount() == 30);
-		assertTrue(hand.getOpenPots().get(0).getAmount() == 18);
+        assertEquals(4, hand.getAllPots().size());
+        assertEquals(30, hand.getAllPots().get(0).getAmount(), 0.0);
+        assertEquals(10, hand.getAllPots().get(1).getAmount(), 0.0);
+        assertEquals(16, hand.getAllPots().get(2).getAmount(), 0.0);
+        assertEquals(30, hand.getAllPots().get(3).getAmount(), 0.0);
+        assertEquals(18, hand.getOpenPots().get(0).getAmount(), 0.0);
 		for (Pot p : hand.getAllPots()) {
-			assertTrue(p.getAmountOwed() == 0);
-			assertTrue(p.getNumPlayersPaid() == 0);
+            assertEquals(0, p.getAmountOwed(), 0.0);
+            assertEquals(0, p.getNumPlayersPaid());
 		}
-		assertTrue(p1.getBalance() == 0);
-		assertTrue(p2.getBalance() == 0);
-		assertTrue(p3.getBalance() == 0);
-		assertTrue(p4.getBalance() == 20);
-		assertTrue(p5.getBalance() == 0);
-		assertTrue(p6.getBalance() == 70);
+        assertEquals(0, p1.getBalance(), 0.0);
+        assertEquals(0, p2.getBalance(), 0.0);
+        assertEquals(0, p3.getBalance(), 0.0);
+        assertEquals(20, p4.getBalance(), 0.0);
+        assertEquals(0, p5.getBalance(), 0.0);
+        assertEquals(70, p6.getBalance(), 0.0);
 
 		hand.chargeSmallBlind(3);
 		hand.chargeBigBlind(5);
 
-		assertTrue(p4.getBalance() == 0);
-		assertTrue(p4.getAmountThisTurn() == 20);
-		assertTrue(p6.getBalance() == 0);
-		assertTrue(p6.getAmountThisTurn() == 70);
+        assertEquals(0, p4.getBalance(), 0.0);
+        assertEquals(20, p4.getAmountThisTurn(), 0.0);
+        assertEquals(0, p6.getBalance(), 0.0);
+        assertEquals(70, p6.getAmountThisTurn(), 0.0);
 	}
 }

@@ -35,7 +35,7 @@ public class Rules {
 	private boolean isTourney;
 	
 	/** The length of the blind level in minutes. */
-	private int blindLevelTimeMins;
+	private int blindLevelTimeMinutes;
 	
 	/** The amount for the big blinds at each level, this array excludes the initial bigBlind. */
 	private double[] bigBlinds;
@@ -59,14 +59,14 @@ public class Rules {
 	 * @param timeLimitSecs the amount each player has to act;
 	 * @param maxCapacity the maximum number of players allowed to sit at the table
 	 * @param prizes the prizes awarded to the highest finishers
-	 * @param blindLevelTimeMins the amount of time each blind level lasts
+	 * @param blindLevelTimeMinutes the amount of time each blind level lasts
 	 * @param bigBlinds the amount of money the big blind is at each level
 	 * @param smallBlinds the amount of money the small blind is at each level
 	 * @param antes the amount of money the ante is at each level
 	 * @param gameType the type of game the players will be playing at the table
 	 */
 	public Rules(double smallBlind, double bigBlind, double ante, int timeLimitSecs, int maxCapacity, double[] prizes,
-				 int blindLevelTimeMins, double[] bigBlinds, double[] smallBlinds, double[] antes, GameType gameType) {
+				 int blindLevelTimeMinutes, double[] bigBlinds, double[] smallBlinds, double[] antes, GameType gameType) {
 		this.smallBlind = smallBlind;
 		this.bigBlind = bigBlind;
 		this.ante = ante;
@@ -74,7 +74,7 @@ public class Rules {
 		this.maxCapacity = maxCapacity;
 		this.prizes = prizes;
 		this.isTourney = true;
-		this.blindLevelTimeMins = blindLevelTimeMins;
+		this.blindLevelTimeMinutes = blindLevelTimeMinutes;
 		this.bigBlinds = bigBlinds;
 		this.smallBlinds = smallBlinds;
 		this.antes = antes;
@@ -99,7 +99,7 @@ public class Rules {
 		this.maxCapacity = maxCapacity;
 		this.prizes = new double[0];
 		this.isTourney = false;
-		this.blindLevelTimeMins = 0;
+		this.blindLevelTimeMinutes = 0;
 		this.bigBlinds = new double[0];
 		this.smallBlinds = new double[0];
 		this.antes = new double[0];
@@ -124,8 +124,8 @@ public class Rules {
 		return isTourney;
 	}
 
-	public int getBlindLevelTimeMins() {
-		return blindLevelTimeMins;
+	public int getBlindLevelTimeMinutes() {
+		return blindLevelTimeMinutes;
 	}
 
 	public double[] getBigBlinds() {

@@ -14,7 +14,6 @@ public class HoldEmAnalyzer extends HandAnalyzer {
 
     @Override
     public final List<List<Card>> fiveCardCombinations(List<Card> fullHand) {
-        final int numCard = 5;
-        return recurseCombinations(fullHand, numCard);
+        return recurseCombinations(fullHand, 5);
     }
 }

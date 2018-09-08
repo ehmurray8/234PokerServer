@@ -130,6 +130,6 @@ public class GameTest {
 		testClient = new TestClient();
 		Game game = new Game(players, rules, true, testClient);
 		game.startGame();
-		assertTrue(p1.getBalance() + p2.getBalance() == 1000.);
+        assertEquals(1000., p1.getBalance() + p2.getBalance(), 0.0);
 	}
 }

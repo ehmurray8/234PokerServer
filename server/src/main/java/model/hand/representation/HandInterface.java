@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import model.card.Card;
 
 /**
- * This interface defines a Hand that contains informations about the pot, the
+ * This interface defines a Hand that contains information about the pot, the
  * blinds, and the community cards.
  *
  * <p>

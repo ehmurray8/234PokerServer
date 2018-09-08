@@ -14,7 +14,7 @@ import model.card.Card.Rank;
 import model.card.Card.Suit;
 
 /**
- * The method tests Omaha hands to determine if the OmahaAnalzyer can correctly
+ * The method tests Omaha hands to determine if the OmahaAnalyzer can correctly
  * determine the ranks of the hands.
  *
  * @author Emmet Murray

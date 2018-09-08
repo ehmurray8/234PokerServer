@@ -32,7 +32,7 @@ public class CardTest {
 
         Comparator<Card> cc = new Card.CardComparator();
 
-        assertTrue(cc.compare(c1, c2) == 0);
+        assertEquals(0, cc.compare(c1, c2));
     }
 
     @Test

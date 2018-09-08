@@ -8,8 +8,8 @@ public enum HandRank {
     STRAIGHT(5, "Straight"), FLUSH(6, "Flush"), FULL_HOUSE(7, "Full House"), FOUR_OF_A_KIND(8, "Four of a Kind"),
     STRAIGHT_FLUSH(9, "Straight Flush"), ROYAL_FLUSH(10, "Royal Flush");
 
-    private int strength;
-    private String string;
+    private final int strength;
+    private final String string;
 
     HandRank(int strength, String string) {
         this.strength = strength;

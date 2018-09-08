@@ -8,7 +8,7 @@ import model.card.Card;
 public class Player  {
 
     private static final Comparator<Card> CARD_COMPARATOR = new Card.CardComparator();
-    private String name;
+    private final String name;
     private double balance;
     private ArrayList<Card> hand;
     private boolean hasFolded;

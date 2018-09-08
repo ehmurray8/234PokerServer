@@ -2,8 +2,8 @@ package model.option;
 
 public class Option {
 
-    private OptionType type;
-    private double amount;
+    private final OptionType type;
+    private final double amount;
 
     public enum OptionKind {
         FOLD, CHECK_CALL, RAISE_BET, ALLIN
@@ -17,8 +17,8 @@ public class Option {
         BET("Bet", OptionKind.RAISE_BET),
         ALLIN("All-in", OptionKind.ALLIN);
 
-        private String string;
-        private OptionKind kind;
+        private final String string;
+        private final OptionKind kind;
 
 
         OptionType(String string, OptionKind kind) {

@@ -4,15 +4,15 @@ import java.util.Comparator;
 
 public class Card {
 
-    private Rank rank;
-    private Suit suit;
+    private final Rank rank;
+    private final Suit suit;
 
     public enum Rank {
 
         ONE(1), TWO(2), THREE(3), FOUR(4), FIVE(5), SIX(6), SEVEN(7),
         EIGHT(8), NINE(9), TEN(10), JACK(11), QUEEN(12), KING(13), ACE(14);
 
-        private int strength;
+        private final int strength;
 
         Rank(int strength) {
             this.strength = strength;
@@ -47,7 +47,7 @@ public class Card {
                 final Card otherCard = (Card) obj;
                 return this.getRank().equals(otherCard.getRank()) && this.getSuit().equals(otherCard.getSuit());
             }
-        } catch (NullPointerException npe) { }
+        } catch (NullPointerException ignored) { }
         return false;
     }
 

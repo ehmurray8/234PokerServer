@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
-import model.hand.representation.Hand;
 import model.hand.representation.HandRank;
 import org.junit.Test;
 

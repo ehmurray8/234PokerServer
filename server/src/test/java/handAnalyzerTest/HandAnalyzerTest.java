@@ -1,5 +1,6 @@
 package handAnalyzerTest;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -78,7 +79,7 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(this.handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, this.handAnalyzerComparator.compare(hA1, hA2));
     }
 
     @Test
@@ -274,7 +275,7 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(this.handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, this.handAnalyzerComparator.compare(hA1, hA2));
     }
 
     @Test
@@ -358,7 +359,7 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(this.handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, this.handAnalyzerComparator.compare(hA1, hA2));
     }
 
     @Test
@@ -442,7 +443,7 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(this.handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, this.handAnalyzerComparator.compare(hA1, hA2));
     }
 
     @Test
@@ -470,7 +471,7 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(this.handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, this.handAnalyzerComparator.compare(hA1, hA2));
     }
 
     @Test
@@ -555,7 +556,7 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(this.handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, this.handAnalyzerComparator.compare(hA1, hA2));
     }
 
     @Test
@@ -667,7 +668,7 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(this.handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, this.handAnalyzerComparator.compare(hA1, hA2));
     }
 
     @Test
@@ -695,7 +696,7 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(this.handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, this.handAnalyzerComparator.compare(hA1, hA2));
     }
 
     @Test
@@ -751,6 +752,6 @@ public class HandAnalyzerTest {
         HandAnalyzer hA1 = new HoldEmAnalyzer(Arrays.asList(cards));
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
-        assertTrue(handAnalyzerComparator.compare(hA1, hA2) == 0);
+        assertEquals(0, handAnalyzerComparator.compare(hA1, hA2));
     }
 }

@@ -39,7 +39,7 @@ public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
         switch (rank) {
             case HIGH_CARD:
             case FLUSH:
-                return compareCardsDescending();
+                return compareCardsDescending(sortedHand, otherSortedHand);
             case STRAIGHT:
             case STRAIGHT_FLUSH:
                 return compareStraight();
@@ -64,42 +64,33 @@ public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
         } else if (otherHasWheelStraight && !hasWheelStraight) {
             return 1;
         }
-        return compareCardsDescending();
+        return compareCardsDescending(sortedHand, otherSortedHand);
     }
 
     private boolean checkForWheelStraight(List<Card.Rank> hand) {
         return hand.contains(Card.Rank.ACE) && hand.contains(Card.Rank.TWO);
     }
 
-    private int compareCardsDescending() {
-        for (int i = 0; i < sortedHand.size(); i++) {
-            if (!sortedHand.get(i).equals(otherSortedHand.get(i))) {
-                return sortedHand.get(i).getStrength() - otherSortedHand.get(i).getStrength();
-            }
-        }
-        return 0;
-    }
-
     private int comparePairs() {
-        int comparison = compareCardsDescending();
+        int comparison = compareCardsDescending(sortedHand, otherSortedHand);
         if(comparison != 0) {
             return comparison;
         }
-        List<Card.Rank> nonPairRanks1 = handAnalyzer.getNonPairRanks();
-        List<Card.Rank> nonPairRanks2 = otherHandAnalyzer.getNonPairRanks();
-        for (int i = 0; i < nonPairRanks1.size(); i++) {
-            if (!nonPairRanks1.get(i).equals(nonPairRanks2.get(i))) {
-                return nonPairRanks1.get(i).getStrength() - nonPairRanks2.get(i).getStrength();
-            }
-        }
-        return 0;
+        List<Card.Rank> nonPairRanks = handAnalyzer.getNonPairRanks();
+        List<Card.Rank> otherNonPairRanks = otherHandAnalyzer.getNonPairRanks();
+        return compareCardsDescending(nonPairRanks, otherNonPairRanks);
     }
 
     private int compareFullHouse() {
-        for (int i = 0; i < handAnalyzer.getFullHouseRanks().size(); i++) {
-            if (!handAnalyzer.getFullHouseRanks().get(i).equals(otherHandAnalyzer.getFullHouseRanks().get(i))) {
-                return handAnalyzer.getFullHouseRanks().get(i).getStrength()
-                        - otherHandAnalyzer.getFullHouseRanks().get(i).getStrength();
+        List<Card.Rank> fullHouseRanks = handAnalyzer.getFullHouseRanks();
+        List<Card.Rank> otherFullHouseRanks = otherHandAnalyzer.getFullHouseRanks();
+        return compareCardsDescending(fullHouseRanks, otherFullHouseRanks);
+    }
+
+    private int compareCardsDescending(List<Card.Rank> first, List<Card.Rank> second) {
+        for (int i = 0; i < first.size(); i++) {
+            if (!first.get(i).equals(second.get(i))) {
+                return first.get(i).getStrength() - second.get(i).getStrength();
             }
         }
         return 0;

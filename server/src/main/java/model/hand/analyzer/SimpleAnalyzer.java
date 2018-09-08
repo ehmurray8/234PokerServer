@@ -8,9 +8,9 @@ import model.card.Card;
 public class SimpleAnalyzer extends HandAnalyzer {
     SimpleAnalyzer(List<Card> fullHand) {
         super(fullHand);
-        ArrayList<Card> fullHandList = new ArrayList<>(super.getFullHand());
+        ArrayList<Card> fullHandList = new ArrayList<>(getFullHand());
         FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(fullHandList);
-        super.setTopRank(fiveCardAnalyzer.getRank());
+        setTopRank(fiveCardAnalyzer.getRank());
     }
 
     @Override
@@ -20,8 +20,8 @@ public class SimpleAnalyzer extends HandAnalyzer {
 
     @Override
     public final void analyze() {
-        super.findPairRanks();
-        super.findFullHouseRanks();
-        super.findBestHand();
+        findPairRanks();
+        findFullHouseRanks();
+        findBestHand();
     }
 }
