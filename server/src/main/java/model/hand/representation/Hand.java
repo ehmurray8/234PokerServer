@@ -21,7 +21,7 @@ import model.player.Player;
  * full poker hand, and decides its winner.
  * </p>
  */
-public abstract class Hand implements HandInterface {
+public abstract class Hand {
 
     final Deck deck;
     private final ArrayList<Card> communityCards;
@@ -52,6 +52,8 @@ public abstract class Hand implements HandInterface {
         allPots = new ArrayList<>();
     }
 
+    public abstract void dealInitialHand();
+
     public List<Pot> getOpenPots() {
     	return openPots;
     }
@@ -60,31 +62,26 @@ public abstract class Hand implements HandInterface {
     	return allPots;
     }
 
-    @Override
     public final ArrayList<Card> getCommunityCards() {
         return communityCards;
     }
 
-    @Override
     public final String toString() {
         double totalAmountInPots = openPots.stream().map(Pot::getAmount).reduce(0.0, (pot1, pot2) -> pot1 + pot2);
         return communityCards.toString() + " Pot: " + totalAmountInPots + " Big: " +
                bigBlindAmount + " Small: " + smallBlindAmount;
     }
 
-    @Override
     public final void dealFlop() {
         deck.pop();
         IntStream.range(0, 3).forEach(iteration -> communityCards.add(deck.pop()));
     }
 
-    @Override
     public final void dealTurn() {
         deck.pop();
         communityCards.add(deck.pop());
     }
 
-    @Override
     public final void dealRiver() {
         deck.pop();
         communityCards.add(deck.pop());

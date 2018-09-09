@@ -41,7 +41,7 @@ public class Pot {
 		return numPlayersPaid;
 	}
 
-	public List<Player> getPlayers() {
+	List<Player> getPlayers() {
 		return players;
 	}
 
@@ -72,9 +72,7 @@ public class Pot {
 	 @Override
 	public String toString() {
 		StringBuilder playerStr = new StringBuilder();
-		for(Player p : players) {
-			playerStr.append(" ").append(p.getName()).append(": ").append(p.getBalance());
-		}
+		players.forEach(player -> playerStr.append(" ").append(player.getName()).append(": ").append(player.getBalance()));
 		return "Amount in pot: " + amount + ", Amount owed: " + amountOwed + ", Number of players paid: " +
 				numPlayersPaid + ", Players in pot: " + playerStr;
 	}
