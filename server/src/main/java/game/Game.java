@@ -1,7 +1,9 @@
 package game;
 import model.player.Player;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import game.Rules.GameType;
 import model.hand.representation.*;
@@ -141,13 +143,10 @@ public class Game {
 	public void removePlayer(Player player) throws TableEmptyException {
 	    if(tableEmpty()) { throw new TableEmptyException(); }
 
-		for(int i = 0; i < players.length; i++) {
-			if(players[i].equals(player)) {
-				players[i] = null;
-			}
-		}
-		this.numPlayers--;
-		if(this.rules.isTourney()) {
+        Arrays.stream(players).filter(p -> p.equals(player)).forEach(p -> p = null);
+
+		numPlayers--;
+		if(rules.isTourney()) {
 			if(numPlayers < rules.getPrizes().length) {
 				System.out.println("Player " + player.toString() + " wins $" + rules.getPrizes()[numPlayers]);
 				// Need to figure out how to return money to the players account
@@ -192,11 +191,8 @@ public class Game {
 	}
 	
 	public void removeBrokePlayers() {
-		for (Player player : players) {
-			if (player != null && player.getBalance() == 0) {
-				player.setSittingOut(true);
-			}
-		}
+        Arrays.stream(players).filter(player -> player != null && player.getBalance() == 0)
+                .forEach(player -> player.setSittingOut(true));
 	}
 	
 	public void bettingRound(Hand currHand, boolean resetBetting) {
@@ -211,7 +207,6 @@ public class Game {
             Option option = askPlayerForOption(currOptions, player);
             currHand.executeOption(player, option);
             incrementCurrentAction();
-            System.out.println(player.getName() + ": " + option.toString());
         }
 	}
 	
@@ -224,22 +219,11 @@ public class Game {
 	}
 	
 	private boolean tableEmpty() {
-		for(Player p : players) {
-			if(p != null) {
-				return false;
-			}
-		}
-		return true;
+	    return Arrays.stream(players).allMatch(Objects::isNull);
 	}
 	
 	private boolean stillBetting() {
-		int count = 0;
-		for(Player p : playersInHand) {
-			if(!p.hasFolded()) {
-				count ++;
-			}
-		}
-		return count > 1;
+		return playersInHand.stream().filter(player -> !player.hasFolded()).count() > 1;
 	}
 	
 	/**
@@ -251,8 +235,6 @@ public class Game {
 	 * TODO: Handle showing cards
 	 */
 	public void startGame() {
-        GameType currGameType;
-        Hand currHand;
 		while(!tableEmpty()) {
 			for(Player p : players) {
 				if(p != null && !p.isSittingOut()) {
@@ -263,15 +245,15 @@ public class Game {
 			
 			if(this.playersInHand.size() <= 1) {
 				// Inactive game
-				System.out.println("Inactive game.");
 				break;
 			}
 	
-			currGameType = rules.getGameType();
+			GameType currGameType = rules.getGameType();
 			if(currGameType == GameType.MIXED) {
 				currGameType = askDealerForGameType();
 			}
-			
+
+            Hand currHand;
 			switch(currGameType){
 			case HOLDEM:
 				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
@@ -314,16 +296,11 @@ public class Game {
 			currHand.payWinners();
 			
 			// Show cards
-			for(Player p : players) {
-				System.out.println(p.toString());
-				p.resetStatus();
-			}
-			
+			Arrays.stream(players).forEach(Player::resetStatus);
+
 			removeBrokePlayers();
 			incrementDealerNum();
 			playersInHand.clear();
 		}
-		// Dead game
-		System.out.println("Dead Game");
 	}
 }
