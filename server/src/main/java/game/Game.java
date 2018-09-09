@@ -272,7 +272,6 @@ public class Game {
 				currGameType = askDealerForGameType();
 			}
 			
-			boolean isHoldemAnalyzer = true;
 			switch(currGameType){
 			case HOLDEM:
 				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
@@ -283,14 +282,11 @@ public class Game {
 				break;
 			case OMAHA:
 				currHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
-				isHoldemAnalyzer = false;
 				break;
 			default:
 				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
 			}
-			
-			System.out.println(currHand.toString());
-			
+
 			currHand.dealInitialHand();
 			if(this.rules.getAnte() > 0) {
                 currHand.chargeAntes();
@@ -299,41 +295,23 @@ public class Game {
 			currHand.chargeBigBlind(bigBlindNum());
 			currentAction = playersInHand.indexOf(players[bigBlindNum()]);
 			
-			for(Player p : players) {
-				System.out.println(p.toString());
-			}
-			
             bettingRound(currHand, false);
             if(stillBetting()) {
                 currHand.dealFlop();
             }
-			
-			for(Player p : players) {
-				System.out.println(p.toString());
-			}
-			System.out.println("Flop: " + currHand.getCommunityCards().toString());
-			System.out.println("Pot: " + currHand.getOpenPots().get(0).getAmount());
 			
 			bettingRound(currHand, true);
 			if(stillBetting()) {
                 currHand.dealTurn();
 			}
 			
-			System.out.println("Turn: " + currHand.getCommunityCards().toString());
-			System.out.println("Pot: " + currHand.getOpenPots().get(0).getAmount());
-
 			bettingRound(currHand, true);
 			if(stillBetting()) {
                 currHand.dealRiver();
 			}
 
-			System.out.println("River: " + currHand.getCommunityCards().toString());
-			System.out.println("Pot: " + currHand.getOpenPots().get(0).getAmount());
-
 			bettingRound(currHand, true);
-			
-			System.out.println("Pot: " + currHand.getOpenPots().get(0).getAmount());
-			currHand.payWinners(isHoldemAnalyzer);
+			currHand.payWinners();
 			
 			// Show cards
 			for(Player p : players) {

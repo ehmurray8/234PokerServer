@@ -17,8 +17,8 @@ import static model.hand.analyzer.AnalyzerHelpers.*;
  */
 public abstract class HandAnalyzer {
 
+    public static final HandAnalyzerComparator HAND_ANALYZER_COMPARATOR = new HandAnalyzerComparator();
     private static final HandRank.HandRankComparator HAND_RANK_COMPARATOR = new HandRank.HandRankComparator();
-    private static final HandAnalyzerComparator HAND_ANALYZER_COMPARATOR = new HandAnalyzerComparator();
 
     private HandRank topRank;
     private SimpleAnalyzer topHandAnalyzer;

@@ -7,7 +7,6 @@ import java.util.stream.IntStream;
 import model.card.Card;
 import model.card.Deck;
 import model.hand.analyzer.HandAnalyzer;
-import model.hand.analyzer.HandAnalyzerComparator;
 import model.hand.analyzer.HoldEmAnalyzer;
 import model.hand.analyzer.OmahaAnalyzer;
 import model.option.Option;
@@ -43,7 +42,7 @@ public abstract class Hand implements HandInterface {
         this.bigBlindAmount = bigBlindAmount;
         this.anteAmount = anteAmount;
         this.players = players;
-        openPots.add(new Pot(this.players));
+        openPots.add(new Pot(players));
     }
 
     private Hand() {
@@ -91,8 +90,6 @@ public abstract class Hand implements HandInterface {
         communityCards.add(deck.pop());
     }
 
-
-
     private void chargeAmount(double amount, List<Player> playersToCharge) {
         playersToCharge.stream().filter(player -> player.getBalance() > 0)
                 .forEach(player -> chargePlayerAmount(player, amount));
@@ -109,51 +106,84 @@ public abstract class Hand implements HandInterface {
     private void playerPaidFullAmount(double amountPaid) {
         for(Pot pot : openPots) {
             if(pot.getAmountOwed() != 0) {
-                if(amountPaid >= pot.getAmountOwed()) {
-                    amountPaid -= pot.getAmountOwed();
-                    pot.addAmount(pot.getAmountOwed(), 1);
-                } else {
-                    pot.addAmount(pot.getAmountOwed() - amountPaid, 1);
-                    amountPaid = 0;
-                }
+                amountPaid = payOpenPot(pot, amountPaid);
             }
         }
         if(amountPaid > 0) {
-            Pot currPot = openPots.get(openPots.size() - 1);
-            currPot.setAmountOwed(currPot.getAmountOwed() + amountPaid);
-            currPot.addAmount(amountPaid, 1);
+            addAmountToCurrentPot(amountPaid);
         }
     }
 
+    private double payOpenPot(Pot pot, double amountPaid) {
+        return amountPaid >= pot.getAmountOwed() ? addFullAmountToPot(pot, amountPaid)
+                                                 : addRemainingAmountToPot(pot, amountPaid);
+    }
+
+    private double addFullAmountToPot(Pot pot, double amountPaid) {
+        amountPaid -= pot.getAmountOwed();
+        pot.addAmount(pot.getAmountOwed(), 1);
+        return amountPaid;
+    }
+
+    private double addRemainingAmountToPot(Pot pot, double amountPaid) {
+        pot.addAmount(pot.getAmountOwed() - amountPaid, 1);
+        return 0;
+    }
+
+    private void addAmountToCurrentPot(double amount) {
+        Pot currPot = openPots.get(openPots.size() - 1);
+        currPot.setAmountOwed(currPot.getAmountOwed() + amount);
+        currPot.addAmount(amount, 1);
+    }
+
     private void chargePlayerRemainingBalance(Player player, double fullAmount) {
+        double playerStartingBalance = player.getBalance();
+        int numPotsPaid = payAllPotsPossible(player);
+        int nextPotIndex = numPotsPaid + 1;
+        double nextPotAmount = getNextPotAmount(numPotsPaid);
+        double amountOwed = fullAmount - playerStartingBalance;
+        setupNextPot(numPotsPaid, player, amountOwed);
+        if(nextPotIndex + 1 < openPots.size()) {
+            Pot currentPot = openPots.get(numPotsPaid);
+            openPots.get(nextPotIndex).setAmountOwed(nextPotAmount - currentPot.getAmountOwed());
+            currentPot.updatePot();
+        }
+        IntStream.range(nextPotIndex, openPots.size() - 1).forEach(i -> openPots.get(i).getPlayers().remove(player));
+        player.addAmountThisTurn(player.getBalance());
+    }
+
+    private int payAllPotsPossible(Player player) {
         int numPotsPaid = 0;
-            double startBalance = player.getBalance();
-            for(Pot pot : openPots) {
-                if(pot.getAmountOwed() == 0 || !player.addAmountThisTurn(pot.getAmountOwed())) {
-                    break;
-                }
-                pot.addAmount(pot.getAmountOwed(), 1);
-                numPotsPaid++;
+        for(Pot pot : openPots) {
+            if(pot.getAmountOwed() == 0 || !player.addAmountThisTurn(pot.getAmountOwed())) {
+                break;
             }
-            double nextPotAmt = 0;
-            if(numPotsPaid + 1 < openPots.size()) {
-                nextPotAmt = openPots.get(numPotsPaid).getAmountOwed();
-            }
-            openPots.add(numPotsPaid + 1, new Pot(openPots.get(numPotsPaid).getPlayers()));
-            openPots.get(numPotsPaid + 1).removePlayer(player);
-            openPots.get(numPotsPaid + 1).setAmountOwed(fullAmount - startBalance);
-            double carryOver = openPots.get(numPotsPaid).setAmountOwed(player.getBalance());
-            int numPaid = openPots.get(numPotsPaid).getNumPlayersPaid();
-            openPots.get(numPotsPaid + 1).addAmount(carryOver, numPaid);
-            openPots.get(numPotsPaid).addAmount(player.getBalance(), 1);
-            if(numPotsPaid + 2 < openPots.size()) {
-                openPots.get(numPotsPaid + 1).setAmountOwed(nextPotAmt - openPots.get(numPotsPaid).getAmountOwed());
-                openPots.get(numPotsPaid).updatePot();
-            }
-            for(int i = openPots.size() - 1; i > numPotsPaid; i--){
-                openPots.get(i).getPlayers().remove(player);
-            }
-            player.addAmountThisTurn(player.getBalance());
+            pot.addAmount(pot.getAmountOwed(), 1);
+            numPotsPaid++;
+        }
+        return numPotsPaid;
+    }
+
+    private double getNextPotAmount(int currentPotIndex) {
+        double nextPotAmount = 0;
+        if(currentPotIndex + 1 < openPots.size()) {
+            nextPotAmount = openPots.get(currentPotIndex).getAmountOwed();
+        }
+        return nextPotAmount;
+    }
+
+    private void setupNextPot(int currentPotIndex, Player player, double amountOwed) {
+        int nextPotIndex = currentPotIndex + 1;
+        List<Player> playersInCurrentPot = openPots.get(currentPotIndex).getPlayers();
+        Pot nextPot = new Pot(playersInCurrentPot);
+        openPots.add(nextPotIndex, nextPot);
+        nextPot.removePlayer(player);
+        nextPot.setAmountOwed(amountOwed);
+        Pot currentPot = openPots.get(currentPotIndex);
+        double carryOver = currentPot.setAmountOwed(player.getBalance());
+        int numberPlayersPaid = currentPot.getNumPlayersPaid();
+        nextPot.addAmount(carryOver, numberPlayersPaid);
+        currentPot.addAmount(player.getBalance(), 1);
     }
     
     private void removeBrokePlayers() {
@@ -163,76 +193,49 @@ public abstract class Hand implements HandInterface {
     }
     
     private void removeOldPots() {
-    	for(int i = this.openPots.size() - 2; i >= 0; i--) {
-            this.allPots.add(0, this.openPots.remove(i));
+    	for(int i = openPots.size() - 2; i >= 0; i--) {
+            allPots.add(0, openPots.remove(i));
     	}
     }
 
     public final void chargeAntes() {
-    	this.openPots.get(0).setAmountOwed(this.anteAmount);
-    	chargeAmount(this.anteAmount, this.players);
-    	for(Player p : this.players) {
-    		p.clearAmtThisTurn();
-    	}
+    	openPots.get(0).setAmountOwed(anteAmount);
+    	chargeAmount(anteAmount, players);
+    	players.forEach(Player::clearAmtThisTurn);
     	removeOldPots();
     }
     
     public final void chargeBigBlind(int bigBlindPos) {
-    	double potNum = this.bigBlindAmount;
+    	double potNum = bigBlindAmount;
     	if(this.openPots.size() > 1) {
-    		potNum = this.bigBlindAmount - this.openPots.get(0).getAmountOwed();
+    		potNum = bigBlindAmount - openPots.get(0).getAmountOwed();
     	}
-    	this.openPots.get(this.openPots.size() - 1).setAmountOwed(potNum);
-        chargeAmount(this.bigBlindAmount, Collections.singletonList(this.players.get(bigBlindPos)));
+    	openPots.get(openPots.size() - 1).setAmountOwed(potNum);
+        chargeAmount(bigBlindAmount, Collections.singletonList(players.get(bigBlindPos)));
     	removeBrokePlayers();
     	removeOldPots();
     }
     
     public final void chargeSmallBlind(int smallBlindPos) {
-    	this.openPots.get(0).setAmountOwed(this.smallBlindAmount);
-        chargeAmount(this.smallBlindAmount, Collections.singletonList(this.players.get(smallBlindPos)));
+    	openPots.get(0).setAmountOwed(smallBlindAmount);
+        chargeAmount(smallBlindAmount, Collections.singletonList(players.get(smallBlindPos)));
     }
     
     public void setupBetRound() {
-    	for(Player p : this.players) {
-    		p.noActionThisTurn();
-    	}
+        players.forEach(Player::noActionThisTurn);
     }
     
     public boolean playersBetting() {
-        double amountOwed = 0;
-        int numPlayersWithMoney = 0;
-        boolean res = false;
-        int numNotFolded = 0;
-
-        if (players.size() < 2) {
+        int numNotFolded = (int) players.stream().filter(player -> !player.hasFolded()).count();
+        if (players.size() < 2 || numNotFolded < 2) {
             return false;
         }
 
-        for (Player p : players) {
-            if (!p.hasFolded()) {
-                numNotFolded += 1;
-            }
-        }
-        if (numNotFolded < 2) {
-            return false;
-        }
+        double amountOwed = openPots.stream().mapToDouble(Pot::getAmountOwed).sum();
+        int numPlayersWithMoney = (int) players.stream().filter(player -> player.getBalance() > 0).count();
+        boolean playerNoAction = players.stream().anyMatch(player -> player.getAmountThisTurn() == -1);
 
-        for (Pot p : openPots) {
-            amountOwed += p.getAmountOwed();
-        }
-
-        for (Player p : players) {
-            if (p.getBalance() > 0) {
-                numPlayersWithMoney++;
-            }
-            if (p.getAmountThisTurn() == -1) {
-                res = true;
-            }
-        }
-
-        return numPlayersWithMoney > 0 && amountOwed != 0 || numPlayersWithMoney >= 2 && res;
-
+        return numPlayersWithMoney > 0 && amountOwed != 0 || numPlayersWithMoney >= 2 && playerNoAction;
     }
     
     public void executeOption(Player player, Option option) {
@@ -245,7 +248,7 @@ public abstract class Hand implements HandInterface {
     	case RAISE:
     	case BET:
     	case ALLIN:
-    		this.openPots.get(this.openPots.size()-1).setAmountOwed(this.openPots.get(this.openPots.size()-1).getAmountOwed()
+    		openPots.get(openPots.size()-1).setAmountOwed(openPots.get(openPots.size()-1).getAmountOwed()
     				+ option.getAmount());
     	case CALL:
     		chargeAmount(option.getAmount(), Collections.singletonList(player));
@@ -255,113 +258,118 @@ public abstract class Hand implements HandInterface {
     	}
     }
     
-    public void payWinners(boolean isHoldem) {
-    	List<HandAnalyzer> analyzers;
-    	HandAnalyzer analyzer;
-    	List<Card> hand;
-        Comparator<HandAnalyzer> hAC = new HandAnalyzerComparator();
-        int numLeft = 0;
-    	for(Pot pot : openPots) {
-            analyzers = new ArrayList<>();
-    		for(Player player : pot.getPlayers()) {
-                hand = new ArrayList<>();
-                hand.addAll(player.getHand());
-                hand.addAll(this.getCommunityCards());
-                System.out.println("Paying Winners Check: " + player.toString() + ", Full hand: " + hand.toString());
-                if (this.getCommunityCards().size() == 5) {
-                    if(!player.hasFolded() && !player.isSittingOut()) {
-                        if(isHoldem) {
-                            analyzer = new HoldEmAnalyzer(hand);
-                            analyzers.add(analyzer);
-                        } else {
-                            analyzer = new OmahaAnalyzer(hand);
-                            analyzers.add(analyzer);
-                        }
-                        System.out.println(player.getName() + ": " + analyzer.toString());
-                    } else {
-                        analyzers.add(null);
-                    }
-                } else if(!player.hasFolded()) {
-                	numLeft++;
-                }
-    		}
-    		if(numLeft == 1) {
-                double winnings = pot.getAmount(); 
-                DecimalFormat df = new DecimalFormat(".##");
-                winnings = Double.parseDouble(df.format(winnings));
-                for(int i = 0; i < players.size(); i++) {
-                	if(!players.get(i).hasFolded() && !players.get(i).isSittingOut()) {
-                        System.out.println(pot.getPlayers().get(i).getName() + " has won " + winnings + "!");
-                        pot.getPlayers().get(i).updateBalance(winnings);
-                	}
-                }
-                System.out.println("Left over: " + (pot.getAmount() - winnings));
-    		} else {
-                List<Integer> potWinnerIndexes = new ArrayList<>();
-                for(int i = 0; i < pot.getPlayers().size(); i++) {
-                    if(analyzers.get(i) != null) {
-                        if(potWinnerIndexes.isEmpty()) {
-                            potWinnerIndexes.add(i);
-                        } else {
-                            if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIndexes.get(0))) > 0) {
-                                potWinnerIndexes.clear();
-                                potWinnerIndexes.add(i);
-                            } else if(hAC.compare(analyzers.get(i), analyzers.get(potWinnerIndexes.get(0))) == 0) {
-                                potWinnerIndexes.add(i);
-                            }
-                        }
-                    }
-                    
-                }
-                double winnings = pot.getAmount() / potWinnerIndexes.size();
-                DecimalFormat df = new DecimalFormat(".##");
-                winnings = Double.parseDouble(df.format(winnings));
-                for(int pwi : potWinnerIndexes) {
-                    System.out.println(pot.getPlayers().get(pwi).getName() + " has won " + winnings + "!");
-                    pot.getPlayers().get(pwi).updateBalance(winnings);
-                }
-                pot.getPlayers().get(0).updateBalance(pot.getAmount() - winnings);
-                System.out.println("Left over: " + (pot.getAmount() - winnings));
-    		}
-    	}
+    public void payWinners() {
+        openPots.forEach(this::payPotWinner);
+    }
+
+    private void payPotWinner(Pot pot) {
+        int numLeft = (int) pot.getPlayers().stream().filter(player -> !player.hasFolded()).count();
+        if(numLeft == 1) {
+            payOnlyRemainingPlayer(pot);
+        } else {
+            findAndPayPotWinners(pot);
+        }
+    }
+
+    private void payOnlyRemainingPlayer(Pot pot) {
+        double winnings = pot.getAmount();
+        DecimalFormat df = new DecimalFormat(".##");
+        winnings = Double.parseDouble(df.format(winnings));
+        for(int i = 0; i < players.size(); i++) {
+            if(!players.get(i).hasFolded() && !players.get(i).isSittingOut()) {
+                pot.getPlayers().get(i).updateBalance(winnings);
+            }
+        }
+    }
+
+    private void findAndPayPotWinners(Pot pot) {
+        List<HandAnalyzer> analyzers = new ArrayList<>();
+        players.forEach(player -> createAnalyzers(player, analyzers));
+        List<Integer> potWinnerIndexes = new ArrayList<>();
+        IntStream.range(0, pot.getPlayers().size()).filter(i -> analyzers.get(i) != null).forEach(i -> {
+            if(potWinnerIndexes.isEmpty()) {
+                potWinnerIndexes.add(i);
+            } else {
+                updatePotWinnerIndexes(analyzers, potWinnerIndexes, i);
+            }
+        });
+        DecimalFormat df = new DecimalFormat(".##");
+        double winnings = Double.parseDouble(df.format(pot.getAmount() / potWinnerIndexes.size()));
+        potWinnerIndexes.forEach(i -> pot.getPlayers().get(i).updateBalance(winnings));
+    }
+
+    private void createAnalyzers(Player player, List<HandAnalyzer> analyzers) {
+        if(!player.hasFolded() && !player.isSittingOut()) {
+            addAnalyzer(player, analyzers);
+        } else {
+            analyzers.add(null);
+        }
+    }
+
+    private void addAnalyzer(Player player, List<HandAnalyzer> analyzers) {
+        List<Card> hand = new ArrayList<>();
+        hand.addAll(player.getHand());
+        hand.addAll(getCommunityCards());
+        analyzers.add(isHoldem() ? new HoldEmAnalyzer(hand) : new OmahaAnalyzer(hand));
+    }
+
+    private boolean isHoldem() {
+        return !(this instanceof OmahaHand);
+    }
+
+    private void updatePotWinnerIndexes(List<HandAnalyzer> handAnalyzers, List<Integer> potWinnerIndexes, int index) {
+        HandAnalyzer newAnalyzer = handAnalyzers.get(index);
+        HandAnalyzer currentWinnerAnalyzer = handAnalyzers.get(potWinnerIndexes.get(0));
+        if(HandAnalyzer.HAND_ANALYZER_COMPARATOR.compare(newAnalyzer, currentWinnerAnalyzer) > 0) {
+            potWinnerIndexes.clear();
+            potWinnerIndexes.add(index);
+        } else if(HandAnalyzer.HAND_ANALYZER_COMPARATOR.compare(newAnalyzer, currentWinnerAnalyzer) == 0) {
+            potWinnerIndexes.add(index);
+        }
     }
     
     public List<Option> generateOptions(Player player) {
-    	double numOwed  = 0;
-    	List<Option> options = new ArrayList<>();
     	if(player.getBalance() > 0) {
-            for(Pot p : openPots) {
-                numOwed += p.getAmountOwed();
-            }
-            if(player.getAmountThisTurn() != -1) {
-                numOwed -= player.getAmountThisTurn();
-            }
-            if(numOwed == 0) {
-                options.add(new Option(Option.OptionType.CHECK, 0));
-                if(this.bigBlindAmount < player.getBalance()) {
-                    options.add(new Option(Option.OptionType.BET, this.bigBlindAmount));
-                }
-            } else {
-                options.add(new Option(Option.OptionType.FOLD, 0));
-                if(numOwed < player.getBalance()) {
-                    options.add(new Option(Option.OptionType.CALL, numOwed));
-                }
-                if(numOwed + this.bigBlindAmount < player.getBalance()) {
-                	int count = 0;
-                	for(Player p : players) {
-                		if(p.getBalance() > 0 && !p.hasFolded() && !p.isSittingOut()) {
-                			count++;
-                		}
-                	}
-                	if(count > 1) {
-                        options.add(new Option(Option.OptionType.RAISE, this.bigBlindAmount + numOwed));
-                	}
-                }
-            }
-            if(numOwed + this.bigBlindAmount <= player.getBalance()) {
-                options.add(new Option(Option.OptionType.ALLIN, player.getBalance()));
-            }
+    	    return createOptionsForNonBrokePlayer(player);
     	}
+        return new ArrayList<>();
+    }
+
+    private List<Option> createOptionsForNonBrokePlayer(Player player) {
+        List<Option> options = new ArrayList<>();
+        double amountOwed = openPots.stream().mapToDouble(Pot::getAmountOwed).sum();
+        if(player.getAmountThisTurn() != -1) {
+            amountOwed -= player.getAmountThisTurn();
+        }
+        if(amountOwed == 0) {
+            createCheckAndBetOptions(options, player);
+        } else {
+            createFoldCallRaiseOptions(options, player, amountOwed);
+        }
+        if(amountOwed + bigBlindAmount <= player.getBalance()) {
+            options.add(new Option(Option.OptionType.ALLIN, player.getBalance()));
+        }
         return options;
+    }
+
+    private void createCheckAndBetOptions(List<Option> options, Player player) {
+        options.add(new Option(Option.OptionType.CHECK, 0));
+        if(bigBlindAmount < player.getBalance()) {
+            options.add(new Option(Option.OptionType.BET, bigBlindAmount));
+        }
+    }
+
+    private void createFoldCallRaiseOptions(List<Option> options, Player player, double amountOwed) {
+        options.add(new Option(Option.OptionType.FOLD, 0));
+        if(amountOwed < player.getBalance()) {
+            options.add(new Option(Option.OptionType.CALL, amountOwed));
+        }
+        if(amountOwed + bigBlindAmount < player.getBalance()) {
+            int count = (int) players.stream()
+                    .filter(p -> p.getBalance() > 0 && !p.hasFolded() && !p.isSittingOut()).count();
+            if(count > 1) {
+                options.add(new Option(Option.OptionType.RAISE, bigBlindAmount + amountOwed));
+            }
+        }
     }
 }
