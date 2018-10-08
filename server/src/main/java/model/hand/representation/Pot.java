@@ -36,6 +36,10 @@ public class Pot {
 			numPlayersPaid = 0;
 		}
 	}
+
+	void removeAmount(double amount) {
+		this.amount -= amount;
+	}
 	
 	public int getNumPlayersPaid() {
 		return numPlayersPaid;

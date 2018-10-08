@@ -240,8 +240,8 @@ public class HandTest {
 		assertTrue(player1.hasFolded());
 		assertFalse(players.contains(player1));
 		assertEquals(player1.getBalance(), 2000, 0);
-		assertEquals(player1.getAmountThisTurn(), 0, 0);
-		assertEquals(hand.getTotalAmountInPots(), 0, 0);
+		assertEquals(0, player1.getAmountThisTurn(), 0);
+		assertEquals(0, hand.getTotalAmountInPots(), 0);
 	}
 
 	@Test
@@ -250,8 +250,8 @@ public class HandTest {
 		assertFalse(player1.hasFolded());
 		assertTrue(players.contains(player1));
 		assertEquals(player1.getBalance(), 2000, 0);
-		assertEquals(player1.getAmountThisTurn(), 0, 0);
-		assertEquals(hand.getTotalAmountInPots(), 0, 0);
+		assertEquals(0, player1.getAmountThisTurn(), 0);
+		assertEquals(0, hand.getTotalAmountInPots(), 0);
 	}
 
 	@Test
@@ -260,8 +260,8 @@ public class HandTest {
 		assertFalse(player1.hasFolded());
 		assertTrue(players.contains(player1));
 		assertEquals(player1.getBalance(), 1900, 0);
-		assertEquals(player1.getAmountThisTurn(), 100, 0);
-		assertEquals(hand.getTotalAmountInPots(), 100, 0);
+		assertEquals(100, player1.getAmountThisTurn(), 0);
+		assertEquals(100, hand.getTotalAmountInPots(), 0);
 	}
 
 	@Test
@@ -272,8 +272,8 @@ public class HandTest {
 		assertFalse(player1.hasFolded());
 		assertTrue(players.contains(player1));
 		assertEquals(player1.getBalance(), 1900, 0);
-		assertEquals(player1.getAmountThisTurn(), 100, 0);
-		assertEquals(hand.getTotalAmountInPots(), 100, 0);
+		assertEquals(100, player1.getAmountThisTurn(), 0);
+		assertEquals(100, hand.getTotalAmountInPots(), 0);
 	}
 
 	@Test
@@ -284,8 +284,8 @@ public class HandTest {
 		assertFalse(player1.hasFolded());
 		assertTrue(players.contains(player1));
 		assertEquals(player1.getBalance(), 1800, 0);
-		assertEquals(player1.getAmountThisTurn(), 200, 0);
-		assertEquals(hand.getTotalAmountInPots(), 200, 0);
+		assertEquals(200, player1.getAmountThisTurn(), 0);
+		assertEquals(200, hand.getTotalAmountInPots(), 0);
 	}
 
 	@Test
@@ -296,8 +296,8 @@ public class HandTest {
 		assertFalse(player2.hasFolded());
 		assertTrue(players.contains(player1));
 		assertEquals(player1.getBalance(), 0, 0);
-		assertEquals(player1.getAmountThisTurn(), 2000, 0);
-		assertEquals(hand.getTotalAmountInPots(), 2000, 0);
+		assertEquals(2000, player1.getAmountThisTurn(), 0);
+		assertEquals(2000, hand.getTotalAmountInPots(), 0);
 	}
 
 	@Test
@@ -305,8 +305,8 @@ public class HandTest {
 	    hand.executeOption(player1, bet);
 	    hand.executeOption(player2, fold);
 	    hand.payWinners();
-	    assertEquals(player1.getBalance(), 2000, 0);
-	    assertEquals(player2.getBalance(), 2000, 0);
+	    assertEquals(2000, player1.getBalance(), 0);
+	    assertEquals(2000, player2.getBalance(), 0);
     }
 
     @Test
@@ -317,8 +317,8 @@ public class HandTest {
 		hand.executeOption(player2, raise);
 		hand.executeOption(player1, fold);
 		hand.payWinners();
-        assertEquals(player1.getBalance(), 1900, 0);
-		assertEquals(player2.getBalance(), 2100, 0);
+        assertEquals(1900, player1.getBalance(), 0);
+		assertEquals(2100, player2.getBalance(), 0);
 	}
 
 	@Test
@@ -335,8 +335,8 @@ public class HandTest {
         player2.setHand(new Card[]{player2Card, player2Card1});
 	    hand.payWinners();
 
-	    assertEquals(player1.getBalance(), 6000, 0);
-	    assertEquals(player2.getBalance(), 0, 0);
+	    assertEquals(6000, player1.getBalance(), 0);
+	    assertEquals(0, player2.getBalance(), 0);
     }
 
     @Test
@@ -353,8 +353,8 @@ public class HandTest {
         player2.setHand(new Card[]{player2Card, player2Card1});
         hand.payWinners();
 
-        assertEquals(player1.getBalance(), 2000, 0);
-        assertEquals(player1.getBalance(), 4000, 0);
+        assertEquals(2000, player1.getBalance(), 0);
+        assertEquals(4000, player2.getBalance(), 0);
     }
 
     private void setupBoard1() {
@@ -367,7 +367,7 @@ public class HandTest {
 	    hand.setCommunityCards(new Card[]{card1, card2, card3, card4, card5});
 
 	    var bigBet = new Option(Option.OptionType.BET, 2100);
-	    var bigCall = new Option(Option.OptionType.CALL, 2000);
+	    var bigCall = new Option(Option.OptionType.CALL, 2100);
 
         player1.updateBalance(2000);
 

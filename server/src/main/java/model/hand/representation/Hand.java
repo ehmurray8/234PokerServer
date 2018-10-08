@@ -183,13 +183,12 @@ public abstract class Hand {
         double carryOver = currentPot.setAmountOwed(player.getBalance());
         int numberPlayersPaid = currentPot.getNumPlayersPaid();
         nextPot.addAmount(carryOver, numberPlayersPaid);
+        currentPot.removeAmount(carryOver * numberPlayersPaid);
         currentPot.addAmount(player.getBalance(), 1);
     }
-    
+
     private void removeBrokePlayers() {
-        IntStream.rangeClosed(players.size() - 1, 0).filter(i -> players.get(i).getBalance() == 0).forEach(i ->
-                players.remove(i)
-        );
+        IntStream.rangeClosed(players.size() - 1, 0).filter(i -> players.get(i).getBalance() == 0).forEach(players::remove);
     }
     
     private void removeOldPots() {
@@ -277,7 +276,7 @@ public abstract class Hand {
         double winnings = pot.getAmount();
         DecimalFormat df = new DecimalFormat(".##");
         winnings = Double.parseDouble(df.format(winnings));
-        for (Player player : players) {
+        for (Player player : pot.getPlayers()) {
             if (!player.hasFolded() && !player.isSittingOut()) {
                 player.updateBalance(winnings);
             }
