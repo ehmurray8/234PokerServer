@@ -34,7 +34,7 @@ public abstract class Hand {
     private final List<Pot> openPots;
     
     /** All openPots that have been opened during the hand. */
-    private final List<Pot> allPots;
+    private final List<Pot> closedPots;
 
     Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
         this();
@@ -49,7 +49,7 @@ public abstract class Hand {
         deck = new Deck();
         communityCards = new ArrayList<>();
         openPots = new ArrayList<>();
-        allPots = new ArrayList<>();
+        closedPots = new ArrayList<>();
     }
 
     public abstract void dealInitialHand();
@@ -58,8 +58,12 @@ public abstract class Hand {
     	return openPots;
     }
     
-    public List<Pot> getAllPots() {
-    	return allPots;
+    public List<Pot> getClosedPots() {
+    	return closedPots;
+    }
+
+    public double getTotalAmountInPots() {
+        return closedPots.stream().mapToDouble(Pot::getAmount).sum() + openPots.stream().mapToDouble(Pot::getAmount).sum();
     }
 
     public final ArrayList<Card> getCommunityCards() {
@@ -88,8 +92,7 @@ public abstract class Hand {
     }
 
     private void chargeAmount(double amount, List<Player> playersToCharge) {
-        playersToCharge.stream().filter(player -> player.getBalance() > 0)
-                .forEach(player -> chargePlayerAmount(player, amount));
+        playersToCharge.forEach(player -> chargePlayerAmount(player, amount));
     }
 
     private void chargePlayerAmount(Player player, double amount) {
@@ -111,9 +114,9 @@ public abstract class Hand {
         }
     }
 
-    private double payOpenPot(Pot pot, double amountPaid) {
-        return amountPaid >= pot.getAmountOwed() ? addFullAmountToPot(pot, amountPaid)
-                                                 : addRemainingAmountToPot(pot, amountPaid);
+    private double payOpenPot(Pot pot, double amount) {
+        return amount >= pot.getAmountOwed() ? addFullAmountToPot(pot, amount)
+                                             : addRemainingAmountToPot(pot, amount);
     }
 
     private double addFullAmountToPot(Pot pot, double amountPaid) {
@@ -191,7 +194,7 @@ public abstract class Hand {
     
     private void removeOldPots() {
     	for(int i = openPots.size() - 2; i >= 0; i--) {
-            allPots.add(0, openPots.remove(i));
+            closedPots.add(0, openPots.remove(i));
     	}
     }
 
@@ -232,7 +235,7 @@ public abstract class Hand {
         int numPlayersWithMoney = (int) players.stream().filter(player -> player.getBalance() > 0).count();
         boolean playerNoAction = players.stream().anyMatch(player -> player.getAmountThisTurn() == -1);
 
-        return numPlayersWithMoney > 0 && amountOwed != 0 || numPlayersWithMoney >= 2 && playerNoAction;
+        return numPlayersWithMoney > 0 && (amountOwed != 0 || (numPlayersWithMoney >= 2 && playerNoAction));
     }
     
     public void executeOption(Player player, Option option) {
@@ -245,8 +248,9 @@ public abstract class Hand {
     	case RAISE:
     	case BET:
     	case ALLIN:
-    		openPots.get(openPots.size()-1).setAmountOwed(openPots.get(openPots.size()-1).getAmountOwed()
-    				+ option.getAmount());
+    		var currentPot = openPots.get(openPots.size()-1);
+    		var amountOwed = option.getAmount();
+            currentPot.setAmountOwed(amountOwed);
     	case CALL:
     		chargeAmount(option.getAmount(), Collections.singletonList(player));
     		break;
@@ -257,6 +261,7 @@ public abstract class Hand {
     
     public void payWinners() {
         openPots.forEach(this::payPotWinner);
+        closedPots.forEach(this::payPotWinner);
     }
 
     private void payPotWinner(Pot pot) {

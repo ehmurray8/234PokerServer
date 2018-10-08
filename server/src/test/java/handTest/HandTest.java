@@ -3,11 +3,9 @@ package handTest;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-
 import model.hand.representation.OmahaHand;
+import model.option.Option;
+import org.junit.Before;
 import org.junit.Test;
 
 import model.player.Player;
@@ -15,71 +13,71 @@ import model.hand.representation.Hand;
 import model.hand.representation.TexasHoldEmHand;
 import model.hand.representation.Pot;
 
+import static org.junit.Assert.*;
+
 
 public class HandTest {
 
+	private Hand hand;
+	private Player player1;
+	private Player player2;
+	private ArrayList<Player> players;
+	private Option fold = new Option(Option.OptionType.FOLD, 0);
+	private Option bet = new Option(Option.OptionType.BET, 100);
+	private Option check = new Option(Option.OptionType.CHECK, 0);
+
+	@Before
+	public void setup() {
+		player1 = new Player(2000, "P1");
+		player2 = new Player(2000, "P2");
+		players = new ArrayList<>(Arrays.asList(player1, player2));
+		hand = new TexasHoldEmHand(60, 120, 30, players);
+	}
+
 	@Test
 	public void testDealHoldemHand() {
-		Player p1 = new Player(100, "P1");
-		Player p2 = new Player(100, "P2");
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(p1);
-		players.add(p2);
-		Hand hand = new TexasHoldEmHand(25, 50, 0, players);
 		hand.dealInitialHand();
 
-		assertEquals(2, p1.getHand().size());
-		assertEquals(2, p2.getHand().size());
-		assertNotEquals(p1.getHand(), p2.getHand());
+		assertEquals(2, player1.getHand().size());
+		assertEquals(2, player2.getHand().size());
+		assertNotEquals(player1.getHand(), player2.getHand());
 	}
 
 	@Test
 	public void testDealOmahaHand() {
-		Player p1 = new Player(100, "P1");
-		Player p2 = new Player(100, "P2");
-		ArrayList<Player> players = new ArrayList<>();
-		players.add(p1);
-		players.add(p2);
-		Hand hand = new OmahaHand(25, 50, 0, players);
+		hand = new OmahaHand(20, 40, 0, new ArrayList<>(Arrays.asList(player1, player2)));
 		hand.dealInitialHand();
 
-		assertEquals(4, p1.getHand().size());
-		assertEquals(4, p2.getHand().size());
-		assertNotEquals(p1.getHand(), p2.getHand());
+		assertEquals(4, player1.getHand().size());
+		assertEquals(4, player2.getHand().size());
+		assertNotEquals(player1.getHand(), player2.getHand());
 	}
 
 	@Test
 	public void testDealFlop() {
-		Hand hand = new TexasHoldEmHand(25, 50, 0, new ArrayList<>());
 		hand.dealFlop();
 		assertEquals(hand.getCommunityCards().size(), 3);
 	}
 
 	@Test
 	public void testDealTurn() {
-		Hand hand = new TexasHoldEmHand(25, 50, 0, new ArrayList<>());
 		hand.dealTurn();
 		assertEquals(hand.getCommunityCards().size(), 1);
 	}
 
 	@Test
 	public void testDealRiver() {
-		Hand hand = new TexasHoldEmHand(25, 50, 0, new ArrayList<>());
 		hand.dealRiver();
 		assertEquals(hand.getCommunityCards().size(), 1);
 	}
 
 	@Test
 	public void testChargeAntesBasic() {
-		Player p1 = new Player(2000, "P1");
-		Player p2 = new Player(2000, "P2");
-		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2));
-		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
 		hand.dealInitialHand();
 		hand.chargeAntes();
 
-        assertEquals(1970., p1.getBalance(), 0.0);
-        assertEquals(1970., p2.getBalance(), 0.0);
+        assertEquals(1970., player1.getBalance(), 0.0);
+        assertEquals(1970., player2.getBalance(), 0.0);
 		assertEquals(60., hand.getOpenPots().get(0).getAmount(), .001);
 	}
 
@@ -107,15 +105,11 @@ public class HandTest {
 
 	@Test
 	public void testBlindsBasic() {
-		Player p1 = new Player(2000, "P1");
-		Player p2 = new Player(2000, "P2");
-		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2));
-		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
 		hand.dealInitialHand();
 		hand.chargeSmallBlind(1);
 		hand.chargeBigBlind(0);
-        assertEquals(1880., p1.getBalance(), 0.0);
-        assertEquals(1940., p2.getBalance(), 0.0);
+        assertEquals(1880., player1.getBalance(), 0.0);
+        assertEquals(1940., player2.getBalance(), 0.0);
         assertEquals(180., hand.getOpenPots().get(0).getAmount(), 0.0);
 	}
 
@@ -153,13 +147,13 @@ public class HandTest {
 		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
 		hand.dealInitialHand();
 		hand.chargeAntes();
-        assertEquals(4, hand.getAllPots().size());
-        assertEquals(30, hand.getAllPots().get(0).getAmount(), 0.0);
-        assertEquals(10, hand.getAllPots().get(1).getAmount(), 0.0);
-        assertEquals(16, hand.getAllPots().get(2).getAmount(), 0.0);
-        assertEquals(30, hand.getAllPots().get(3).getAmount(), 0.0);
+        assertEquals(4, hand.getClosedPots().size());
+        assertEquals(30, hand.getClosedPots().get(0).getAmount(), 0.0);
+        assertEquals(10, hand.getClosedPots().get(1).getAmount(), 0.0);
+        assertEquals(16, hand.getClosedPots().get(2).getAmount(), 0.0);
+        assertEquals(30, hand.getClosedPots().get(3).getAmount(), 0.0);
         assertEquals(18, hand.getOpenPots().get(0).getAmount(), 0.0);
-		for (Pot p : hand.getAllPots()) {
+		for (Pot p : hand.getClosedPots()) {
             assertEquals(0, p.getAmountOwed(), 0.0);
             assertEquals(0, p.getNumPlayersPaid());
 		}
@@ -177,5 +171,154 @@ public class HandTest {
         assertEquals(20, p4.getAmountThisTurn(), 0.0);
         assertEquals(0, p6.getBalance(), 0.0);
         assertEquals(70, p6.getAmountThisTurn(), 0.0);
+	}
+
+	@Test
+	public void testPlayersBetting() {
+		var player = new Player(10.0, "P1");
+		var players = new ArrayList<Player>();
+		players.add(player);
+		Hand hand = new TexasHoldEmHand(10.0, 20.0, 0.0, players);
+		assertFalse(hand.playersBetting());
+	}
+
+	@Test
+	public void testPlayersBettingOneNotFolded() {
+	    player1.fold();
+	    assertFalse(hand.playersBetting());
+	}
+
+	@Test
+	public void testPlayersBettingNoMoney() {
+		player1.updateBalance(-2000);
+		player2.updateBalance(-2000);
+
+		assertFalse(hand.playersBetting());
+	}
+
+	@Test
+	public void testPlayersBettingPlayerOwesMoney() {
+		hand.executeOption(player1, bet);
+		assertTrue(hand.playersBetting());
+	}
+
+	@Test
+	public void testPlayersBettingBetAndCall() {
+		var call = new Option(Option.OptionType.CALL, 100);
+
+		hand.executeOption(player1, bet);
+		hand.executeOption(player2, call);
+
+		assertFalse(hand.playersBetting());
+	}
+
+	@Test
+	public void testPlayersBettingBetAndRaise() {
+		var raise = new Option(Option.OptionType.BET, 500);
+
+		hand.executeOption(player1, bet);
+		hand.executeOption(player2, raise);
+
+		assertTrue(hand.playersBetting());
+	}
+
+	@Test
+	public void testPlayersBettingCheckRaiseCall() {
+		var raise = new Option(Option.OptionType.RAISE, 500);
+		var call = new Option(Option.OptionType.CALL, 400);
+
+		hand.executeOption(player1, check);
+		hand.executeOption(player2, bet);
+		hand.executeOption(player1, raise);
+		hand.executeOption(player2, call);
+
+		assertFalse(hand.playersBetting());
+	}
+
+	@Test
+	public void testFold() {
+		hand.executeOption(player1, fold);
+		assertTrue(player1.hasFolded());
+		assertFalse(players.contains(player1));
+		assertEquals(player1.getBalance(), 2000, 0);
+		assertEquals(player1.getAmountThisTurn(), 0, 0);
+		assertEquals(hand.getTotalAmountInPots(), 0, 0);
+	}
+
+	@Test
+	public void testCheck() {
+		hand.executeOption(player1, check);
+		assertFalse(player1.hasFolded());
+		assertTrue(players.contains(player1));
+		assertEquals(player1.getBalance(), 2000, 0);
+		assertEquals(player1.getAmountThisTurn(), 0, 0);
+		assertEquals(hand.getTotalAmountInPots(), 0, 0);
+	}
+
+	@Test
+	public void testBet() {
+		hand.executeOption(player1, bet);
+		assertFalse(player1.hasFolded());
+		assertTrue(players.contains(player1));
+		assertEquals(player1.getBalance(), 1900, 0);
+		assertEquals(player1.getAmountThisTurn(), 100, 0);
+		assertEquals(hand.getTotalAmountInPots(), 100, 0);
+	}
+
+	@Test
+	public void testRaise() {
+		var raise = new Option(Option.OptionType.RAISE, 100);
+
+		hand.executeOption(player1, raise);
+		assertFalse(player1.hasFolded());
+		assertTrue(players.contains(player1));
+		assertEquals(player1.getBalance(), 1900, 0);
+		assertEquals(player1.getAmountThisTurn(), 100, 0);
+		assertEquals(hand.getTotalAmountInPots(), 100, 0);
+	}
+
+	@Test
+	public void testCall() {
+		var call = new Option(Option.OptionType.CALL, 200);
+
+		hand.executeOption(player1, call);
+		assertFalse(player1.hasFolded());
+		assertTrue(players.contains(player1));
+		assertEquals(player1.getBalance(), 1800, 0);
+		assertEquals(player1.getAmountThisTurn(), 200, 0);
+		assertEquals(hand.getTotalAmountInPots(), 200, 0);
+	}
+
+	@Test
+	public void testAllIn() {
+		var allIn = new Option(Option.OptionType.ALLIN, player1.getBalance());
+
+		hand.executeOption(player1, allIn);
+		assertFalse(player2.hasFolded());
+		assertTrue(players.contains(player1));
+		assertEquals(player1.getBalance(), 0, 0);
+		assertEquals(player1.getAmountThisTurn(), 2000, 0);
+		assertEquals(hand.getTotalAmountInPots(), 2000, 0);
+	}
+
+	@Test
+    public void testPayReturnToPlayer() {
+	    hand.executeOption(player1, bet);
+	    hand.executeOption(player2, fold);
+	    hand.payWinners();
+	    assertEquals(player1.getBalance(), 2000, 0);
+	    assertEquals(player2.getBalance(), 2000, 0);
+    }
+
+    @Test
+	public void testPaySoleWinner() {
+		var raise = new Option(Option.OptionType.RAISE, 500);
+
+		hand.executeOption(player1, bet);
+		hand.executeOption(player2, raise);
+		hand.executeOption(player1, fold);
+		hand.payWinners();
+		assertEquals(player1.getBalance(), 2100, 0);
+		assertEquals(player2.getBalance(), 1900, 0);
 	}
 }
