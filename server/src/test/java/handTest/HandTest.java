@@ -3,24 +3,23 @@ package handTest;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import model.hand.representation.OmahaHand;
+import model.card.Card;
+import model.hand.representation.*;
 import model.option.Option;
+import model.player.TestPlayer;
 import org.junit.Before;
 import org.junit.Test;
 
 import model.player.Player;
-import model.hand.representation.Hand;
-import model.hand.representation.TexasHoldEmHand;
-import model.hand.representation.Pot;
 
 import static org.junit.Assert.*;
 
 
 public class HandTest {
 
-	private Hand hand;
-	private Player player1;
-	private Player player2;
+	private TestHand hand;
+	private TestPlayer player1;
+	private TestPlayer player2;
 	private ArrayList<Player> players;
 	private Option fold = new Option(Option.OptionType.FOLD, 0);
 	private Option bet = new Option(Option.OptionType.BET, 100);
@@ -28,10 +27,10 @@ public class HandTest {
 
 	@Before
 	public void setup() {
-		player1 = new Player(2000, "P1");
-		player2 = new Player(2000, "P2");
+		player1 = new TestPlayer(2000, "P1");
+		player2 = new TestPlayer(2000, "P2");
 		players = new ArrayList<>(Arrays.asList(player1, player2));
-		hand = new TexasHoldEmHand(60, 120, 30, players);
+		hand = new TestHand(60, 120, 30, players);
 	}
 
 	@Test
@@ -45,8 +44,8 @@ public class HandTest {
 
 	@Test
 	public void testDealOmahaHand() {
-		hand = new OmahaHand(20, 40, 0, new ArrayList<>(Arrays.asList(player1, player2)));
-		hand.dealInitialHand();
+		var omahaHand = new OmahaHand(20, 40, 0, new ArrayList<>(Arrays.asList(player1, player2)));
+		omahaHand.dealInitialHand();
 
 		assertEquals(4, player1.getHand().size());
 		assertEquals(4, player2.getHand().size());
@@ -318,7 +317,61 @@ public class HandTest {
 		hand.executeOption(player2, raise);
 		hand.executeOption(player1, fold);
 		hand.payWinners();
-		assertEquals(player1.getBalance(), 2100, 0);
-		assertEquals(player2.getBalance(), 1900, 0);
+        assertEquals(player1.getBalance(), 1900, 0);
+		assertEquals(player2.getBalance(), 2100, 0);
 	}
+
+	@Test
+    public void testPlayerWinMultiplePots() {
+	    setupBoard1();
+
+        Card player1Card = new Card(Card.Rank.KING, Card.Suit.CLUBS);
+        Card player1Card1 = new Card(Card.Rank.ACE, Card.Suit.DIAMONDS);
+
+        Card player2Card = new Card(Card.Rank.JACK, Card.Suit.DIAMONDS);
+        Card player2Card1 = new Card(Card.Rank.SIX, Card.Suit.CLUBS);
+
+        player1.setHand(new Card[]{player1Card, player1Card1});
+        player2.setHand(new Card[]{player2Card, player2Card1});
+	    hand.payWinners();
+
+	    assertEquals(player1.getBalance(), 6000, 0);
+	    assertEquals(player2.getBalance(), 0, 0);
+    }
+
+    @Test
+    public void testPlayerWinSinglePotWithRefund() {
+	    setupBoard1();
+
+        Card player1Card = new Card(Card.Rank.THREE, Card.Suit.CLUBS);
+        Card player1Card1 = new Card(Card.Rank.FOUR, Card.Suit.SPADES);
+
+        Card player2Card = new Card(Card.Rank.ACE, Card.Suit.DIAMONDS);
+        Card player2Card1 = new Card(Card.Rank.SEVEN, Card.Suit.DIAMONDS);
+
+        player1.setHand(new Card[]{player1Card, player1Card1});
+        player2.setHand(new Card[]{player2Card, player2Card1});
+        hand.payWinners();
+
+        assertEquals(player1.getBalance(), 2000, 0);
+        assertEquals(player1.getBalance(), 4000, 0);
+    }
+
+    private void setupBoard1() {
+	    Card card1 = new Card(Card.Rank.ACE, Card.Suit.CLUBS);
+	    Card card2 = new Card(Card.Rank.JACK, Card.Suit.CLUBS);
+	    Card card3 = new Card(Card.Rank.TEN, Card.Suit.DIAMONDS);
+	    Card card4 = new Card(Card.Rank.THREE, Card.Suit.SPADES);
+	    Card card5 = new Card(Card.Rank.TWO, Card.Suit.CLUBS);
+
+	    hand.setCommunityCards(new Card[]{card1, card2, card3, card4, card5});
+
+	    var bigBet = new Option(Option.OptionType.BET, 2100);
+	    var bigCall = new Option(Option.OptionType.CALL, 2000);
+
+        player1.updateBalance(2000);
+
+        hand.executeOption(player1,  bigBet);
+        hand.executeOption(player2, bigCall);
+    }
 }

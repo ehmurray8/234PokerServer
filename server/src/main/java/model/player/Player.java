@@ -10,7 +10,7 @@ public class Player  {
     private static final Comparator<Card> CARD_COMPARATOR = new Card.CardComparator();
     private final String name;
     private double balance;
-    private ArrayList<Card> hand;
+    protected ArrayList<Card> hand;
     private boolean hasFolded;
     private double amountThisTurn;
     private boolean isSittingOut;

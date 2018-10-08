@@ -24,7 +24,7 @@ import model.player.Player;
 public abstract class Hand {
 
     final Deck deck;
-    private final ArrayList<Card> communityCards;
+    final ArrayList<Card> communityCards;
     private double smallBlindAmount;
     private double bigBlindAmount;
     private double anteAmount;
@@ -126,7 +126,7 @@ public abstract class Hand {
     }
 
     private double addRemainingAmountToPot(Pot pot, double amountPaid) {
-        pot.addAmount(pot.getAmountOwed() - amountPaid, 1);
+        pot.addAmount(amountPaid, 1);
         return 0;
     }
 
@@ -277,9 +277,9 @@ public abstract class Hand {
         double winnings = pot.getAmount();
         DecimalFormat df = new DecimalFormat(".##");
         winnings = Double.parseDouble(df.format(winnings));
-        for(int i = 0; i < players.size(); i++) {
-            if(!players.get(i).hasFolded() && !players.get(i).isSittingOut()) {
-                pot.getPlayers().get(i).updateBalance(winnings);
+        for (Player player : players) {
+            if (!player.hasFolded() && !player.isSittingOut()) {
+                player.updateBalance(winnings);
             }
         }
     }
