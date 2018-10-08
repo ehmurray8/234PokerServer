@@ -8,7 +8,6 @@ import model.card.Card;
 import model.card.Deck;
 import model.hand.analyzer.HandAnalyzer;
 import model.hand.analyzer.HoldEmAnalyzer;
-import model.hand.analyzer.OmahaAnalyzer;
 import model.option.Option;
 import model.player.Player;
 
@@ -311,11 +310,11 @@ public abstract class Hand {
         List<Card> hand = new ArrayList<>();
         hand.addAll(player.getHand());
         hand.addAll(getCommunityCards());
-        analyzers.add(isHoldem() ? new HoldEmAnalyzer(hand) : new OmahaAnalyzer(hand));
+        analyzers.add(createAnalyzer(hand));
     }
 
-    private boolean isHoldem() {
-        return !(this instanceof OmahaHand);
+    protected HandAnalyzer createAnalyzer(List<Card> cards) {
+        return new HoldEmAnalyzer(cards);
     }
 
     private void updatePotWinnerIndexes(List<HandAnalyzer> handAnalyzers, List<Integer> potWinnerIndexes, int index) {
@@ -362,7 +361,7 @@ public abstract class Hand {
 
     private void createFoldCallRaiseOptions(List<Option> options, Player player, double amountOwed) {
         options.add(new Option(Option.OptionType.FOLD, 0));
-        if(amountOwed < player.getBalance()) {
+        if(amountOwed != 0) {
             options.add(new Option(Option.OptionType.CALL, amountOwed));
         }
         if(amountOwed + bigBlindAmount < player.getBalance()) {
