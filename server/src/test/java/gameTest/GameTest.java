@@ -1,22 +1,14 @@
-/**
- * 
- */
 package gameTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
 import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import game.TestClient;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import game.Game;
-import game.Game.TableFullException;
 import game.Rules;
 import game.Rules.GameType;
 import model.player.Player;

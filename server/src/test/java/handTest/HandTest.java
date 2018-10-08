@@ -21,9 +21,9 @@ public class HandTest {
 	private TestPlayer player1;
 	private TestPlayer player2;
 	private ArrayList<Player> players;
-	private Option fold = new Option(Option.OptionType.FOLD, 0);
-	private Option bet = new Option(Option.OptionType.BET, 100);
-	private Option check = new Option(Option.OptionType.CHECK, 0);
+	private final Option fold = new Option(Option.OptionType.FOLD, 0);
+	private final Option bet = new Option(Option.OptionType.BET, 100);
+	private final Option check = new Option(Option.OptionType.CHECK, 0);
 
 	@Before
 	public void setup() {

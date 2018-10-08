@@ -313,7 +313,7 @@ public abstract class Hand {
         analyzers.add(createAnalyzer(hand));
     }
 
-    protected HandAnalyzer createAnalyzer(List<Card> cards) {
+    HandAnalyzer createAnalyzer(List<Card> cards) {
         return new HoldEmAnalyzer(cards);
     }
 

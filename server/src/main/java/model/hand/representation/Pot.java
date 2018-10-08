@@ -8,7 +8,7 @@ import model.player.Player;
 public class Pot {
 
 	private double amount;
-	private List<Player> players;
+	private final List<Player> players;
 	private double amountOwed;
 	private int numPlayersPaid;
 	

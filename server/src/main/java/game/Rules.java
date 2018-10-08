@@ -1,9 +1,5 @@
-/**
- * 
- */
 package game;
 
-/** */
 public class Rules {
 
 	public enum GameType {

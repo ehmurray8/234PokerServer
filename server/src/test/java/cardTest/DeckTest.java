@@ -29,10 +29,7 @@ public class DeckTest {
 
     @Test
     public void testDeckShuffled() {
-        Deck d1 = new Deck();
-        Deck d2 = new Deck();
-
-        assertNotEquals(Collections.singletonList(d1).toArray(), Collections.singletonList(d2).toArray());
+        assertNotEquals(Collections.singletonList(new Deck()).toArray(), Collections.singletonList(new Deck()).toArray());
     }
 
     @Test
