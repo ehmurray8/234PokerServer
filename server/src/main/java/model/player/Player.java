@@ -2,8 +2,11 @@ package model.player;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.UUID;
 
 import model.card.Card;
+
+import static java.util.UUID.randomUUID;
 
 public class Player  {
 
@@ -14,6 +17,7 @@ public class Player  {
     private boolean hasFolded;
     private double amountThisTurn;
     private boolean isSittingOut;
+    private UUID playerId;
 
     public void resetStatus() {
         hand = new ArrayList<>();
@@ -26,6 +30,11 @@ public class Player  {
         this.name = name;
         this.resetStatus();
         this.isSittingOut = false;
+        this.playerId = randomUUID();
+    }
+
+    public UUID getPlayerId() {
+        return playerId;
     }
 
     public boolean isSittingOut() {

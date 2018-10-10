@@ -44,11 +44,21 @@ public class HandTest {
 
 	@Test
 	public void testDealOmahaHand() {
-		var omahaHand = new OmahaHand(20, 40, 0, new ArrayList<>(Arrays.asList(player1, player2)));
+		var omahaHand = new OmahaHand(20, 40, 0, players);
 		omahaHand.dealInitialHand();
 
 		assertEquals(4, player1.getHand().size());
 		assertEquals(4, player2.getHand().size());
+		assertNotEquals(player1.getHand(), player2.getHand());
+	}
+
+	@Test
+	public void testDealPineappleHand() {
+		var pineappleHand = new PineappleHand(20, 40, 0, players);
+		pineappleHand.dealInitialHand();
+
+		assertEquals(3, player1.getHand().size());
+		assertEquals(3, player2.getHand().size());
 		assertNotEquals(player1.getHand(), player2.getHand());
 	}
 
@@ -374,4 +384,53 @@ public class HandTest {
         hand.executeOption(player1,  bigBet);
         hand.executeOption(player2, bigCall);
     }
+
+    @Test
+	public void testGenerateOptionsForBrokePlayer() {
+		player1.updateBalance(-2000);
+		var options = hand.generateOptions(player1);
+		assertEquals(0, options.size());
+	}
+
+	@Test
+	public void testGenerateOptionsBet() {
+		var options = hand.generateOptions(player1);
+		assertTrue(options.contains(new Option(Option.OptionType.BET, 120)));
+		assertTrue(options.contains(new Option(Option.OptionType.CHECK, 0)));
+		assertTrue(options.contains(new Option(Option.OptionType.ALLIN, player1.getBalance())));
+	}
+
+	@Test
+	public void testGenerateOptionsShort() {
+		player1.updateBalance(-100);
+		var allin = new Option(Option.OptionType.ALLIN, player2.getBalance());
+		hand.executeOption(player2, allin);
+
+		var options = hand.generateOptions(player1);
+		assertTrue(options.contains(new Option(Option.OptionType.CALL, allin.getAmount())));
+		assertTrue(options.contains(new Option(Option.OptionType.FOLD, 0)));
+	}
+
+	@Test
+	public void testGenerateOptionsNotEnoughToRaise() {
+		player1.updateBalance(-1380);
+		var bigBet = new Option(Option.OptionType.BET, 500);
+		hand.executeOption(player2, bigBet);
+
+		var options = hand.generateOptions(player1);
+		assertTrue(options.contains(new Option(Option.OptionType.CALL, 500)));
+		assertTrue(options.contains(new Option(Option.OptionType.ALLIN, 620)));
+		assertTrue(options.contains(new Option(Option.OptionType.FOLD, 0)));
+	}
+
+	@Test
+	public void testGenerateOptionsRaise() {
+		hand.executeOption(player2, bet);
+
+		var options = hand.generateOptions(player1);
+        assertTrue(options.contains(new Option(Option.OptionType.CALL, bet.getAmount())));
+        assertTrue(options.contains(new Option(Option.OptionType.RAISE, bet.getAmount() + 120)));
+        assertTrue(options.contains(new Option(Option.OptionType.ALLIN, player1.getBalance())));
+        assertTrue(options.contains(new Option(Option.OptionType.FOLD, 0)));
+	}
 }

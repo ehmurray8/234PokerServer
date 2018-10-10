@@ -4,72 +4,138 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import static org.junit.Assert.*;
 
-import game.TestClient;
+import client.ClientHandler;
+import game.Game;
+import game.TestGame;
 import org.junit.Before;
 import org.junit.Test;
 
-import game.Game;
 import game.Rules;
 import game.Rules.GameType;
 import model.player.Player;
 
 public class GameTest {
 
-	private Rules rules;
-	private TestClient testClient;
+    private Rules rules;
 	private ArrayList<Player> players;
+	private ClientHandler clientHandler;
+	private TestGame game;
 
 	@Before
 	public void setUp() {
-	    rules = new Rules(1, 2, 1, 20, 6, GameType.MIXED);
-	    Player p1 = new Player(1000, "Player 1");
-		Player p2 = new Player(1000, "Player 2");
-	    players = new ArrayList<>(Arrays.asList(p1, p2));
-	    testClient = new TestClient();
+		rules = new Rules(1, 2, 1, 20, 6, GameType.MIXED);
+	    var p1 = new Player(1000, "Player 1");
+		var p2 = new Player(1000, "Player 2");
+		var p4 = new Player(1000, "Player 4");
+		players = new ArrayList<>(Arrays.asList(p1, p2, null, p4));
+		game = new TestGame(players, rules, clientHandler);
+	    clientHandler = new ClientHandler();
 	}
 
 	@Test
 	public void testIncrementDealerNum() {
-		players.add(null);
-		players.add(new Player(1000, "Player 4"));
-		Game game = new Game(players, rules, true, testClient);
-
 		assertEquals(0, game.getDealerNum());
 
-		game.incrementDealerNum();
+		game.moveDealer();
 		assertEquals(1, game.getDealerNum());
 
-		game.incrementDealerNum();
+		game.moveDealer();
 		assertEquals(3, game.getDealerNum());
 
-		game.incrementDealerNum();
+		game.moveDealer();
 		assertEquals(0, game.getDealerNum());
 	}
 
 	@Test
 	public void testSmallBlind() {
-		players.add(null);
-		players.add(new Player(1000, "Player 4"));
-		Game game = new Game(players, rules, true, testClient);
-
 		assertEquals(1, game.smallBlindNum());
 
-		game.incrementDealerNum();
+		game.moveDealer();
 		assertEquals(3, game.smallBlindNum());
 
-		game.incrementDealerNum();
+		game.moveDealer();
 		assertEquals(0, game.smallBlindNum());
 	}
 
 	@Test
 	public void testBigBlind() {
-		players.add(null);
-		players.add(new Player(1000, "Player 4"));
-		Game game = new Game(players, rules, true, testClient);
-
 		assertEquals(3, game.bigBlindNum());
-
-		game.incrementDealerNum();
+		game.moveDealer();
 		assertEquals(0, game.bigBlindNum());
 	}
+
+	@Test
+	public void testTableNotFull() {
+		assertTrue(!game.tableFull());
+	}
+
+	@Test
+	public void testTableFull() {
+	    try {
+			game.addPlayer(new Player(100, "P3"));
+			game.addPlayer(new Player(100, "P5"));
+			game.addPlayer(new Player(100, "P6"));
+		} catch(Game.TableFullException ignored) {}
+		assertTrue(game.tableFull());
+	}
+
+	@Test
+	public void testAddPlayer() {
+		try {
+			game.addPlayer(new Player(100, "P3"));
+		} catch (Game.TableFullException ignored) { }
+        assertEquals(4, game.getNumPlayers());
+	}
+
+	@Test
+    public void testOverflowTable() {
+	    try {
+	        game.addPlayer(new Player(100, "P3"));
+            game.addPlayer(new Player(100, "P5"));
+            game.addPlayer(new Player(100, "P6"));
+            game.addPlayer(new Player(100, "P7"));
+            fail();
+        } catch (Game.TableFullException ignored) { }
+        assertEquals(6, game.getNumPlayers());
+    }
+
+    @Test
+    public void testAddToEmptyTable() {
+        for(var player : players) {
+            game.removePlayer(player);
+        }
+
+	    try {
+	        game.addPlayer(new Player(100, "P1"));
+        } catch(Game.TableFullException ignored) { }
+        assertEquals(1, game.getNumPlayers());
+    }
+
+    @Test
+    public void testRemovePlayer() {
+        game.removePlayer(players.get(0));
+        assertEquals(2, game.getNumPlayers());
+    }
+
+    @Test
+    public void testRemoveAll() {
+	    players.forEach(game::removePlayer);
+	    assertEquals(0, game.getNumPlayers());
+    }
+
+    @Test
+    public void testNumPlayers() {
+	    assertEquals(3, game.getNumPlayers());
+    }
+
+    @Test
+    public void testTableNotEmpty() {
+	    assertTrue(!game.tableEmpty());
+    }
+
+    @Test
+    public void testTableEmpty() {
+	    players.forEach(game::removePlayer);
+	    assertTrue(game.tableEmpty());
+    }
 }

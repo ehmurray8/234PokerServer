@@ -1,80 +1,53 @@
 package game;
+import client.ClientHandler;
 import model.player.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
 import game.Rules.GameType;
 import model.hand.representation.*;
 import model.option.Option;
 
-/** */
 public class Game {
 
 	public static class TableFullException extends Exception { }
 
-	public static class TableEmptyException extends Exception { }
 
-	/**
-	 * List of the players currently at the table. The list represents the players in order with the
-	 * first player in the array sitting in seat 1 (left of the dealer)."
-	 */
 	private Player[] players;
 	private Rules rules;
-	private int numPlayers;
-	private int dealerNum;
+	int dealerNum;
 	private int currentAction;
 	private ArrayList<Player> playersInHand;
-	private boolean debug = false;
-	private TestClient testClient;
+	private ClientHandler clientHandler;
 
-	/**
-	 * TODO Map the players array to a list of clients that allow for communicating between
-	 */
-	public Game(List<Player> players, Rules rules, boolean debug, TestClient testClient) {
-		this(players, rules);
-		this.debug = debug;
-		this.testClient = testClient;
-	}
-
-	public Game(List<Player> players, Rules rules) {
+	Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
 		this.players = new Player[rules.getMaxCapacity()];
 		for(int i = 0; i < players.size(); i++) {
-			this.players[i] = players.get(i);
+            this.players[i] = players.get(i);
 		}
 		this.rules = rules;
-		numPlayers = players.size();
 		dealerNum = initDealerNum();
 		playersInHand = new ArrayList<>();
 		currentAction = smallBlindNum();
+		this.clientHandler = clientHandler;
 	}
 
 	public int getDealerNum() {
 		return dealerNum;
 	}
 
-	/**
-	 * Return the position of the starting dealer.
-	 * 
-	 * TODO: Implement this method properly
-	 * 
-	 * @return position of initial dealer
-	 */
-	public int initDealerNum() {
-	    if(debug) {
-	    	return 0;
-		}
+	private int initDealerNum() {
 		return 0;
 	}
 	
-	public void incrementDealerNum() {
+	void incrementDealerNum() {
 		do {
             dealerNum = (dealerNum + 1) % players.length;
 		} while (players[dealerNum] == null || players[dealerNum].isSittingOut());
 	}
 	
-	public int findStartingLocation() {
+	private int findStartingLocation() {
 		int startLoc = -1;
 		int num = 1;
 		do {
@@ -106,119 +79,68 @@ public class Game {
 		} while(players[bigBlindNum] == null || players[dealerNum].isSittingOut());
 		return bigBlindNum;
 	}
+
+	public int getNumPlayers() {
+	    return (int) Arrays.stream(players).filter(Objects::nonNull).count();
+    }
 	
-	public void incrementCurrentAction() {
+	private void incrementCurrentAction() {
         currentAction = (currentAction + 1) % playersInHand.size();
 	}
 
-	public int getCurrentAction() {
-		return currentAction;
-	}
-
-	/**
-	 * Adds a player to an open seat.
-	 * 
-	 * @param player to add
-	 */
 	public void addPlayer(Player player) throws TableFullException {
 	    if(tableFull()) { throw new TableFullException(); }
 
 		for(int i = 0; i < players.length; i++) {
 			if(players[i] == null) {
 				players[i] = player;
-				numPlayers++;
 				break;
 			}
 		}
 	}
 
-	public int getNumPlayers() {
-		return numPlayers;
-	}
-
-	public Player[] getPlayers() {
-		return players;
-	}
-	
-	public void removePlayer(Player player) throws TableEmptyException {
-	    if(tableEmpty()) { throw new TableEmptyException(); }
-
-        Arrays.stream(players).filter(p -> p.equals(player)).forEach(p -> p = null);
-
-		numPlayers--;
-		if(rules.isTourney()) {
-			if(numPlayers < rules.getPrizes().length) {
-				System.out.println("Player " + player.toString() + " wins $" + rules.getPrizes()[numPlayers]);
-				// Need to figure out how to return money to the players account
-			}
-		} else {
-			System.out.println("Player " + player.toString() + " is exiting the game with " + player.getBalance());
-            // Need to figure out how to return money to the players account
-		}
-	}
-	
-	/**
-	 * Checks whether or not the table is currently full.
-	 * 
-	 * @return whether or not table is full
-	 */
-	public boolean tableFull() {
-		return numPlayers == rules.getMaxCapacity();
-	}
-	
-	/**
-	 * Ask the player currently dealing what game they would like to deal.
-	 * 
-	 * TODO: Implement this method correctly 
-	 * 
-	 * @return game type to deal
-	 */
-	public GameType askDealerForGameType() {
-		if(debug) {
-			return testClient.getDesiredGameType();
-		}
-        int randomNum = ThreadLocalRandom.current().nextInt(1, 4);
-        switch(randomNum) {
-        case 1:
-        	return GameType.HOLDEM;
-        case 2:
-        	return GameType.PINEAPPLE;
-        case 3:
-        	return GameType.OMAHA;
-        default:
-        	return GameType.HOLDEM;
+	public void removePlayer(Player player) {
+	    for(int i = 0; i < players.length; i++) {
+            if(players[i] == player) {
+                players[i] = null;
+            }
         }
+        playersInHand.remove(player);
+	}
+
+	public boolean tableFull() {
+		return getNumPlayers() == rules.getMaxCapacity();
 	}
 	
-	public void removeBrokePlayers() {
+	private GameType askDealerForGameType() {
+        return clientHandler.getDesiredGameType(players[dealerNum].getPlayerId());
+	}
+	
+	private void removeBrokePlayers() {
         Arrays.stream(players).filter(player -> player != null && player.getBalance() == 0)
                 .forEach(player -> player.setSittingOut(true));
 	}
 	
-	public void bettingRound(Hand currHand, boolean resetBetting) {
+	private void bettingRound(Hand currentHand, boolean resetBetting) {
         currentAction = findStartingLocation();
         if(resetBetting) {
-            currHand.setupBetRound();
+            currentHand.setupBetRound();
         }
         List<Option> currOptions;
-        while(currHand.playersBetting()) {
+        while(currentHand.playersBetting()) {
             Player player = playersInHand.get(currentAction);
-            currOptions = currHand.generateOptions(player);
+            currOptions = currentHand.generateOptions(player);
             Option option = askPlayerForOption(currOptions, player);
-            currHand.executeOption(player, option);
+            currentHand.executeOption(player, option);
             incrementCurrentAction();
         }
 	}
 	
-	public Option askPlayerForOption(List<Option> options, Player player) {
-		if (debug) {
-			return testClient.getDesiredOption();
-		}
-        int randomNum = ThreadLocalRandom.current().nextInt(0, options.size());
-        return options.get(randomNum);
+	private Option askPlayerForOption(List<Option> options, Player player) {
+        return clientHandler.getDesiredOption(player.getPlayerId(), options);
 	}
 	
-	private boolean tableEmpty() {
+	public boolean tableEmpty() {
 	    return Arrays.stream(players).allMatch(Objects::isNull);
 	}
 	
@@ -226,81 +148,85 @@ public class Game {
 		return playersInHand.stream().filter(player -> !player.hasFolded()).count() > 1;
 	}
 	
-	/**
-	 * Main loop of an individual game, the game loops infinitely as long as there
-	 * are players at the table. This loop uses the hand class to keep track of the
-	 * game state, and uses Game helper methods to communicate with the client.
-	 * 
-	 * TODO: Handle dead and inactive game
-	 * TODO: Handle showing cards
-	 */
-	public void startGame() {
+	public void runGame() {
 		while(!tableEmpty()) {
-			for(Player p : players) {
-				if(p != null && !p.isSittingOut()) {
-					playersInHand.add(p);
-					p.resetStatus();
-				}
-			}
+            prepareHand();
 			
 			if(this.playersInHand.size() <= 1) {
-				// Inactive game
 				break;
 			}
 	
-			GameType currGameType = rules.getGameType();
-			if(currGameType == GameType.MIXED) {
-				currGameType = askDealerForGameType();
-			}
+            var currentHand = createHand();
+            runHand(currentHand);
 
-            Hand currHand;
-			switch(currGameType){
-			case HOLDEM:
-				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
-				break;
-			case PINEAPPLE:
-				//currHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
-				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
-				break;
-			case OMAHA:
-				currHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
-				break;
-			default:
-				currHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
-			}
-
-			currHand.dealInitialHand();
-			if(this.rules.getAnte() > 0) {
-                currHand.chargeAntes();
-			}
-			currHand.chargeSmallBlind(smallBlindNum());
-			currHand.chargeBigBlind(bigBlindNum());
-			currentAction = playersInHand.indexOf(players[bigBlindNum()]);
-			
-            bettingRound(currHand, false);
-            if(stillBetting()) {
-                currHand.dealFlop();
-            }
-			
-			bettingRound(currHand, true);
-			if(stillBetting()) {
-                currHand.dealTurn();
-			}
-			
-			bettingRound(currHand, true);
-			if(stillBetting()) {
-                currHand.dealRiver();
-			}
-
-			bettingRound(currHand, true);
-			currHand.payWinners();
-			
-			// Show cards
-			Arrays.stream(players).forEach(Player::resetStatus);
-
-			removeBrokePlayers();
-			incrementDealerNum();
-			playersInHand.clear();
+            prepareForNextHand();
 		}
 	}
+
+	private void prepareHand() {
+	    for(Player p : players) {
+            if(p != null && !p.isSittingOut()) {
+                playersInHand.add(p);
+                p.resetStatus();
+            }
+        }
+    }
+
+	private Hand createHand() {
+	    GameType currGameType = rules.getGameType();
+        if(currGameType == GameType.MIXED) {
+            currGameType = askDealerForGameType();
+        }
+
+        Hand currentHand;
+        switch(currGameType){
+        case HOLDEM:
+            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            break;
+        case PINEAPPLE:
+            currentHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            break;
+        case OMAHA:
+            currentHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            break;
+        default:
+            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+        }
+        return currentHand;
+    }
+
+    private void runHand(Hand currentHand) {
+	    currentHand.dealInitialHand();
+			if(this.rules.getAnte() > 0) {
+                currentHand.chargeAntes();
+			}
+			currentHand.chargeSmallBlind(smallBlindNum());
+			currentHand.chargeBigBlind(bigBlindNum());
+			currentAction = playersInHand.indexOf(players[bigBlindNum()]);
+
+            bettingRound(currentHand, false);
+            if(stillBetting()) {
+                currentHand.dealFlop();
+            }
+
+			bettingRound(currentHand, true);
+			if(stillBetting()) {
+                currentHand.dealTurn();
+			}
+
+			bettingRound(currentHand, true);
+			if(stillBetting()) {
+                currentHand.dealRiver();
+			}
+
+			bettingRound(currentHand, true);
+			currentHand.payWinners();
+    }
+
+    private void prepareForNextHand() {
+	    Arrays.stream(players).forEach(Player::resetStatus);
+        removeBrokePlayers();
+        incrementDealerNum();
+        playersInHand.clear();
+    }
 }

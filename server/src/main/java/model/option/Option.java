@@ -53,4 +53,13 @@ public class Option {
     public String toString() {
         return type.toString() + ": $" + amount;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Option) {
+            var option = (Option) obj;
+            return amount == option.amount && type == option.type;
+        }
+        return false;
+    }
 }
