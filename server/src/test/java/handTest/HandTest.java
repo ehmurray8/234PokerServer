@@ -45,6 +45,10 @@ public class HandTest {
 	@Test
 	public void testDealOmahaHand() {
 		var omahaHand = new OmahaHand(20, 40, 0, players);
+
+		player1.setMaxCards(4);
+		player2.setMaxCards(4);
+
 		omahaHand.dealInitialHand();
 
 		assertEquals(4, player1.getHand().size());
@@ -55,6 +59,10 @@ public class HandTest {
 	@Test
 	public void testDealPineappleHand() {
 		var pineappleHand = new PineappleHand(20, 40, 0, players);
+
+		player1.setMaxCards(3);
+		player2.setMaxCards(3);
+
 		pineappleHand.dealInitialHand();
 
 		assertEquals(3, player1.getHand().size());

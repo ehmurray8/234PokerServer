@@ -7,6 +7,8 @@ import static org.junit.Assert.*;
 import client.ClientHandler;
 import game.Game;
 import game.TestGame;
+import model.card.Card;
+import model.player.TestPlayer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -137,5 +139,21 @@ public class GameTest {
     public void testTableEmpty() {
 	    players.forEach(game::removePlayer);
 	    assertTrue(game.tableEmpty());
+    }
+
+    @Test
+    public void testGameLoop() {
+	    var card1 = new Card(Card.Rank.ACE, Card.Suit.SPADES);
+        var card2 = new Card(Card.Rank.ACE, Card.Suit.CLUBS);
+
+        var card3 = new Card(Card.Rank.KING, Card.Suit.DIAMONDS);
+        var card4 = new Card(Card.Rank.KING, Card.Suit.HEARTS);
+
+        var player1 = new TestPlayer(200, "P1");
+        var player2 = new TestPlayer(200, "P2");
+        var game = new Game(Arrays.asList(player1, player2), rules, clientHandler);
+
+        player1.setHand(new Card[]{card1, card2});
+        player2.setHand(new Card[]{card3, card4});
     }
 }

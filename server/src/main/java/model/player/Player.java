@@ -88,9 +88,9 @@ public class Player  {
         return hand;
     }
 
-    public final void addCard(Card card) {
-        this.hand.add(card);
-        this.hand.sort(CARD_COMPARATOR);
+    public void addCard(Card card) {
+        hand.add(card);
+        hand.sort(CARD_COMPARATOR);
     }
 
     public final void fold() {

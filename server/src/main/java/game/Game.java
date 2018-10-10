@@ -15,13 +15,13 @@ public class Game {
 
 
 	private Player[] players;
-	private Rules rules;
+    private Rules rules;
 	int dealerNum;
 	private int currentAction;
 	private ArrayList<Player> playersInHand;
 	private ClientHandler clientHandler;
 
-	Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
+	public Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
 		this.players = new Player[rules.getMaxCapacity()];
 		for(int i = 0; i < players.size(); i++) {
             this.players[i] = players.get(i);
@@ -197,30 +197,30 @@ public class Game {
 
     private void runHand(Hand currentHand) {
 	    currentHand.dealInitialHand();
-			if(this.rules.getAnte() > 0) {
-                currentHand.chargeAntes();
-			}
-			currentHand.chargeSmallBlind(smallBlindNum());
-			currentHand.chargeBigBlind(bigBlindNum());
-			currentAction = playersInHand.indexOf(players[bigBlindNum()]);
+        if(this.rules.getAnte() > 0) {
+            currentHand.chargeAntes();
+        }
+        currentHand.chargeSmallBlind(smallBlindNum());
+        currentHand.chargeBigBlind(bigBlindNum());
+        currentAction = playersInHand.indexOf(players[bigBlindNum()]);
 
-            bettingRound(currentHand, false);
-            if(stillBetting()) {
-                currentHand.dealFlop();
-            }
+        bettingRound(currentHand, false);
+        if(stillBetting()) {
+            currentHand.dealFlop();
+        }
 
-			bettingRound(currentHand, true);
-			if(stillBetting()) {
-                currentHand.dealTurn();
-			}
+        bettingRound(currentHand, true);
+        if(stillBetting()) {
+            currentHand.dealTurn();
+        }
 
-			bettingRound(currentHand, true);
-			if(stillBetting()) {
-                currentHand.dealRiver();
-			}
+        bettingRound(currentHand, true);
+        if(stillBetting()) {
+            currentHand.dealRiver();
+        }
 
-			bettingRound(currentHand, true);
-			currentHand.payWinners();
+        bettingRound(currentHand, true);
+        currentHand.payWinners();
     }
 
     private void prepareForNextHand() {
