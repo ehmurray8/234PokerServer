@@ -3,13 +3,17 @@ package gameTest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
+import client.OptionSelection.SelectionType;
+import client.OptionSelection;
 import client.TestClientHandler;
 import game.Game;
 import game.TestGame;
 import model.card.Card;
+import model.option.Option;
 import model.player.TestPlayer;
 import org.junit.Before;
 import org.junit.Test;
@@ -145,14 +149,104 @@ public class GameTest {
 
     @Test
     public void testGameLoop() {
-	    var card1 = new Card(Card.Rank.ACE, Card.Suit.SPADES);
-        var card2 = new Card(Card.Rank.ACE, Card.Suit.CLUBS);
+        var player1 = new TestPlayer(200, "P1");
+        var player2 = new TestPlayer(200, "P2");
 
+        var preFlopList = Arrays.asList(new OptionSelection(SelectionType.CALL),
+                                        new OptionSelection(SelectionType.CHECK));
+
+        var flopList = Arrays.asList(new OptionSelection(SelectionType.CHECK),
+                                     new OptionSelection(SelectionType.BET),
+                                     new OptionSelection(SelectionType.CALL));
+
+        var turnList = Arrays.asList(new OptionSelection(SelectionType.CHECK),
+                                     new OptionSelection(SelectionType.CHECK));
+
+        var riverList = Arrays.asList(new OptionSelection(SelectionType.BET),
+                                      new OptionSelection(SelectionType.RAISE),
+                                      new OptionSelection(SelectionType.CALL));
+
+        var optionsList = new ArrayList<OptionSelection>();
+        optionsList.addAll(preFlopList);
+        optionsList.addAll(flopList);
+        optionsList.addAll(turnList);
+        optionsList.addAll(riverList);
+
+        clientHandler.setOptionNumList(optionsList);
+
+        var game = setupTwoPlayerTestGame(player1, player2);
+        game.runGame();
+
+        assertEquals(191.0, player1.getBalance(), .1);
+        assertEquals(209.0, player2.getBalance(), .1);
+    }
+
+    @Test
+    public void testPreFlopRaise() {
+        var player1 = new TestPlayer(200, "P1");
+        var player2 = new TestPlayer(200, "P2");
+
+        var preFlopList = Arrays.asList(new OptionSelection(SelectionType.RAISE, 10),
+                                        new OptionSelection(SelectionType.CALL));
+
+        var flopList = Arrays.asList(new OptionSelection(SelectionType.BET, 20),
+                                     new OptionSelection(SelectionType.RAISE, 50),
+                                     new OptionSelection(SelectionType.CALL));
+
+        var turnList = Arrays.asList(new OptionSelection(2),
+                                     new OptionSelection(SelectionType.CALL));
+
+        var optionsList = new ArrayList<OptionSelection>();
+        optionsList.addAll(preFlopList);
+        optionsList.addAll(flopList);
+        optionsList.addAll(turnList);
+
+        clientHandler.setOptionNumList(optionsList);
+
+        var game = setupTwoPlayerTestGame(player1, player2);
+        game.runGame();
+
+        assertEquals(0, player1.getBalance(), 0.1);
+        assertEquals(400, player2.getBalance(), 0.1);
+    }
+
+    @Test
+    public void testRaiseWar() {
+	    var player1 = new TestPlayer(2000, "P1");
+        var player2 = new TestPlayer(1000, "P2");
+
+        var preFlopList = Arrays.asList(new OptionSelection(SelectionType.CALL),
+                                        new OptionSelection(SelectionType.BET, 10),
+                                        new OptionSelection(SelectionType.RAISE, 25),
+                                        new OptionSelection(SelectionType.CALL));
+        // $56 in pot
+
+        var flopList = Arrays.asList(new OptionSelection(SelectionType.BET, 40),
+                                     new OptionSelection(SelectionType.RAISE, 100),
+                                     new OptionSelection(SelectionType.RAISE, 200),
+                                     new OptionSelection(SelectionType.RAISE, 400),
+                                     new OptionSelection(3),
+                                     new OptionSelection(SelectionType.CALL));
+
+        var optionsList = new ArrayList<OptionSelection>();
+        optionsList.addAll(preFlopList);
+        optionsList.addAll(flopList);
+
+        clientHandler.setOptionNumList(optionsList);
+
+        var game = setupTwoPlayerTestGame(player1, player2);
+        game.runGame();
+
+        assertEquals(1000, player1.getBalance(), 0.1);
+        assertEquals(2000, player2.getBalance(), 0.1);
+    }
+
+    private Game setupTwoPlayerTestGame(Player player1, Player player2) {
+        var card1 = new Card(Card.Rank.ACE, Card.Suit.SPADES);
+        var card2 = new Card(Card.Rank.ACE, Card.Suit.CLUBS);
         var card3 = new Card(Card.Rank.KING, Card.Suit.DIAMONDS);
         var card4 = new Card(Card.Rank.KING, Card.Suit.HEARTS);
 
-        var player1 = new TestPlayer(200, "P1");
-        var player2 = new TestPlayer(200, "P2");
         player1.addCard(card1);
         player1.addCard(card2);
         player2.addCard(card3);
@@ -161,21 +255,10 @@ public class GameTest {
         var communityCards = Arrays.asList(new Card(Card.Rank.TWO, Card.Suit.HEARTS),
                 new Card(Card.Rank.TEN, Card.Suit.CLUBS), new Card(Card.Rank.FOUR, Card.Suit.DIAMONDS),
                 new Card(Card.Rank.SEVEN, Card.Suit.CLUBS), new Card(Card.Rank.KING, Card.Suit.SPADES));
-
         var game = new TestGame(Arrays.asList(player1, player2), rules, clientHandler, communityCards);
         game.setNumRuns(1);
+
         clientHandler.setGameType(GameType.HOLDEM);
-
-        // Pre: Call, Check | Flop: Check, Bet, Call | Turn: Check, Check | River: Bet, Raise, Call
-        var optionsList = Arrays.asList(1, 0,
-										 0, 1, 1,
-										 0, 0,
-										 1, 2, 1);
-        clientHandler.setOptionNumList(optionsList);
-
-        game.runGame();
-
-        assertEquals(191.0, player1.getBalance(), .1);
-        assertEquals(209.0, player2.getBalance(), .1);
+        return game;
     }
 }

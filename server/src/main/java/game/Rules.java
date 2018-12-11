@@ -11,6 +11,8 @@ public class Rules {
 	
 	/** Amount the big blind starts at. */
 	private double bigBlind;
+
+	private double straddleAmount;
 	
 	/** Amount the ante starts at. */
 	private double ante;
@@ -100,6 +102,13 @@ public class Rules {
 		this.smallBlinds = new double[0];
 		this.antes = new double[0];
 		this.gameType = gameType;
+		this.straddleAmount = -1;
+	}
+
+	public Rules(double smallBlind, double bigBlind, double straddleAmount, double ante,
+				 int timeLimitSecs, int maxCapacity, GameType gameType) {
+		this(smallBlind, bigBlind, ante, timeLimitSecs, maxCapacity, gameType);
+		this.straddleAmount = straddleAmount;
 	}
 	
 	

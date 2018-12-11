@@ -28,6 +28,7 @@ public abstract class Hand {
     private double bigBlindAmount;
     private double anteAmount;
     ArrayList<Player> players;
+    private double lastRaiseAmount = 0;
 
     /**	Pots that are currently opened, main pot is at index 0. */
     private final List<Pot> openPots;
@@ -221,6 +222,11 @@ public abstract class Hand {
     
     public void setupBetRound() {
         players.forEach(Player::noActionThisTurn);
+        lastRaiseAmount = 0;
+    }
+
+    public void setLastRaiseAmount(double amount) {
+        lastRaiseAmount = amount;
     }
     
     public boolean playersBetting() {
@@ -238,6 +244,7 @@ public abstract class Hand {
     
     public void executeOption(Player player, Option option) {
     	Option.OptionType type = option.getType();
+        var currentPot = openPots.get(openPots.size()-1);
     	switch(type) {
     	case FOLD:
     		player.fold();
@@ -247,9 +254,15 @@ public abstract class Hand {
             player.check();
             break;
     	case RAISE:
-    	case BET:
-    	case ALLIN:
-    		var currentPot = openPots.get(openPots.size()-1);
+        case ALLIN:
+        case BET:
+            var startingAmountThisTurn = player.setupRaise();
+            if(startingAmountThisTurn > 0) {
+                currentPot.removeAmount(startingAmountThisTurn);
+                lastRaiseAmount = option.getAmount() - startingAmountThisTurn;
+            } else {
+                lastRaiseAmount = option.getAmount();
+            }
     		var amountOwed = option.getAmount();
             currentPot.setAmountOwed(amountOwed);
     	case CALL:
@@ -350,7 +363,11 @@ public abstract class Hand {
             createFoldCallRaiseOptions(options, player, amountOwed);
         }
         if(amountOwed + bigBlindAmount <= player.getBalance()) {
-            options.add(new Option(Option.OptionType.ALLIN, player.getBalance()));
+            var amountThisTurn = player.getAmountThisTurn();
+            if(amountThisTurn < 0) {
+                amountThisTurn = 0;
+            }
+            options.add(new Option(Option.OptionType.ALLIN, player.getBalance() + amountThisTurn));
         }
         return options;
     }
@@ -371,7 +388,12 @@ public abstract class Hand {
             int count = (int) players.stream()
                     .filter(p -> p.getBalance() > 0 && !p.hasFolded() && !p.isSittingOut()).count();
             if(count > 1) {
-                options.add(new Option(Option.OptionType.RAISE, bigBlindAmount + amountOwed));
+                var amountThisTurn = player.getAmountThisTurn();
+                if(amountThisTurn < 0) {
+                    amountThisTurn = 0;
+                }
+                var raiseAmount = amountThisTurn + amountOwed + lastRaiseAmount;
+                options.add(new Option(Option.OptionType.RAISE, raiseAmount));
             }
         }
     }

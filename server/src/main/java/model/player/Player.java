@@ -51,6 +51,15 @@ public class Player  {
         return amountThisTurn;
     }
 
+    public double setupRaise() {
+        double startingAmount = amountThisTurn;
+        if(amountThisTurn > 0) {
+            balance += amountThisTurn;
+            amountThisTurn = 0;
+        }
+        return startingAmount;
+    }
+
     /**
      * Add the amount this turn, and deduct from the player's balance.
      *

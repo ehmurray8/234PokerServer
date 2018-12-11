@@ -437,7 +437,7 @@ public class HandTest {
 
 		var options = hand.generateOptions(player1);
         assertTrue(options.contains(new Option(Option.OptionType.CALL, bet.getAmount())));
-        assertTrue(options.contains(new Option(Option.OptionType.RAISE, bet.getAmount() + 120)));
+        assertTrue(options.contains(new Option(Option.OptionType.RAISE, bet.getAmount() * 2)));
         assertTrue(options.contains(new Option(Option.OptionType.ALLIN, player1.getBalance())));
         assertTrue(options.contains(new Option(Option.OptionType.FOLD, 0)));
 	}
