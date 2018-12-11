@@ -12,9 +12,10 @@ class FiveCardAnalyzer  {
     private HandRank rank;
     private final Map<Card.Rank, Integer> rankMap;
     private final Map<Card.Suit, Integer> suitMap;
-    private final List<Card> hand;
+    final List<Card> hand;
     private final ArrayList<Card.Rank> pairRanks;
-    private boolean hasStraight, has3Kind = false, has4Kind = false, hasFlush = false, hasBroadway = false;
+    private boolean has3Kind = false, has4Kind = false, hasFlush = false, hasBroadway = false;
+    boolean hasStraight;
 
     public HandRank getRank() {
         return rank;
@@ -99,7 +100,7 @@ class FiveCardAnalyzer  {
         }
     }
 
-    private void checkCardsAreSequential(List<Card.Rank> rankList) {
+    void checkCardsAreSequential(List<Card.Rank> rankList) {
         hasStraight = true;
         for (int i = 0; i < hand.size() - 1 && hasStraight; i++) {
             if (rankList.get(i + 1).getStrength() - rankList.get(i).getStrength() != 1) {

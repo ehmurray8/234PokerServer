@@ -8,18 +8,22 @@ import java.util.List;
 
 import static extensions.ListExtensions.reverseList;
 
-public final class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
+public class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
     
     private List<Card.Rank> sortedHand;
     private List<Card.Rank> otherSortedHand;
-    private HandAnalyzer handAnalyzer;
-    private HandAnalyzer otherHandAnalyzer;
+    HandAnalyzer handAnalyzer;
+    HandAnalyzer otherHandAnalyzer;
 
     @Override
     public int compare(HandAnalyzer ha1, HandAnalyzer ha2) {
         handAnalyzer = ha1;
         otherHandAnalyzer = ha2;
         int value = handAnalyzer.getTopRank().getStrength() - otherHandAnalyzer.getTopRank().getStrength();
+        return compareStrengths(value);
+    }
+
+    int compareStrengths(int value) {
         if (value == 0 && !handAnalyzer.getTopRank().equals(HandRank.ROYAL_FLUSH)) {
             initSortedHands();
             HandRank rank = handAnalyzer.getTopRank();

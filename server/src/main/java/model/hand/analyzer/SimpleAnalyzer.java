@@ -6,11 +6,17 @@ import java.util.List;
 import model.card.Card;
 
 public class SimpleAnalyzer extends HandAnalyzer {
-    SimpleAnalyzer(List<Card> fullHand) {
+
+    SimpleAnalyzer(List<Card> fullHand, boolean isShortDeck) {
         super(fullHand);
         ArrayList<Card> fullHandList = new ArrayList<>(getFullHand());
-        FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(fullHandList);
-        setTopRank(fiveCardAnalyzer.getRank());
+        if(isShortDeck) {
+            ShortDeckFiveCardAnalyzer fiveCardAnalyzer = new ShortDeckFiveCardAnalyzer(fullHandList);
+            setTopRank(fiveCardAnalyzer.getRank());
+        } else {
+            FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(fullHandList);
+            setTopRank(fiveCardAnalyzer.getRank());
+        }
     }
 
     @Override

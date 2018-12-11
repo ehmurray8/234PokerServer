@@ -22,7 +22,7 @@ import model.player.Player;
  */
 public abstract class Hand {
 
-    final Deck deck;
+    final Stack<Card> deck;
     final ArrayList<Card> communityCards;
     private double smallBlindAmount;
     private double bigBlindAmount;
