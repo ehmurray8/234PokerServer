@@ -3,7 +3,7 @@ package game;
 public class Rules {
 
 	public enum GameType {
-		HOLDEM, PINEAPPLE, OMAHA, MIXED, TEST
+		HOLDEM, PINEAPPLE, OMAHA, MIXED, SHORTDECK, TEST
 	}
 	
 	/** Amount the small blind starts at. */

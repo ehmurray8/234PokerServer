@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 
 import model.card.Card;
 import model.card.Deck;
+import model.card.ShortDeck;
 import model.hand.analyzer.HandAnalyzer;
 import model.hand.analyzer.HoldEmAnalyzer;
 import model.option.Option;
@@ -36,8 +37,8 @@ public abstract class Hand {
     /** All openPots that have been opened during the hand. */
     private final List<Pot> closedPots;
 
-    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
-        this();
+    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, boolean isShortDeck) {
+        this(isShortDeck);
         this.smallBlindAmount = smallBlindAmount;
         this.bigBlindAmount = bigBlindAmount;
         this.anteAmount = anteAmount;
@@ -45,8 +46,12 @@ public abstract class Hand {
         openPots.add(new Pot(players));
     }
 
-    private Hand() {
-        deck = new Deck();
+    private Hand(boolean isShortDeck) {
+        if(!isShortDeck) {
+            deck = new Deck();
+        } else {
+            deck = new ShortDeck();
+        }
         communityCards = new ArrayList<>();
         openPots = new ArrayList<>();
         closedPots = new ArrayList<>();
