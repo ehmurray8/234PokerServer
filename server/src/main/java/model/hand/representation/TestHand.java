@@ -16,4 +16,8 @@ public class TestHand extends TexasHoldEmHand {
     public void setCommunityCards(Card[] cards) {
         communityCards.addAll(Arrays.asList(cards));
     }
+
+    public void addCommunityCard(Card card) {
+        communityCards.add(card);
+    }
 }

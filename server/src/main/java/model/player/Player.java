@@ -10,6 +10,8 @@ import static java.util.UUID.randomUUID;
 
 public class Player  {
 
+    private static int NO_ACTION_THIS_TURN = -1;
+
     private static final Comparator<Card> CARD_COMPARATOR = new Card.CardComparator();
     private final String name;
     private double balance;
@@ -57,7 +59,7 @@ public class Player  {
      */
     public boolean addAmountThisTurn(double addAmt) {
     	if(addAmt <= this.balance) { 
-    		if(amountThisTurn == -1) {
+    		if(amountThisTurn == NO_ACTION_THIS_TURN) {
     			amountThisTurn = 0;
     		}
             amountThisTurn += addAmt;
@@ -68,12 +70,16 @@ public class Player  {
     	}
     }
 
+    public void check() {
+        clearAmtThisTurn();
+    }
+
     public void clearAmtThisTurn() {
         amountThisTurn = 0;
     }
     
     public void noActionThisTurn() {
-    	amountThisTurn = -1;
+    	amountThisTurn = NO_ACTION_THIS_TURN;
     }
 
     public final double getBalance() {

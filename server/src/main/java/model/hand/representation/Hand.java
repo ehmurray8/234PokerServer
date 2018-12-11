@@ -243,6 +243,9 @@ public abstract class Hand {
     		player.fold();
     		players.remove(player);
     		break;
+        case CHECK:
+            player.check();
+            break;
     	case RAISE:
     	case BET:
     	case ALLIN:

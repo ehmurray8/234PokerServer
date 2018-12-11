@@ -3,7 +3,7 @@ package game;
 public class Rules {
 
 	public enum GameType {
-		HOLDEM, PINEAPPLE, OMAHA, MIXED
+		HOLDEM, PINEAPPLE, OMAHA, MIXED, TEST
 	}
 	
 	/** Amount the small blind starts at. */
@@ -167,6 +167,6 @@ public class Rules {
 	@Override
 	public String toString() {
 		return "Big Blind: " + this.bigBlind + ", Small Blind: " + this.smallBlind + ", Ante: " + this.ante +
-				", Time limit (s): " + this.timeLimitSecs;
+				", Time limit: " + this.timeLimitSecs + "s";
 	}
 }

@@ -13,6 +13,7 @@ public class Game {
 
 	public static class TableFullException extends Exception { }
 
+	private static int GAME_ENDED = -1;
 
 	private Player[] players;
     private Rules rules;
@@ -21,7 +22,7 @@ public class Game {
 	private ArrayList<Player> playersInHand;
 	private ClientHandler clientHandler;
 
-	public Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
+	Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
 		this.players = new Player[rules.getMaxCapacity()];
 		for(int i = 0; i < players.size(); i++) {
             this.players[i] = players.get(i);
@@ -121,7 +122,7 @@ public class Game {
                 .forEach(player -> player.setSittingOut(true));
 	}
 	
-	private void bettingRound(Hand currentHand, boolean resetBetting) {
+	void bettingRound(Hand currentHand, boolean resetBetting) {
         currentAction = findStartingLocation();
         if(resetBetting) {
             currentHand.setupBetRound();
@@ -149,25 +150,33 @@ public class Game {
 	}
 	
 	public void runGame() {
-		while(!tableEmpty()) {
-            prepareHand();
-			
-			if(this.playersInHand.size() <= 1) {
-				break;
-			}
-	
-            var currentHand = createHand();
-            runHand(currentHand);
-
-            prepareForNextHand();
-		}
+	    var gameState = 0;
+		while(gameState != GAME_ENDED){
+		    gameState = gameIteration();
+        }
 	}
+
+	int gameIteration() {
+	    prepareHand();
+
+        if(this.playersInHand.size() <= 1) {
+            return GAME_ENDED;
+        }
+
+        var currentHand = createHand();
+        runHand(currentHand);
+
+        prepareForNextHand();
+        if(tableEmpty()) {
+            return GAME_ENDED;
+        }
+        return 0;
+    }
 
 	private void prepareHand() {
 	    for(Player p : players) {
             if(p != null && !p.isSittingOut()) {
                 playersInHand.add(p);
-                p.resetStatus();
             }
         }
     }
@@ -189,42 +198,73 @@ public class Game {
         case OMAHA:
             currentHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
             break;
+        case TEST:
+            currentHand = new TestHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            break;
         default:
             currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
         }
         return currentHand;
     }
 
-    private void runHand(Hand currentHand) {
+    protected void runHand(Hand currentHand) {
 	    currentHand.dealInitialHand();
+	    handleAction(currentHand);
+    }
+
+    void handleAction(Hand currentHand) {
+        handlePreFlop(currentHand);
+        if(stillBetting()) {
+            handleFlop(currentHand);
+        }
+        if(stillBetting()) {
+            handleTurn(currentHand);
+        }
+        if(stillBetting()) {
+            handleRiver(currentHand);
+        }
+        currentHand.payWinners();
+    }
+
+    private void handlePreFlop(Hand currentHand) {
         if(this.rules.getAnte() > 0) {
             currentHand.chargeAntes();
         }
         currentHand.chargeSmallBlind(smallBlindNum());
         currentHand.chargeBigBlind(bigBlindNum());
         currentAction = playersInHand.indexOf(players[bigBlindNum()]);
-
         bettingRound(currentHand, false);
-        if(stillBetting()) {
-            currentHand.dealFlop();
+        var bigBlindPlayer = players[bigBlindNum()];
+        if(currentAction == bigBlindNum() && bigBlindPlayer.getAmountThisTurn() == rules.getBigBlind()) {
+            currentHand.setupBetRound();
+            List<Option> currOptions = currentHand.generateOptions(bigBlindPlayer);
+            Option option = askPlayerForOption(currOptions, bigBlindPlayer);
+            currentHand.executeOption(bigBlindPlayer, option);
+            incrementCurrentAction();
+            if(option.getType() != Option.OptionType.CHECK) {
+                bettingRound(currentHand, false);
+            }
         }
-
-        bettingRound(currentHand, true);
-        if(stillBetting()) {
-            currentHand.dealTurn();
-        }
-
-        bettingRound(currentHand, true);
-        if(stillBetting()) {
-            currentHand.dealRiver();
-        }
-
-        bettingRound(currentHand, true);
-        currentHand.payWinners();
     }
 
+    void handleFlop(Hand currentHand) {
+        currentHand.dealFlop();
+        bettingRound(currentHand, true);
+    }
+
+    void handleTurn(Hand currentHand) {
+        currentHand.dealTurn();
+        bettingRound(currentHand, true);
+    }
+
+    void handleRiver(Hand currentHand) {
+        currentHand.dealRiver();
+        bettingRound(currentHand, true);
+    }
+
+
     private void prepareForNextHand() {
-	    Arrays.stream(players).forEach(Player::resetStatus);
+	    Arrays.stream(players).filter(Objects::nonNull).forEach(Player::resetStatus);
         removeBrokePlayers();
         incrementDealerNum();
         playersInHand.clear();

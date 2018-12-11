@@ -9,14 +9,20 @@ import java.util.UUID;
 public class TestClientHandler extends ClientHandler {
 
     private Rules.GameType gameType = Rules.GameType.HOLDEM;
-    private Option option = null;
+    private List<Integer> optionNumList = null;
+    private int currentSelectionNum = 0;
+
 
     public void setGameType(Rules.GameType gameType) {
         this.gameType = gameType;
     }
 
-    public void setOption(Option option) {
-        this.option = option;
+    public void setOptionNumList(List<Integer> optionNumList) {
+        this.optionNumList = optionNumList;
+    }
+
+    public void resetOptionNum() {
+        currentSelectionNum = 0;
     }
 
     @Override
@@ -26,6 +32,6 @@ public class TestClientHandler extends ClientHandler {
 
     @Override
     public Option getDesiredOption(UUID playerId, List<Option> options) {
-        return option;
+        return options.get(optionNumList.get(currentSelectionNum++));
     }
 }

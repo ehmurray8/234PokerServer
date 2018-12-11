@@ -2,9 +2,11 @@ package gameTest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+
 import static org.junit.Assert.*;
 
-import client.ClientHandler;
+import client.TestClientHandler;
 import game.Game;
 import game.TestGame;
 import model.card.Card;
@@ -20,18 +22,18 @@ public class GameTest {
 
     private Rules rules;
 	private ArrayList<Player> players;
-	private ClientHandler clientHandler;
+	private TestClientHandler clientHandler;
 	private TestGame game;
 
 	@Before
 	public void setUp() {
-		rules = new Rules(1, 2, 1, 20, 6, GameType.MIXED);
+		rules = new Rules(1, 2, 1, 20, 6, GameType.TEST);
 	    var p1 = new Player(1000, "Player 1");
 		var p2 = new Player(1000, "Player 2");
 		var p4 = new Player(1000, "Player 4");
 		players = new ArrayList<>(Arrays.asList(p1, p2, null, p4));
-		game = new TestGame(players, rules, clientHandler);
-	    clientHandler = new ClientHandler();
+        clientHandler = new TestClientHandler();
+		game = new TestGame(players, rules, clientHandler, Collections.emptyList());
 	}
 
 	@Test
@@ -151,9 +153,29 @@ public class GameTest {
 
         var player1 = new TestPlayer(200, "P1");
         var player2 = new TestPlayer(200, "P2");
-        var game = new Game(Arrays.asList(player1, player2), rules, clientHandler);
+        player1.addCard(card1);
+        player1.addCard(card2);
+        player2.addCard(card3);
+        player2.addCard(card4);
 
-        player1.setHand(new Card[]{card1, card2});
-        player2.setHand(new Card[]{card3, card4});
+        var communityCards = Arrays.asList(new Card(Card.Rank.TWO, Card.Suit.HEARTS),
+                new Card(Card.Rank.TEN, Card.Suit.CLUBS), new Card(Card.Rank.FOUR, Card.Suit.DIAMONDS),
+                new Card(Card.Rank.SEVEN, Card.Suit.CLUBS), new Card(Card.Rank.KING, Card.Suit.SPADES));
+
+        var game = new TestGame(Arrays.asList(player1, player2), rules, clientHandler, communityCards);
+        game.setNumRuns(1);
+        clientHandler.setGameType(GameType.HOLDEM);
+
+        // Pre: Call, Check | Flop: Check, Bet, Call | Turn: Check, Check | River: Bet, Raise, Call
+        var optionsList = Arrays.asList(1, 0,
+										 0, 1, 1,
+										 0, 0,
+										 1, 2, 1);
+        clientHandler.setOptionNumList(optionsList);
+
+        game.runGame();
+
+        assertEquals(191.0, player1.getBalance(), .1);
+        assertEquals(209.0, player2.getBalance(), .1);
     }
 }
