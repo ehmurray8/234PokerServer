@@ -4,9 +4,9 @@ import model.card.Card;
 
 import java.util.List;
 
-class ShortDeckFiveCardAnalyzer extends FiveCardAnalyzer {
+public class ShortDeckFiveCardAnalyzer extends FiveCardAnalyzer {
 
-    ShortDeckFiveCardAnalyzer(List<Card> hand) {
+    public ShortDeckFiveCardAnalyzer(List<Card> hand) {
         super(hand);
     }
 

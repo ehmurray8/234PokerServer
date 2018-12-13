@@ -12,6 +12,11 @@ public class TexasHoldEmHand extends Hand {
         super(smallBlindAmount, bigBlindAmount, anteAmount, players);
     }
 
+    public TexasHoldEmHand(double smallBlindAmount, double bigBlindAmount, double anteAmount,
+                           ArrayList<Player> players, boolean isShortDeck) {
+        super(smallBlindAmount, bigBlindAmount, anteAmount, players, isShortDeck);
+    }
+
     @Override
     public final void dealInitialHand() {
         IntStream.range(0, 2).forEach(iteration ->

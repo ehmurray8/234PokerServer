@@ -12,6 +12,10 @@ public class HoldEmAnalyzer extends HandAnalyzer {
         super(fullHand);
     }
 
+    public HoldEmAnalyzer(List<Card> fullHand, boolean isShortDeck) {
+        super(fullHand, isShortDeck);
+    }
+
     @Override
     public final List<List<Card>> fiveCardCombinations(List<Card> fullHand) {
         return recurseCombinations(fullHand, 5);

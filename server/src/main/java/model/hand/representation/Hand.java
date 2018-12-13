@@ -46,6 +46,10 @@ public abstract class Hand {
         openPots.add(new Pot(players));
     }
 
+    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
+        this(smallBlindAmount, bigBlindAmount, anteAmount, players, false);
+    }
+
     private Hand(boolean isShortDeck) {
         if(!isShortDeck) {
             deck = new Deck();

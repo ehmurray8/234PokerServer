@@ -202,6 +202,8 @@ public class Game {
             currentHand = new TestHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
             break;
         case SHORTDECK:
+            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+                    playersInHand, true);
             break;
         default:
             currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
