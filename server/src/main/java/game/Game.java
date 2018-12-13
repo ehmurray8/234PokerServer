@@ -159,7 +159,7 @@ public class Game {
 	int gameIteration() {
 	    prepareHand();
 
-        if(this.playersInHand.size() <= 1) {
+        if(playersInHand.size() <= 1) {
             return GAME_ENDED;
         }
 

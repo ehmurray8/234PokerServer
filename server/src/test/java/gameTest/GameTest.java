@@ -12,6 +12,7 @@ import client.TestClientHandler;
 import game.Game;
 import game.TestGame;
 import model.card.Card;
+import model.option.Option;
 import model.player.TestPlayer;
 import org.junit.Before;
 import org.junit.Test;
@@ -173,6 +174,7 @@ public class GameTest {
         clientHandler.setOptionNumList(optionsList);
 
         var game = setupTwoPlayerTestGame(player1, player2);
+        game.setNumRuns(1);
         game.runGame();
 
         assertEquals(191.0, player1.getBalance(), .1);
@@ -202,6 +204,7 @@ public class GameTest {
         clientHandler.setOptionNumList(optionsList);
 
         var game = setupTwoPlayerTestGame(player1, player2);
+        game.setNumRuns(1);
         game.runGame();
 
         assertEquals(0, player1.getBalance(), 0.1);
@@ -233,13 +236,47 @@ public class GameTest {
         clientHandler.setOptionNumList(optionsList);
 
         var game = setupTwoPlayerTestGame(player1, player2);
+        game.setNumRuns(1);
         game.runGame();
 
         assertEquals(1000, player1.getBalance(), 0.1);
         assertEquals(2000, player2.getBalance(), 0.1);
     }
 
-    private Game setupTwoPlayerTestGame(Player player1, Player player2) {
+    @Test
+    public void  testTwoGameRuns() {
+        var player1 = new Player(200, "P1");
+        var player2 = new Player(200, "P2");
+
+        var preFlopList = Arrays.asList(new OptionSelection(SelectionType.CALL), new OptionSelection(SelectionType.CHECK));
+
+        var flopList = Arrays.asList(new OptionSelection(SelectionType.BET), new OptionSelection(SelectionType.CALL));
+
+        var turnList = Arrays.asList(new OptionSelection(SelectionType.BET, 10),
+                new OptionSelection(SelectionType.RAISE, 25), new OptionSelection(SelectionType.CALL));
+
+        var riverList = Arrays.asList(new OptionSelection(SelectionType.CHECK), new OptionSelection(SelectionType.CHECK));
+
+        var nextHandList = Arrays.asList(new OptionSelection(SelectionType.RAISE), new OptionSelection(SelectionType.FOLD));
+
+        var allActions = new ArrayList<OptionSelection>();
+        allActions.addAll(preFlopList);
+        allActions.addAll(flopList);
+        allActions.addAll(turnList);
+        allActions.addAll(riverList);
+        allActions.addAll(nextHandList);
+
+        clientHandler.setOptionNumList(allActions);
+
+        var game = setupTwoPlayerTestGame(player1, player2);
+        game.setNumRuns(2);
+        game.runGame();
+
+        assertEquals(173, player1.getBalance(), 0.1);
+        assertEquals(227, player2.getBalance(), 0.1);
+    }
+
+    private TestGame setupTwoPlayerTestGame(Player player1, Player player2) {
         var card1 = new Card(Card.Rank.ACE, Card.Suit.SPADES);
         var card2 = new Card(Card.Rank.ACE, Card.Suit.CLUBS);
         var card3 = new Card(Card.Rank.KING, Card.Suit.DIAMONDS);
@@ -254,7 +291,6 @@ public class GameTest {
                 new Card(Card.Rank.TEN, Card.Suit.CLUBS), new Card(Card.Rank.FOUR, Card.Suit.DIAMONDS),
                 new Card(Card.Rank.SEVEN, Card.Suit.CLUBS), new Card(Card.Rank.KING, Card.Suit.SPADES));
         var game = new TestGame(Arrays.asList(player1, player2), rules, clientHandler, communityCards);
-        game.setNumRuns(1);
 
         clientHandler.setGameType(GameType.HOLDEM);
         return game;

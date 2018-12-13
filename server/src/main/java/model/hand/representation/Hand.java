@@ -215,6 +215,7 @@ public abstract class Hand {
     
     public final void chargeBigBlind(int bigBlindPos) {
     	double potNum = bigBlindAmount;
+    	lastRaiseAmount = bigBlindAmount;
     	if(this.openPots.size() > 1) {
     		potNum = bigBlindAmount - openPots.get(0).getAmountOwed();
     	}
@@ -371,7 +372,7 @@ public abstract class Hand {
         } else {
             createFoldCallRaiseOptions(options, player, amountOwed);
         }
-        if(amountOwed + bigBlindAmount <= player.getBalance()) {
+        if(amountOwed + minBetAmount() <= player.getBalance()) {
             var amountThisTurn = player.getAmountThisTurn();
             if(amountThisTurn < 0) {
                 amountThisTurn = 0;
@@ -383,8 +384,8 @@ public abstract class Hand {
 
     private void createCheckAndBetOptions(List<Option> options, Player player) {
         options.add(new Option(Option.OptionType.CHECK, 0));
-        if(bigBlindAmount < player.getBalance()) {
-            options.add(new Option(Option.OptionType.BET, bigBlindAmount));
+        if(minBetAmount() < player.getBalance()) {
+            options.add(new Option(Option.OptionType.BET, minBetAmount()));
         }
     }
 
@@ -393,7 +394,7 @@ public abstract class Hand {
         if(amountOwed != 0) {
             options.add(new Option(Option.OptionType.CALL, amountOwed));
         }
-        if(amountOwed + bigBlindAmount < player.getBalance()) {
+        if(amountOwed + minBetAmount() < player.getBalance()) {
             int count = (int) players.stream()
                     .filter(p -> p.getBalance() > 0 && !p.hasFolded() && !p.isSittingOut()).count();
             if(count > 1) {
@@ -405,5 +406,12 @@ public abstract class Hand {
                 options.add(new Option(Option.OptionType.RAISE, raiseAmount));
             }
         }
+    }
+
+    private double minBetAmount() {
+        if(bigBlindAmount > 0) {
+            return bigBlindAmount;
+        }
+        return anteAmount;
     }
 }
