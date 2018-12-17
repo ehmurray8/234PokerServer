@@ -4,6 +4,7 @@ jdk:
     - oraclejdk11
 
 script:
+    - gradle -v
     - cd server
     - gradle wrapper
     - chmod +x ./gradlew
