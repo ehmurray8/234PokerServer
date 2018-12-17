@@ -6,4 +6,5 @@ jdk:
 
 script:
     - cd server
+    - chmod +x ./gradlew
     - ./gradlew clean test --info
