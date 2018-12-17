@@ -2,7 +2,7 @@ language: java
 install: true
 
 jdk:
-    - oraclejdk10
+    - openjdk10
 
 script:
     - javadoc -d ./docs -sourcepath server/src/main/java -subpackages .
