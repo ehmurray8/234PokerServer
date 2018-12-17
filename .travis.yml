@@ -1,0 +1,10 @@
+language: java
+install: true
+
+jdk:
+    - oraclejdk10
+
+script:
+    - javadoc -d ./docs -sourcepath server/src/main/java -subpackages .
+    - cd server
+    - ./gradlew clean test --info
