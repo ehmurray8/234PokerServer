@@ -4,6 +4,7 @@ jdk:
     - oraclejdk11
 
 script:
+    - sudo apt-get install gradle
     - gradle -v
     - cd server
     - gradle wrapper
