@@ -61,6 +61,40 @@ public class Card {
     public final String toString() {
         return String.format("{%s, %s}", rank, suit);
     }
+
+    public String toClientString() {
+        String rank, suit;
+        switch(this.rank) {
+        case JACK:
+            rank = "J";
+            break;
+        case QUEEN:
+            rank = "Q";
+            break;
+        case KING:
+            rank = "K";
+            break;
+        case ACE:
+            rank = "A";
+            break;
+        default:
+            rank = Integer.toString(this.rank.ordinal());
+        }
+        switch(this.suit) {
+        case SPADES:
+            suit = "s";
+            break;
+        case DIAMONDS:
+            suit = "d";
+            break;
+        case CLUBS:
+            suit = "c";
+            break;
+        default:
+            suit = "h";
+        }
+        return String.format("%s%s", rank, suit);
+    }
     
     public static final class CardComparator implements Comparator<Card> {
 

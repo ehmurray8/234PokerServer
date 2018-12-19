@@ -26,7 +26,7 @@ public class OptionSelection {
         this(index, 0);
     }
 
-    public OptionSelection(int index, double amount) {
+    private OptionSelection(int index, double amount) {
         this.index = index;
         this.amount = amount;
     }

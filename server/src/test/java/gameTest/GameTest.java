@@ -12,7 +12,6 @@ import client.TestClientHandler;
 import game.Game;
 import game.TestGame;
 import model.card.Card;
-import model.option.Option;
 import model.player.TestPlayer;
 import org.junit.Before;
 import org.junit.Test;

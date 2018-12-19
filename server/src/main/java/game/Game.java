@@ -1,10 +1,9 @@
 package game;
 import client.ClientHandler;
 import model.player.Player;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
+
 import game.Rules.GameType;
 import model.hand.representation.*;
 import model.option.Option;
@@ -21,6 +20,8 @@ public class Game {
 	private int currentAction;
 	private ArrayList<Player> playersInHand;
 	private ClientHandler clientHandler;
+	private GameType currentGameType;
+    Hand currentHand;
 
 	Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
 		this.players = new Player[rules.getMaxCapacity()];
@@ -122,7 +123,7 @@ public class Game {
                 .forEach(player -> player.setSittingOut(true));
 	}
 	
-	void bettingRound(Hand currentHand, boolean resetBetting) {
+	void bettingRound(boolean resetBetting) {
         currentAction = findStartingLocation();
         if(resetBetting) {
             currentHand.setupBetRound();
@@ -138,7 +139,10 @@ public class Game {
 	}
 	
 	private Option askPlayerForOption(List<Option> options, Player player) {
-        return clientHandler.getDesiredOption(player.getPlayerId(), options);
+	    var updates = createUpdates();
+	    var update = updates.get(player.getPlayerId());
+	    update.setOptions(options);
+	    return clientHandler.getDesiredOption(player.getPlayerId(), updates, options);
 	}
 	
 	public boolean tableEmpty() {
@@ -163,8 +167,7 @@ public class Game {
             return GAME_ENDED;
         }
 
-        var currentHand = createHand();
-        runHand(currentHand);
+        runHand();
 
         prepareForNextHand();
         if(tableEmpty()) {
@@ -182,13 +185,12 @@ public class Game {
     }
 
 	private Hand createHand() {
-	    GameType currGameType = rules.getGameType();
-        if(currGameType == GameType.MIXED) {
-            currGameType = askDealerForGameType();
+	    currentGameType = rules.getGameType();
+        if(currentGameType == GameType.MIXED) {
+            currentGameType = askDealerForGameType();
         }
 
-        Hand currentHand;
-        switch(currGameType){
+        switch(currentGameType){
         case HOLDEM:
             currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
             break;
@@ -211,33 +213,33 @@ public class Game {
         return currentHand;
     }
 
-    protected void runHand(Hand currentHand) {
+    protected void runHand() {
 	    currentHand.dealInitialHand();
-	    handleAction(currentHand);
+	    handleAction();
     }
 
-    void handleAction(Hand currentHand) {
-        handlePreFlop(currentHand);
+    void handleAction() {
+        handlePreFlop();
         if(stillBetting()) {
-            handleFlop(currentHand);
+            handleFlop();
         }
         if(stillBetting()) {
-            handleTurn(currentHand);
+            handleTurn();
         }
         if(stillBetting()) {
-            handleRiver(currentHand);
+            handleRiver();
         }
         currentHand.payWinners();
     }
 
-    private void handlePreFlop(Hand currentHand) {
+    private void handlePreFlop() {
         if(this.rules.getAnte() > 0) {
             currentHand.chargeAntes();
         }
         currentHand.chargeSmallBlind(smallBlindNum());
         currentHand.chargeBigBlind(bigBlindNum());
         currentAction = playersInHand.indexOf(players[bigBlindNum()]);
-        bettingRound(currentHand, false);
+        bettingRound(false);
         var bigBlindPlayer = players[bigBlindNum()];
         if(currentAction == bigBlindNum() && bigBlindPlayer.getAmountThisTurn() == rules.getBigBlind()) {
             currentHand.setupBetRound();
@@ -246,24 +248,24 @@ public class Game {
             currentHand.executeOption(bigBlindPlayer, option);
             incrementCurrentAction();
             if(option.getType() != Option.OptionType.CHECK) {
-                bettingRound(currentHand, false);
+                bettingRound(false);
             }
         }
     }
 
-    void handleFlop(Hand currentHand) {
+    void handleFlop() {
         currentHand.dealFlop();
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 
-    void handleTurn(Hand currentHand) {
+    void handleTurn() {
         currentHand.dealTurn();
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 
-    void handleRiver(Hand currentHand) {
+    void handleRiver() {
         currentHand.dealRiver();
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 
 
@@ -272,5 +274,16 @@ public class Game {
         removeBrokePlayers();
         incrementDealerNum();
         playersInHand.clear();
+    }
+
+    private HashMap<UUID, RegularUpdate> createUpdates() {
+	    var actionLimit = rules.getTimeLimitSecs();
+	    HashMap<UUID, RegularUpdate> updates = new HashMap<>();
+	    for(var player: players) {
+	        var update = new RegularUpdate(currentGameType, player, Arrays.asList(players).indexOf(player), players,
+                    playersInHand, currentHand.getCommunityCards(), currentAction, actionLimit);
+	        updates.put(player.getPlayerId(), update);
+        }
+        return updates;
     }
 }

@@ -2,7 +2,6 @@ package game;
 
 import client.ClientHandler;
 import model.card.Card;
-import model.hand.representation.Hand;
 import model.hand.representation.TestHand;
 import model.player.Player;
 
@@ -35,28 +34,28 @@ public class TestGame extends Game {
     }
 
     @Override
-    public void runHand(Hand currentHand) {
-        handleAction(currentHand);
+    public void runHand() {
+        handleAction();
     }
 
     @Override
-    public void handleFlop(Hand currentHand) {
+    public void handleFlop() {
         TestHand hand = (TestHand) currentHand;
         communityCards.subList(0, 3).forEach(hand::addCommunityCard);
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 
     @Override
-    public void handleTurn(Hand currentHand) {
+    public void handleTurn() {
         TestHand hand = (TestHand) currentHand;
         hand.addCommunityCard(communityCards.get(3));
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 
     @Override
-    public void handleRiver(Hand currentHand) {
+    public void handleRiver() {
         TestHand hand = (TestHand)  currentHand;
         hand.addCommunityCard(communityCards.get(4));
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 }
