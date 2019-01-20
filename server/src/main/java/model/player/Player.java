@@ -27,6 +27,11 @@ public class Player  {
         clearAmtThisTurn();
     }
 
+    public Player(double balance, String name, UUID playerId) {
+        this(balance, name);
+        this.playerId = playerId;
+    }
+
     public Player(double balance, String name) {
         this.balance = balance;
         this.name = name;

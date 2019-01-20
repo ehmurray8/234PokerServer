@@ -22,7 +22,7 @@ public class Game {
 	private ArrayList<Player> playersInHand;
 	private ClientHandler clientHandler;
 
-	Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
+	public Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
 		this.players = new Player[rules.getMaxCapacity()];
 		for(int i = 0; i < players.size(); i++) {
             this.players[i] = players.get(i);
@@ -30,7 +30,9 @@ public class Game {
 		this.rules = rules;
 		dealerNum = initDealerNum();
 		playersInHand = new ArrayList<>();
-		currentAction = smallBlindNum();
+		if (players.size() > 0) {
+            currentAction = smallBlindNum();
+        }
 		this.clientHandler = clientHandler;
 	}
 
