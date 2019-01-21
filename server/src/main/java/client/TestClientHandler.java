@@ -24,10 +24,6 @@ public class TestClientHandler extends ClientHandler {
         this.optionNumList = optionNumList;
     }
 
-    public void resetOptionNum() {
-        currentSelectionNum = 0;
-    }
-
     @Override
     public Rules.GameType getDesiredGameType(UUID playerId) {
         return gameType;

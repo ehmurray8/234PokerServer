@@ -244,10 +244,15 @@ public abstract class Hand {
     public void setLastRaiseAmount(double amount) {
         lastRaiseAmount = amount;
     }
+
+    public boolean onlyOnePlayerLeftInHand() {
+        var numNotFolded = (int) players.stream().filter(player -> !player.hasFolded()).count();
+        return players.size() < 2 || numNotFolded < 2;
+    }
+
     
     public boolean playersBetting() {
-        int numNotFolded = (int) players.stream().filter(player -> !player.hasFolded()).count();
-        if (players.size() < 2 || numNotFolded < 2) {
+        if (onlyOnePlayerLeftInHand()) {
             return false;
         }
 

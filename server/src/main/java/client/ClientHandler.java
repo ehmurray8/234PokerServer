@@ -56,13 +56,15 @@ public class ClientHandler {
 
             if (this.server != null) {
                 this.server.addEventListener("option" + eventId, Map.class, (responseClient, data, ackRequest) -> {
+                    System.out.println(data.toString());
                     var optionType = Option.stringToOptionType(data.get("type"));
                     if (optionType != null) {
                         try {
-                            String amountString = (String) data.get("amount");
-                            var amount = Double.parseDouble(amountString);
+                            double amount = (double) data.get("amount");
                             optionSelection = new Option(optionType, amount);
-                            monitor.notifyAll();
+                            synchronized (monitor) {
+                                monitor.notifyAll();
+                            }
                         } catch (ClassCastException | NumberFormatException ignored) { } }
                 });
             }
@@ -79,7 +81,9 @@ public class ClientHandler {
 
             try {
                 System.out.println("Waiting... " + eventId + " for - " + timeoutSeconds);
-                monitor.wait(timeoutSeconds * 1_000 + 500);
+                synchronized (monitor) {
+                    monitor.wait(timeoutSeconds * 1_000 + 500);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 System.out.println("Selected: " + optionSelection.toString());
@@ -106,7 +110,7 @@ public class ClientHandler {
             }
         }
         try {
-            wait(5000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

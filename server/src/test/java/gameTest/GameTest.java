@@ -12,7 +12,6 @@ import client.TestClientHandler;
 import game.Game;
 import game.TestGame;
 import model.card.Card;
-import model.option.Option;
 import model.player.TestPlayer;
 import org.junit.Before;
 import org.junit.Test;
@@ -212,6 +211,22 @@ public class GameTest {
     }
 
     @Test
+    public void testHeadsUpSmallBlindFold() {
+        var player1 = new TestPlayer(200, "P1");
+        var player2 = new TestPlayer(200, "P2");
+
+        var actions = Collections.singletonList(new OptionSelection(SelectionType.FOLD));
+        clientHandler.setOptionNumList(actions);
+
+        var game = setupTwoPlayerTestGame(player1, player2);
+        game.setNumRuns(1);
+        game.runGame();
+
+        assertEquals(202, player1.getBalance(), 0.1);
+        assertEquals(198, player2.getBalance(), 0.1);
+    }
+
+    @Test
     public void testRaiseWar() {
 	    var player1 = new TestPlayer(2000, "P1");
         var player2 = new TestPlayer(1000, "P2");
@@ -244,7 +259,7 @@ public class GameTest {
     }
 
     @Test
-    public void  testTwoGameRuns() {
+    public void testTwoGameRuns() {
         var player1 = new Player(200, "P1");
         var player2 = new Player(200, "P2");
 

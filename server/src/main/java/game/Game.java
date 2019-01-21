@@ -248,7 +248,8 @@ public class Game {
         currentAction = playersInHand.indexOf(players[bigBlindNum()]);
         bettingRound(false);
         var bigBlindPlayer = players[bigBlindNum()];
-        if(currentAction == bigBlindNum() && bigBlindPlayer.getAmountThisTurn() == rules.getBigBlind()) {
+        if(currentAction == bigBlindNum() && bigBlindPlayer.getAmountThisTurn() == rules.getBigBlind()
+                && !currentHand.onlyOnePlayerLeftInHand()) {
             this.currentHand.setupBetRound();
             List<Option> currOptions = this.currentHand.generateOptions(bigBlindPlayer);
             Option option = askPlayerForOption(currOptions, bigBlindPlayer);
