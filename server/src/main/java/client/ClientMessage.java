@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ClientMessage {
@@ -14,6 +15,7 @@ public class ClientMessage {
     private double mainPotAmount;
     private List<Card> userCards;
     private double userStackSize;
+    private String username;
     private List<Option> options;
     private double lastUserAmount;
     private List<Double> lastActionAmounts;
@@ -21,12 +23,17 @@ public class ClientMessage {
     private List<Boolean> raiseUserCards;
     private boolean userHasFolded;
     private int decisionTimeMaxSeconds;
+    private int eventId;
 
 
-    private static Player createPlayer(model.player.Player player, @Nullable List<model.card.Card> winningCards) {
+    private static Player createPlayer(model.player.Player player,
+                                       @Nullable List<model.card.Card> winningCards, boolean showCards) {
         var name = player.getName();
         var balance = player.getBalance();
-        var cards = player.getHand().stream().map(ClientMessage::createCard).collect(Collectors.toList());
+        List<Card> cards = new ArrayList<>();
+        if (showCards) {
+            cards = player.getHand().stream().map(ClientMessage::createCard).collect(Collectors.toList());
+        }
         var raiseCards = new ArrayList<Boolean>();
         if (winningCards != null) {
             raiseCards.addAll(player.getHand().stream().map(winningCards::contains).collect(Collectors.toList()));
@@ -42,7 +49,7 @@ public class ClientMessage {
 
     private static Option createOption(model.option.Option option) {
         var type = option.typeToString();
-        var amount = Double.toString(option.getAmount());
+        var amount = option.getAmount();
         return new Option(type, amount);
     }
 
@@ -50,8 +57,8 @@ public class ClientMessage {
                                              @Nullable List<model.option.Option> options,
                                              @Nullable List<model.card.Card> winningCards,
                                              List<model.player.Player> players, Hand hand,
-                                             int decisionTimeMaxSeconds) {
-        var mainPlayerIndex =  players.stream().map(model.player.Player::getPlayerId)
+                                             int decisionTimeMaxSeconds, int eventId) {
+        var mainPlayerIndex = players.stream().filter(Objects::nonNull).map(model.player.Player::getPlayerId)
                 .collect(Collectors.toList()).indexOf(player.getPlayerId());
 
         var message = new ClientMessage();
@@ -59,6 +66,7 @@ public class ClientMessage {
         message.setPlayerInfo(players, winningCards, mainPlayerIndex);
         message.setHandInfo(hand, winningCards);
         message.setDecisionTimeMaxSeconds(decisionTimeMaxSeconds);
+        message.setEventId(eventId);
         return message;
     }
 
@@ -67,6 +75,7 @@ public class ClientMessage {
         userCards = player.getHand().stream().map(ClientMessage::createCard).collect(Collectors.toList());
         userStackSize = player.getBalance();
         lastUserAmount = player.getAmountThisTurn();
+        username = player.getName();
         if (winningCards != null) {
             raiseUserCards = player.getHand().stream().map(winningCards::contains).collect(Collectors.toList());
         }
@@ -79,9 +88,12 @@ public class ClientMessage {
     private void setPlayerInfo(List<model.player.Player> players, @Nullable List<model.card.Card> winningCards, int mainPlayerIndex) {
         this.players = new ArrayList<>();
         this.lastActionAmounts = new ArrayList<>();
-        for (int i = mainPlayerIndex, count = 0; count < players.size(); i = (i + 1) % players.size(), count++) {
-            this.players.add(createPlayer(players.get(i), winningCards));
-            this.lastActionAmounts.add(players.get(i).getAmountThisTurn());
+        for (int i = mainPlayerIndex + 1, count = 0; count < players.size(); i = (i + 1) % players.size(), count++) {
+            var player = players.get(i);
+            if (player != null && mainPlayerIndex != i) {
+                this.players.add(createPlayer(player, winningCards, winningCards != null));
+                this.lastActionAmounts.add(player.getAmountThisTurn());
+            }
         }
     }
 
@@ -100,6 +112,7 @@ public class ClientMessage {
         this.mainPotAmount = 0;
         this.userCards = new ArrayList<>();
         this.userStackSize = 0;
+        this.username = "";
         this.options = new ArrayList<>();
         this.lastUserAmount = 0;
         this.lastActionAmounts = new ArrayList<>();
@@ -107,6 +120,7 @@ public class ClientMessage {
         this.raiseUserCards = new ArrayList<>();
         this.userHasFolded = false;
         this.decisionTimeMaxSeconds = 0;
+        this.eventId = 0;
     }
 
     public List<Player> getPlayers() {
@@ -205,6 +219,22 @@ public class ClientMessage {
         this.decisionTimeMaxSeconds = decisionTimeMaxSeconds;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public int getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(int eventId) {
+        this.eventId = eventId;
+    }
+
     static class Player {
         private String name;
         private double balance;
@@ -279,9 +309,9 @@ public class ClientMessage {
 
     static class Option {
         private String type;
-        private String amount;
+        private double amount;
 
-        Option(String type, String amount) {
+        Option(String type, double amount) {
             this.type = type;
             this.amount = amount;
         }
@@ -294,11 +324,11 @@ public class ClientMessage {
             this.type = type;
         }
 
-        public String getAmount() {
+        public double getAmount() {
             return amount;
         }
 
-        public void setAmount(String amount) {
+        public void setAmount(double amount) {
             this.amount = amount;
         }
     }

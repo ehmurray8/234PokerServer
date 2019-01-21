@@ -1,17 +1,14 @@
 package game;
 import client.ClientHandler;
-import model.card.Card;
 import model.player.Player;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import game.Rules.GameType;
 import model.hand.representation.*;
 import model.option.Option;
 
 public class Game {
-
     Hand currentHand;
 
     public static class TableFullException extends Exception { }

@@ -15,12 +15,18 @@ public class ClientHandler {
     private Map<UUID, SocketIOClient> clients;
     private SocketIOServer server = null;
     private Option optionSelection = null;
+    private Map<UUID, ClientMessage> pendingMessages;
 
     private static Random RANDOM_GENERATOR = new Random();
 
     public ClientHandler(SocketIOServer server) {
         this();
         this.server = server;
+        this.pendingMessages = new HashMap<>();
+    }
+
+    public ClientMessage getPendingMessage(UUID playerId) {
+        return pendingMessages.get(playerId);
     }
 
     ClientHandler() {
@@ -42,8 +48,9 @@ public class ClientHandler {
         if (client == null) {
             return options.get(0);
         } else {
-            var actingPlayerData = ClientMessage.createClientMessage(player, options, null, players, hand, timeoutSeconds);
+            var actingPlayerData = ClientMessage.createClientMessage(player, options, null, players, hand, timeoutSeconds, eventId);
             client.sendEvent("gameUpdate", actingPlayerData);
+            pendingMessages.put(player.getPlayerId(), actingPlayerData);
             optionSelection = options.get(0);
 
             if (this.server != null) {
@@ -54,25 +61,34 @@ public class ClientHandler {
                             String amountString = (String) data.get("amount");
                             var amount = Double.parseDouble(amountString);
                             optionSelection = new Option(optionType, amount);
-                            notify();
+                            notifyAll();
                         } catch (ClassCastException | NumberFormatException ignored) { } }
                 });
             }
 
             for (var otherPlayer: players) {
-                var otherPlayerData = ClientMessage.createClientMessage(otherPlayer, null, null,
-                        players, hand, timeoutSeconds);
-                clients.get(otherPlayer.getPlayerId()).sendEvent("gameUpdate", otherPlayerData);
+                if (otherPlayer != null && otherPlayer.getPlayerId() != player.getPlayerId()) {
+                    var otherPlayerData = ClientMessage.createClientMessage(otherPlayer, null, null,
+                            players, hand, timeoutSeconds, eventId);
+                    var otherPlayerId = otherPlayer.getPlayerId();
+                    clients.get(otherPlayerId).sendEvent("gameUpdate", otherPlayerData);
+                    pendingMessages.put(otherPlayerId, otherPlayerData);
+                }
             }
 
             try {
-                wait(timeoutSeconds * 1000 + 1000);
+                System.out.println("Waiting... " + eventId);
+                wait(timeoutSeconds * 1_000 + 1_000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                System.out.println("Selected: " + optionSelection.toString());
                 this.server.removeAllListeners("option" + eventId);
+                this.pendingMessages.clear();
                 return options.get(0);
             }
 
+            System.out.println("Selected: " + optionSelection.toString());
+            this.pendingMessages.clear();
             this.server.removeAllListeners("option" + eventId);
 
             return optionSelection;
@@ -81,8 +97,18 @@ public class ClientHandler {
 
     public void sendHandOverMessage(Hand hand, List<Player> players, List<Card> winningCards) {
         for(var player: players) {
-            var message = ClientMessage.createClientMessage(player, null, winningCards, players, hand, 0);
-            clients.get(player.getPlayerId()).sendEvent("gameUpdate", message);
+            if (player.getPlayerId() != null) {
+                var message = ClientMessage.createClientMessage(player, null, winningCards, players,
+                        hand, 0, -1);
+                clients.get(player.getPlayerId()).sendEvent("gameUpdate", message);
+                pendingMessages.put(player.getPlayerId(), message);
+            }
         }
+        try {
+            wait(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        pendingMessages.clear();
     }
 }

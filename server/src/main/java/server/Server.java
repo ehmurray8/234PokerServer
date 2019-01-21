@@ -26,12 +26,32 @@ public class Server {
         var singleGame = new Game(Collections.emptyList(), defaultRules, defaultClientHandler);
         var usernameMap = new HashMap<String, UUID>();
 
-
         server.addConnectListener(client -> {
-            System.out.println(client.toString());
+            System.out.println("Connect: " + client.toString());
+        });
+
+        server.addEventListener("welcomeStatus", Map.class, (client, data, ackRequest) -> {
+            String username;
+            try {
+                username = (String) data.get("username");
+            } catch (ClassCastException ignored) {
+                username = null;
+            }
+
+            if (username != null && usernameMap.containsKey(username)) {
+                var payload = new HashMap<String, Boolean>();
+                payload.put("joinGame", true);
+                client.sendEvent("returnToGame", payload);
+                var message = defaultClientHandler.getPendingMessage(usernameMap.get(username));
+                if (message != null) {
+                    client.sendEvent("gameUpdate", message);
+                }
+            }
         });
 
         server.addEventListener("joinGame", Map.class, (client, data, ackRequest) -> {
+            System.out.println("Join Game");
+            System.out.println(usernameMap.toString());
             var map = (LinkedHashMap) data;
             var username = (String) map.get("username");
 
@@ -49,12 +69,18 @@ public class Server {
                 singleGame.addPlayer(player);
                 defaultClientHandler.addClient(uuid, client);
             }
+
+            if (singleGame.getNumPlayers() >= 2) {
+                System.out.println("Starting game...");
+                singleGame.runGame();
+            }
         });
 
         server.addDisconnectListener(client -> {
             System.out.println("Disconnect");
         });
 
+        Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
         server.start();
     }
 }
