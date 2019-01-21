@@ -30,6 +30,7 @@ public abstract class Hand {
     private double anteAmount;
     ArrayList<Player> players;
     private double lastRaiseAmount = 0;
+    private Set<Card> winningCards;
 
     /**	Pots that are currently opened, main pot is at index 0. */
     private final List<Pot> openPots;
@@ -59,6 +60,7 @@ public abstract class Hand {
         communityCards = new ArrayList<>();
         openPots = new ArrayList<>();
         closedPots = new ArrayList<>();
+        winningCards = new HashSet<>();
     }
 
     public abstract void dealInitialHand();
@@ -69,6 +71,10 @@ public abstract class Hand {
     
     public List<Pot> getClosedPots() {
     	return closedPots;
+    }
+
+    public Set<Card> getWinningCards() {
+        return winningCards;
     }
 
     public double getTotalAmountInPots() {
@@ -347,9 +353,12 @@ public abstract class Hand {
         HandAnalyzer newAnalyzer = handAnalyzers.get(index);
         HandAnalyzer currentWinnerAnalyzer = handAnalyzers.get(potWinnerIndexes.get(0));
         if(HandAnalyzer.HAND_ANALYZER_COMPARATOR.compare(newAnalyzer, currentWinnerAnalyzer) > 0) {
+            winningCards.clear();
+            winningCards.addAll(newAnalyzer.getBestHand());
             potWinnerIndexes.clear();
             potWinnerIndexes.add(index);
         } else if(HandAnalyzer.HAND_ANALYZER_COMPARATOR.compare(newAnalyzer, currentWinnerAnalyzer) == 0) {
+            winningCards.addAll(newAnalyzer.getBestHand());
             potWinnerIndexes.add(index);
         }
     }

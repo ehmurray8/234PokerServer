@@ -1,17 +1,20 @@
 package game;
 import client.ClientHandler;
+import model.card.Card;
 import model.player.Player;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 import game.Rules.GameType;
 import model.hand.representation.*;
 import model.option.Option;
 
 public class Game {
 
-	public static class TableFullException extends Exception { }
+    Hand currentHand;
+
+    public static class TableFullException extends Exception { }
 
 	private static int GAME_ENDED = -1;
 
@@ -35,6 +38,10 @@ public class Game {
         }
 		this.clientHandler = clientHandler;
 	}
+
+	public boolean hasPlayer(UUID playerId) {
+	    return Arrays.stream(players).map(Player::getPlayerId).filter(pid -> pid == playerId).toArray().length > 0;
+    }
 
 	public int getDealerNum() {
 		return dealerNum;
@@ -124,23 +131,24 @@ public class Game {
                 .forEach(player -> player.setSittingOut(true));
 	}
 	
-	void bettingRound(Hand currentHand, boolean resetBetting) {
+	void bettingRound(boolean resetBetting) {
         currentAction = findStartingLocation();
         if(resetBetting) {
-            currentHand.setupBetRound();
+            this.currentHand.setupBetRound();
         }
         List<Option> currOptions;
-        while(currentHand.playersBetting()) {
+        while(this.currentHand.playersBetting()) {
             Player player = playersInHand.get(currentAction);
-            currOptions = currentHand.generateOptions(player);
+            currOptions = this.currentHand.generateOptions(player);
             Option option = askPlayerForOption(currOptions, player);
-            currentHand.executeOption(player, option);
+            this.currentHand.executeOption(player, option);
             incrementCurrentAction();
         }
 	}
 	
 	private Option askPlayerForOption(List<Option> options, Player player) {
-        return clientHandler.getDesiredOption(player.getPlayerId(), options);
+        return clientHandler.getDesiredOption(player, options, rules.getTimeLimitSecs(), this.currentHand,
+                Arrays.asList(this.players));
 	}
 	
 	public boolean tableEmpty() {
@@ -165,8 +173,8 @@ public class Game {
             return GAME_ENDED;
         }
 
-        var currentHand = createHand();
-        runHand(currentHand);
+        this.currentHand = createHand();
+        runHand();
 
         prepareForNextHand();
         if(tableEmpty()) {
@@ -213,59 +221,61 @@ public class Game {
         return currentHand;
     }
 
-    protected void runHand(Hand currentHand) {
-	    currentHand.dealInitialHand();
-	    handleAction(currentHand);
+    protected void runHand() {
+	    this.currentHand.dealInitialHand();
+	    handleAction();
     }
 
-    void handleAction(Hand currentHand) {
-        handlePreFlop(currentHand);
+    void handleAction() {
+        handlePreFlop();
         if(stillBetting()) {
-            handleFlop(currentHand);
+            handleFlop();
         }
         if(stillBetting()) {
-            handleTurn(currentHand);
+            handleTurn();
         }
         if(stillBetting()) {
-            handleRiver(currentHand);
+            handleRiver();
         }
         currentHand.payWinners();
+        var winningCards = new ArrayList<>(currentHand.getWinningCards());
+        clientHandler.sendHandOverMessage(currentHand, Arrays.asList(players), winningCards);
     }
 
-    private void handlePreFlop(Hand currentHand) {
+    private void handlePreFlop() {
         if(this.rules.getAnte() > 0) {
-            currentHand.chargeAntes();
+            this.currentHand.chargeAntes();
         }
-        currentHand.chargeSmallBlind(smallBlindNum());
-        currentHand.chargeBigBlind(bigBlindNum());
+        this.currentHand.chargeSmallBlind(smallBlindNum());
+        this.currentHand.chargeBigBlind(bigBlindNum());
         currentAction = playersInHand.indexOf(players[bigBlindNum()]);
-        bettingRound(currentHand, false);
+        bettingRound(false);
         var bigBlindPlayer = players[bigBlindNum()];
         if(currentAction == bigBlindNum() && bigBlindPlayer.getAmountThisTurn() == rules.getBigBlind()) {
-            currentHand.setupBetRound();
-            List<Option> currOptions = currentHand.generateOptions(bigBlindPlayer);
+            this.currentHand.setupBetRound();
+            List<Option> currOptions = this.currentHand.generateOptions(bigBlindPlayer);
             Option option = askPlayerForOption(currOptions, bigBlindPlayer);
-            currentHand.executeOption(bigBlindPlayer, option);
+            this.currentHand.executeOption(bigBlindPlayer, option);
             incrementCurrentAction();
             if(option.getType() != Option.OptionType.CHECK) {
-                bettingRound(currentHand, false);
+                bettingRound(false);
             }
         }
     }
 
-    void handleFlop(Hand currentHand) {
-        currentHand.dealFlop();
-        bettingRound(currentHand, true);
+    void handleFlop() {
+        this.currentHand.dealFlop();
+        bettingRound(true);
     }
 
-    void handleTurn(Hand currentHand) {
-        currentHand.dealTurn();
-        bettingRound(currentHand, true);
+    void handleTurn() {
+        this.currentHand.dealTurn();
+        bettingRound(true);
     }
 
-    void handleRiver(Hand currentHand) {
-        currentHand.dealRiver();
-        bettingRound(currentHand, true);
+    void handleRiver() {
+        this.currentHand.dealRiver();
+        bettingRound(true);
     }
 
 

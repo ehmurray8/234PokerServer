@@ -1,7 +1,9 @@
 package client;
 
 import game.Rules;
+import model.hand.representation.Hand;
 import model.option.Option;
+import model.player.Player;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +33,7 @@ public class TestClientHandler extends ClientHandler {
     }
 
     @Override
-    public Option getDesiredOption(UUID playerId, List<Option> options) {
+    public Option getDesiredOption(Player player, List<Option> options, int timeoutSeconds, Hand hand, List<Player> players) {
         var selection = optionNumList.get(currentSelectionNum++);
         var option = options.get(selection.getIndex());
         if(selection.getAmount() != 0) {

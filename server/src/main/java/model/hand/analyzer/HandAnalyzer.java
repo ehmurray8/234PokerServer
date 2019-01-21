@@ -30,6 +30,7 @@ public abstract class HandAnalyzer {
     private List<List<Card>> allHands;
     private Map<Rank, Integer> rankMap;
     private boolean isShortDeck = false;
+    private List<Card> bestHand;
 
 
     HandAnalyzer(List<Card> fullHand) {
@@ -52,6 +53,7 @@ public abstract class HandAnalyzer {
         bestHandRanks = new ArrayList<>();
         pairRanks = new ArrayList<>();
         fullHouseRanks = new ArrayList<>();
+        bestHand = new ArrayList<>();
     }
 
     public final HandRank getTopRank() {
@@ -60,6 +62,10 @@ public abstract class HandAnalyzer {
 
     final List<Rank> getBestHandRanks() {
         return bestHandRanks;
+    }
+
+    public List<Card> getBestHand() {
+        return bestHand;
     }
 
     @Override
@@ -91,16 +97,20 @@ public abstract class HandAnalyzer {
     }
 
     private void compareTopRank(List<Card> hand) {
+        var rankCheck = getHandRank(hand);
+        if (HAND_RANK_COMPARATOR.compare(rankCheck, topRank) > 0) {
+            topRank = rankCheck;
+        }
+    }
+
+    private HandRank getHandRank(List<Card> hand) {
         FiveCardAnalyzer fiveCardAnalyzer;
         if(!isShortDeck) {
             fiveCardAnalyzer = new FiveCardAnalyzer(hand);
         } else {
             fiveCardAnalyzer = new ShortDeckFiveCardAnalyzer(hand);
         }
-        HandRank rankCheck = fiveCardAnalyzer.getRank();
-        if (HAND_RANK_COMPARATOR.compare(rankCheck, topRank) > 0) {
-            topRank = rankCheck;
-        }
+        return fiveCardAnalyzer.getRank();
     }
 
     private List<SimpleAnalyzer> createAnalyzersForTopRankHands() {
@@ -110,13 +120,7 @@ public abstract class HandAnalyzer {
     }
 
     private void addTopRankAnalyzers(List<Card> hand, List<SimpleAnalyzer> topRankAnalyzers) {
-        FiveCardAnalyzer fiveCardAnalyzer;
-        if(!isShortDeck) {
-            fiveCardAnalyzer = new FiveCardAnalyzer(hand);
-        } else {
-            fiveCardAnalyzer = new ShortDeckFiveCardAnalyzer(hand);
-        }
-        HandRank rankCheck = fiveCardAnalyzer.getRank();
+        var rankCheck = getHandRank(hand);
         if (HAND_RANK_COMPARATOR.compare(rankCheck, topRank) == 0) {
             SimpleAnalyzer analyzer = new SimpleAnalyzer(hand, isShortDeck);
             topRankAnalyzers.add(analyzer);
@@ -130,6 +134,7 @@ public abstract class HandAnalyzer {
             topHandAnalyzer = Collections.max(topRankAnalyzers, SHORT_DECK_HAND_ANALYZER_COMPARATOR);
         }
         bestHandRanks = topHandAnalyzer.getBestHandRanks();
+        bestHand = topHandAnalyzer.getFullHand();
     }
 
     final List<Rank> getNonPairRanks() {

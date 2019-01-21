@@ -35,28 +35,28 @@ public class TestGame extends Game {
     }
 
     @Override
-    public void runHand(Hand currentHand) {
-        handleAction(currentHand);
+    public void runHand() {
+        handleAction();
     }
 
     @Override
-    public void handleFlop(Hand currentHand) {
-        TestHand hand = (TestHand) currentHand;
+    public void handleFlop() {
+        var hand = (TestHand) currentHand;
         communityCards.subList(0, 3).forEach(hand::addCommunityCard);
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 
     @Override
-    public void handleTurn(Hand currentHand) {
-        TestHand hand = (TestHand) currentHand;
+    public void handleTurn() {
+        var hand = (TestHand) currentHand;
         hand.addCommunityCard(communityCards.get(3));
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 
     @Override
-    public void handleRiver(Hand currentHand) {
-        TestHand hand = (TestHand)  currentHand;
+    public void handleRiver() {
+        var hand = (TestHand)  currentHand;
         hand.addCommunityCard(communityCards.get(4));
-        bettingRound(currentHand, true);
+        bettingRound(true);
     }
 }

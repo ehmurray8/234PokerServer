@@ -1,0 +1,305 @@
+package client;
+
+import model.hand.representation.Hand;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ClientMessage {
+
+    private List<Player> players;
+    private List<Card> communityCards;
+    private double mainPotAmount;
+    private List<Card> userCards;
+    private double userStackSize;
+    private List<Option> options;
+    private double lastUserAmount;
+    private List<Double> lastActionAmounts;
+    private List<Boolean> raiseCommunityCards;
+    private List<Boolean> raiseUserCards;
+    private boolean userHasFolded;
+    private int decisionTimeMaxSeconds;
+
+
+    private static Player createPlayer(model.player.Player player, @Nullable List<model.card.Card> winningCards) {
+        var name = player.getName();
+        var balance = player.getBalance();
+        var cards = player.getHand().stream().map(ClientMessage::createCard).collect(Collectors.toList());
+        var raiseCards = new ArrayList<Boolean>();
+        if (winningCards != null) {
+            raiseCards.addAll(player.getHand().stream().map(winningCards::contains).collect(Collectors.toList()));
+        }
+        return new Player(name, balance, cards, raiseCards);
+    }
+
+    private static Card createCard(model.card.Card card) {
+        var suit = card.getSuit().name().toLowerCase();
+        var rank = card.getRank().getClientName();
+        return new Card(rank, suit);
+    }
+
+    private static Option createOption(model.option.Option option) {
+        var type = option.typeToString();
+        var amount = Double.toString(option.getAmount());
+        return new Option(type, amount);
+    }
+
+    static ClientMessage createClientMessage(model.player.Player player,
+                                             @Nullable List<model.option.Option> options,
+                                             @Nullable List<model.card.Card> winningCards,
+                                             List<model.player.Player> players, Hand hand,
+                                             int decisionTimeMaxSeconds) {
+        var mainPlayerIndex =  players.stream().map(model.player.Player::getPlayerId)
+                .collect(Collectors.toList()).indexOf(player.getPlayerId());
+
+        var message = new ClientMessage();
+        message.setUserInfo(player, winningCards, options);
+        message.setPlayerInfo(players, winningCards, mainPlayerIndex);
+        message.setHandInfo(hand, winningCards);
+        message.setDecisionTimeMaxSeconds(decisionTimeMaxSeconds);
+        return message;
+    }
+
+    private void setUserInfo(model.player.Player player, @Nullable List<model.card.Card> winningCards,
+                             @Nullable List<model.option.Option> options) {
+        userCards = player.getHand().stream().map(ClientMessage::createCard).collect(Collectors.toList());
+        userStackSize = player.getBalance();
+        lastUserAmount = player.getAmountThisTurn();
+        if (winningCards != null) {
+            raiseUserCards = player.getHand().stream().map(winningCards::contains).collect(Collectors.toList());
+        }
+        userHasFolded = player.hasFolded();
+        if (options != null) {
+            this.options.addAll(options.stream().map(ClientMessage::createOption).collect(Collectors.toList()));
+        }
+    }
+
+    private void setPlayerInfo(List<model.player.Player> players, @Nullable List<model.card.Card> winningCards, int mainPlayerIndex) {
+        this.players = new ArrayList<>();
+        this.lastActionAmounts = new ArrayList<>();
+        for (int i = mainPlayerIndex, count = 0; count < players.size(); i = (i + 1) % players.size(), count++) {
+            this.players.add(createPlayer(players.get(i), winningCards));
+            this.lastActionAmounts.add(players.get(i).getAmountThisTurn());
+        }
+    }
+
+    private void setHandInfo(Hand hand, @Nullable List<model.card.Card> winningCards) {
+        communityCards.clear();
+        communityCards.addAll(hand.getCommunityCards().stream().map(ClientMessage::createCard).collect(Collectors.toList()));
+        mainPotAmount = hand.getTotalAmountInPots();
+        if (winningCards != null) {
+            this.raiseCommunityCards = hand.getCommunityCards().stream().map(winningCards::contains).collect(Collectors.toList());
+        }
+    }
+
+    private ClientMessage() {
+        this.players = new ArrayList<>();
+        this.communityCards = new ArrayList<>();
+        this.mainPotAmount = 0;
+        this.userCards = new ArrayList<>();
+        this.userStackSize = 0;
+        this.options = new ArrayList<>();
+        this.lastUserAmount = 0;
+        this.lastActionAmounts = new ArrayList<>();
+        this.raiseCommunityCards = new ArrayList<>();
+        this.raiseUserCards = new ArrayList<>();
+        this.userHasFolded = false;
+        this.decisionTimeMaxSeconds = 0;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
+    }
+
+    public List<Card> getCommunityCards() {
+        return communityCards;
+    }
+
+    public void setCommunityCards(List<Card> communityCards) {
+        this.communityCards = communityCards;
+    }
+
+    public double getMainPotAmount() {
+        return mainPotAmount;
+    }
+
+    public void setMainPotAmount(double mainPotAmount) {
+        this.mainPotAmount = mainPotAmount;
+    }
+
+    public List<Card> getUserCards() {
+        return userCards;
+    }
+
+    public void setUserCards(List<Card> userCards) {
+        this.userCards = userCards;
+    }
+
+    public double getUserStackSize() {
+        return userStackSize;
+    }
+
+    public void setUserStackSize(double userStackSize) {
+        this.userStackSize = userStackSize;
+    }
+
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<Option> options) {
+        this.options = options;
+    }
+
+    public double getLastUserAmount() {
+        return lastUserAmount;
+    }
+
+    public void setLastUserAmount(double lastUserAmount) {
+        this.lastUserAmount = lastUserAmount;
+    }
+
+    public List<Double> getLastActionAmounts() {
+        return lastActionAmounts;
+    }
+
+    public void setLastActionAmounts(List<Double> lastActionAmounts) {
+        this.lastActionAmounts = lastActionAmounts;
+    }
+
+    public List<Boolean> getRaiseCommunityCards() {
+        return raiseCommunityCards;
+    }
+
+    public void setRaiseCommunityCards(List<Boolean> raiseCommunityCards) {
+        this.raiseCommunityCards = raiseCommunityCards;
+    }
+
+    public List<Boolean> getRaiseUserCards() {
+        return raiseUserCards;
+    }
+
+    public void setRaiseUserCards(List<Boolean> raiseUserCards) {
+        this.raiseUserCards = raiseUserCards;
+    }
+
+    public boolean isUserHasFolded() {
+        return userHasFolded;
+    }
+
+    public void setUserHasFolded(boolean userHasFolded) {
+        this.userHasFolded = userHasFolded;
+    }
+
+    public int getDecisionTimeMaxSeconds() {
+        return decisionTimeMaxSeconds;
+    }
+
+    public void setDecisionTimeMaxSeconds(int decisionTimeMaxSeconds) {
+        this.decisionTimeMaxSeconds = decisionTimeMaxSeconds;
+    }
+
+    static class Player {
+        private String name;
+        private double balance;
+        private List<Card> cards;
+        private List<Boolean> raiseCards;
+
+        Player(String name, double balance, List<Card> cards, List<Boolean> raiseCards) {
+            this.name = name;
+            this.balance = balance;
+            this.cards = cards;
+            this.raiseCards = raiseCards;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public double getBalance() {
+            return balance;
+        }
+
+        public void setBalance(double balance) {
+            this.balance = balance;
+        }
+
+        public List<Card> getCards() {
+            return cards;
+        }
+
+        public void setCards(List<Card> cards) {
+            this.cards = cards;
+        }
+
+        public List<Boolean> getRaiseCards() {
+            return raiseCards;
+        }
+
+        public void setRaiseCards(List<Boolean> raiseCards) {
+            this.raiseCards = raiseCards;
+        }
+    }
+
+    static class Card {
+        private String rank;
+        private String suit;
+
+        Card(String rank, String suit) {
+            this.rank = rank;
+            this.suit = suit;
+        }
+
+        public String getRank() {
+            return rank;
+        }
+
+        public void setRank(String rank) {
+            this.rank = rank;
+        }
+
+        public String getSuit() {
+            return suit;
+        }
+
+        public void setSuit(String suit) {
+            this.suit = suit;
+        }
+    }
+
+    static class Option {
+        private String type;
+        private String amount;
+
+        Option(String type, String amount) {
+            this.type = type;
+            this.amount = amount;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getAmount() {
+            return amount;
+        }
+
+        public void setAmount(String amount) {
+            this.amount = amount;
+        }
+    }
+}

@@ -49,6 +49,42 @@ public class Option {
         return amount;
     }
 
+    public static Option.OptionType stringToOptionType(Object optionObject) {
+        String optionString;
+        try {
+            optionString = (String) optionObject;
+        } catch (ClassCastException e) {
+            return null;
+        }
+
+        if (optionString.equalsIgnoreCase("check")) {
+            return Option.OptionType.CHECK;
+        } else if (optionString.equalsIgnoreCase("fold")) {
+            return Option.OptionType.FOLD;
+        } else if (optionString.equalsIgnoreCase("bet")) {
+            return Option.OptionType.BET;
+        } else if (optionString.equalsIgnoreCase("raise")) {
+            return Option.OptionType.RAISE;
+        } else if (optionString.equalsIgnoreCase("call")) {
+            return Option.OptionType.CALL;
+        } else if (optionString.equalsIgnoreCase("allin")) {
+            return Option.OptionType.ALLIN;
+        }
+        return null;
+    }
+
+    public String typeToString() {
+        switch (type) {
+            case BET: return "bet";
+            case CHECK: return "check";
+            case FOLD: return "fold";
+            case RAISE: return "raise";
+            case CALL: return "call";
+            case ALLIN: return "allin";
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return type.toString() + ": $" + amount;
