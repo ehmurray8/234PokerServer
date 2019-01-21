@@ -91,8 +91,14 @@ public class ClientMessage {
         for (int i = mainPlayerIndex + 1, count = 0; count < players.size(); i = (i + 1) % players.size(), count++) {
             var player = players.get(i);
             if (player != null && mainPlayerIndex != i) {
-                this.players.add(createPlayer(player, winningCards, winningCards != null));
-                this.lastActionAmounts.add(player.getAmountThisTurn());
+                var showCards = winningCards != null;
+                if (player.hasFolded()) {
+                    showCards = false;
+                }
+                this.players.add(createPlayer(player, winningCards, showCards));
+                if (winningCards == null) {
+                    this.lastActionAmounts.add(player.getAmountThisTurn());
+                }
             }
         }
     }

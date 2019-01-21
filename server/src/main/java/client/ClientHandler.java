@@ -44,7 +44,7 @@ public class ClientHandler {
 
     public Option getDesiredOption(Player player, List<Option> options, int timeoutSeconds, Hand hand, List<Player> players) {
         var client = clients.get(player.getPlayerId());
-        var eventId = RANDOM_GENERATOR.nextInt();
+        var eventId = RANDOM_GENERATOR.nextInt(1_000_000) + 1;
         final var monitor = new Object();
         if (client == null) {
             return options.get(0);
