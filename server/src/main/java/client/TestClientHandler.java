@@ -1,6 +1,7 @@
 package client;
 
 import game.Rules;
+import model.card.Card;
 import model.hand.representation.Hand;
 import model.option.Option;
 import model.player.Player;
@@ -41,4 +42,7 @@ public class TestClientHandler extends ClientHandler {
         }
         return option;
     }
+
+    @Override
+    public void sendHandOverMessage(Hand hand, List<Player> players, List<Card> winningCards) { }
 }

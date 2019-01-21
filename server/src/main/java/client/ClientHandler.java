@@ -45,6 +45,7 @@ public class ClientHandler {
     public Option getDesiredOption(Player player, List<Option> options, int timeoutSeconds, Hand hand, List<Player> players) {
         var client = clients.get(player.getPlayerId());
         var eventId = RANDOM_GENERATOR.nextInt();
+        final var monitor = new Object();
         if (client == null) {
             return options.get(0);
         } else {
@@ -61,7 +62,7 @@ public class ClientHandler {
                             String amountString = (String) data.get("amount");
                             var amount = Double.parseDouble(amountString);
                             optionSelection = new Option(optionType, amount);
-                            notifyAll();
+                            monitor.notifyAll();
                         } catch (ClassCastException | NumberFormatException ignored) { } }
                 });
             }
@@ -77,8 +78,8 @@ public class ClientHandler {
             }
 
             try {
-                System.out.println("Waiting... " + eventId);
-                wait(timeoutSeconds * 1_000 + 1_000);
+                System.out.println("Waiting... " + eventId + " for - " + timeoutSeconds);
+                monitor.wait(timeoutSeconds * 1_000 + 500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 System.out.println("Selected: " + optionSelection.toString());
