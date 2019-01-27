@@ -11,6 +11,7 @@ public class TestHand extends TexasHoldEmHand {
 
     public TestHand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
         super(smallBlindAmount, bigBlindAmount, anteAmount, players);
+        numberOfCards = 2;
     }
 
     public void setCommunityCards(Card[] cards) {

@@ -31,6 +31,7 @@ public class Server {
         });
 
         server.addEventListener("welcomeStatus", Map.class, (client, data, ackRequest) -> {
+            System.out.println("Welcome status");
             String username;
             try {
                 username = (String) data.get("username");
@@ -39,6 +40,7 @@ public class Server {
             }
 
             if (username != null && usernameMap.containsKey(username)) {
+                defaultClientHandler.addClient(usernameMap.get(username), client);
                 var payload = new HashMap<String, Boolean>();
                 payload.put("joinGame", true);
                 client.sendEvent("returnToGame", payload);
@@ -51,7 +53,6 @@ public class Server {
 
         server.addEventListener("joinGame", Map.class, (client, data, ackRequest) -> {
             System.out.println("Join Game");
-            System.out.println(usernameMap.toString());
             var map = (LinkedHashMap) data;
             var username = (String) map.get("username");
 

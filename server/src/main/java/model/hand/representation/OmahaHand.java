@@ -13,6 +13,7 @@ public class OmahaHand extends Hand {
 
     public OmahaHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
         super(smallBlind, bigBlind, ante, players);
+        numberOfCards = 4;
     }
 
     @Override

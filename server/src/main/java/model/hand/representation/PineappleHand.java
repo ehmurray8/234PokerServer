@@ -9,6 +9,7 @@ public class PineappleHand extends Hand {
 
     public PineappleHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
         super(smallBlind, bigBlind, ante, players);
+        numberOfCards = 3;
     }
 
     @Override

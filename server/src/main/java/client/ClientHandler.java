@@ -60,7 +60,7 @@ public class ClientHandler {
                     var optionType = Option.stringToOptionType(data.get("type"));
                     if (optionType != null) {
                         try {
-                            double amount = (double) data.get("amount");
+                            double amount = Double.parseDouble(data.get("amount").toString());
                             optionSelection = new Option(optionType, amount);
                             synchronized (monitor) {
                                 monitor.notifyAll();
@@ -102,7 +102,7 @@ public class ClientHandler {
 
     public void sendHandOverMessage(Hand hand, List<Player> players, List<Card> winningCards) {
         for(var player: players) {
-            if (player.getPlayerId() != null) {
+            if (player != null && player.getPlayerId() != null) {
                 var message = ClientMessage.createClientMessage(player, null, winningCards, players,
                         hand, 0, -1);
                 clients.get(player.getPlayerId()).sendEvent("gameUpdate", message);
@@ -110,7 +110,7 @@ public class ClientHandler {
             }
         }
         try {
-            Thread.sleep(5000);
+            Thread.sleep(7500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -240,20 +240,20 @@ public class Game {
     }
 
     private void handlePreFlop() {
-        if(this.rules.getAnte() > 0) {
-            this.currentHand.chargeAntes();
+        if(rules.getAnte() > 0) {
+            currentHand.chargeAntes();
         }
-        this.currentHand.chargeSmallBlind(smallBlindNum());
-        this.currentHand.chargeBigBlind(bigBlindNum());
+        currentHand.chargeSmallBlind(smallBlindNum());
+        currentHand.chargeBigBlind(bigBlindNum());
         currentAction = playersInHand.indexOf(players[bigBlindNum()]);
         bettingRound(false);
         var bigBlindPlayer = players[bigBlindNum()];
         if(currentAction == bigBlindNum() && bigBlindPlayer.getAmountThisTurn() == rules.getBigBlind()
-                && currentHand.onlyOnePlayerLeftInHand()) {
-            this.currentHand.setupBetRound();
-            List<Option> currOptions = this.currentHand.generateOptions(bigBlindPlayer);
+                && !currentHand.onlyOnePlayerLeftInHand()) {
+            currentHand.setupBetRound();
+            List<Option> currOptions = currentHand.generateOptions(bigBlindPlayer);
             Option option = askPlayerForOption(currOptions, bigBlindPlayer);
-            this.currentHand.executeOption(bigBlindPlayer, option);
+            currentHand.executeOption(bigBlindPlayer, option);
             incrementCurrentAction();
             if(option.getType() != Option.OptionType.CHECK) {
                 bettingRound(false);

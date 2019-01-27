@@ -24,15 +24,18 @@ public class ClientMessage {
     private boolean userHasFolded;
     private int decisionTimeMaxSeconds;
     private int eventId;
+    private int numberOfCards;
 
 
     private static Player createPlayer(model.player.Player player,
                                        @Nullable List<model.card.Card> winningCards, boolean showCards) {
         var name = player.getName();
         var balance = player.getBalance();
-        List<Card> cards = new ArrayList<>();
-        if (showCards) {
+        List<Card> cards = null;
+        if (!player.hasFolded() && showCards) {
             cards = player.getHand().stream().map(ClientMessage::createCard).collect(Collectors.toList());
+        } else if (!player.hasFolded()) {
+            cards = new ArrayList<>();
         }
         var raiseCards = new ArrayList<Boolean>();
         if (winningCards != null) {
@@ -63,10 +66,14 @@ public class ClientMessage {
 
         var message = new ClientMessage();
         message.setUserInfo(player, winningCards, options);
-        message.setPlayerInfo(players, winningCards, mainPlayerIndex);
+        message.setPlayerInfo(players, winningCards, mainPlayerIndex, hand);
         message.setHandInfo(hand, winningCards);
         message.setDecisionTimeMaxSeconds(decisionTimeMaxSeconds);
         message.setEventId(eventId);
+
+        if (hand.getWinningPlayers().contains(player)) {
+            message.setLastUserAmount(hand.getWinnings());
+        }
         return message;
     }
 
@@ -74,7 +81,10 @@ public class ClientMessage {
                              @Nullable List<model.option.Option> options) {
         userCards = player.getHand().stream().map(ClientMessage::createCard).collect(Collectors.toList());
         userStackSize = player.getBalance();
-        lastUserAmount = player.getAmountThisTurn();
+        lastUserAmount = 0;
+        if (winningCards == null) {
+            lastUserAmount = player.getAmountThisTurn();
+        }
         username = player.getName();
         if (winningCards != null) {
             raiseUserCards = player.getHand().stream().map(winningCards::contains).collect(Collectors.toList());
@@ -85,7 +95,8 @@ public class ClientMessage {
         }
     }
 
-    private void setPlayerInfo(List<model.player.Player> players, @Nullable List<model.card.Card> winningCards, int mainPlayerIndex) {
+    private void setPlayerInfo(List<model.player.Player> players, @Nullable List<model.card.Card> winningCards,
+                               int mainPlayerIndex, Hand hand) {
         this.players = new ArrayList<>();
         this.lastActionAmounts = new ArrayList<>();
         for (int i = mainPlayerIndex + 1, count = 0; count < players.size(); i = (i + 1) % players.size(), count++) {
@@ -96,8 +107,12 @@ public class ClientMessage {
                     showCards = false;
                 }
                 this.players.add(createPlayer(player, winningCards, showCards));
-                if (winningCards == null) {
-                    this.lastActionAmounts.add(player.getAmountThisTurn());
+                if (winningCards == null && !player.hasFolded()) {
+                    lastActionAmounts.add(player.getAmountThisTurn());
+                } else if (winningCards != null && !player.hasFolded() && hand.getWinningPlayers().contains(player)) {
+                    lastActionAmounts.add(hand.getWinnings());
+                } else {
+                    lastActionAmounts.add(0.0);
                 }
             }
         }
@@ -110,6 +125,7 @@ public class ClientMessage {
         if (winningCards != null) {
             this.raiseCommunityCards = hand.getCommunityCards().stream().map(winningCards::contains).collect(Collectors.toList());
         }
+        setNumberOfCards(hand.getNumberOfCards());
     }
 
     private ClientMessage() {
@@ -239,6 +255,14 @@ public class ClientMessage {
 
     public void setEventId(int eventId) {
         this.eventId = eventId;
+    }
+
+    public int getNumberOfCards() {
+        return numberOfCards;
+    }
+
+    public void setNumberOfCards(int numberOfCards) {
+        this.numberOfCards = numberOfCards;
     }
 
     static class Player {

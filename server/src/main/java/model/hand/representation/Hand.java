@@ -31,6 +31,10 @@ public abstract class Hand {
     ArrayList<Player> players;
     private double lastRaiseAmount = 0;
     private Set<Card> winningCards;
+    int numberOfCards = 0;
+    private double winnings = 0;
+    private List<Player> winningPlayers;
+    private String winningHandString = "";
 
     /**	Pots that are currently opened, main pot is at index 0. */
     private final List<Pot> openPots;
@@ -65,6 +69,10 @@ public abstract class Hand {
 
     public abstract void dealInitialHand();
 
+    public int getNumberOfCards() {
+        return numberOfCards;
+    }
+
     public List<Pot> getOpenPots() {
     	return openPots;
     }
@@ -79,6 +87,17 @@ public abstract class Hand {
 
     public double getTotalAmountInPots() {
         return closedPots.stream().mapToDouble(Pot::getAmount).sum() + openPots.stream().mapToDouble(Pot::getAmount).sum();
+    }
+
+    public double getWinnings() {
+        return winnings;
+    }
+
+    public List<Player> getWinningPlayers() {
+        if (winningPlayers == null) {
+            return new ArrayList<>();
+        }
+        return winningPlayers;
     }
 
     public final ArrayList<Card> getCommunityCards() {
@@ -241,10 +260,6 @@ public abstract class Hand {
         lastRaiseAmount = 0;
     }
 
-    public void setLastRaiseAmount(double amount) {
-        lastRaiseAmount = amount;
-    }
-
     public boolean onlyOnePlayerLeftInHand() {
         var numNotFolded = (int) players.stream().filter(player -> !player.hasFolded()).count();
         return players.size() < 2 || numNotFolded < 2;
@@ -309,12 +324,13 @@ public abstract class Hand {
     }
 
     private void payOnlyRemainingPlayer(Pot pot) {
-        double winnings = pot.getAmount();
+        winnings = pot.getAmount();
         DecimalFormat df = new DecimalFormat(".##");
         winnings = Double.parseDouble(df.format(winnings));
         for (Player player : pot.getPlayers()) {
             if (!player.hasFolded() && !player.isSittingOut()) {
                 player.updateBalance(winnings);
+                winningPlayers = new ArrayList<>(Collections.singletonList(player));
             }
         }
     }
@@ -331,8 +347,14 @@ public abstract class Hand {
             }
         });
         DecimalFormat df = new DecimalFormat(".##");
-        double winnings = Double.parseDouble(df.format(pot.getAmount() / potWinnerIndexes.size()));
-        potWinnerIndexes.forEach(i -> pot.getPlayers().get(i).updateBalance(winnings));
+        winnings = Double.parseDouble(df.format(pot.getAmount() / potWinnerIndexes.size()));
+        winningPlayers = new ArrayList<>();
+        potWinnerIndexes.forEach(i -> {
+            var player = pot.getPlayers().get(i);
+            player.updateBalance(winnings);
+            winningPlayers.add(player);
+        });
+        System.out.println(winningHandString);
     }
 
     private void createAnalyzers(Player player, List<HandAnalyzer> analyzers) {
@@ -360,9 +382,11 @@ public abstract class Hand {
         if(HandAnalyzer.HAND_ANALYZER_COMPARATOR.compare(newAnalyzer, currentWinnerAnalyzer) > 0) {
             winningCards.clear();
             winningCards.addAll(newAnalyzer.getBestHand());
+            winningHandString = newAnalyzer.getTopRank().toString();
             potWinnerIndexes.clear();
             potWinnerIndexes.add(index);
         } else if(HandAnalyzer.HAND_ANALYZER_COMPARATOR.compare(newAnalyzer, currentWinnerAnalyzer) == 0) {
+            winningHandString = newAnalyzer.getTopRank().toString();
             winningCards.addAll(newAnalyzer.getBestHand());
             potWinnerIndexes.add(index);
         }
