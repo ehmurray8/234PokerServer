@@ -7,6 +7,7 @@ import model.card.Card;
 import model.hand.representation.Hand;
 import model.option.Option;
 import model.player.Player;
+import server.Server;
 
 import java.util.*;
 
@@ -50,7 +51,7 @@ public class ClientHandler {
             return options.get(0);
         } else {
             var actingPlayerData = ClientMessage.createClientMessage(player, options, null, players, hand, timeoutSeconds, eventId);
-            client.sendEvent("gameUpdate", actingPlayerData);
+            client.sendEvent(Server.GAME_UPDATE_EVENT, actingPlayerData);
             pendingMessages.put(player.getPlayerId(), actingPlayerData);
             optionSelection = options.get(0);
 
@@ -67,6 +68,7 @@ public class ClientHandler {
                             }
                         } catch (ClassCastException | NumberFormatException ignored) { } }
                 });
+                System.out.println("Listening for option" + eventId);
             }
 
             for (var otherPlayer: players) {
@@ -74,7 +76,7 @@ public class ClientHandler {
                     var otherPlayerData = ClientMessage.createClientMessage(otherPlayer, null, null,
                             players, hand, timeoutSeconds, eventId);
                     var otherPlayerId = otherPlayer.getPlayerId();
-                    clients.get(otherPlayerId).sendEvent("gameUpdate", otherPlayerData);
+                    clients.get(otherPlayerId).sendEvent(Server.GAME_UPDATE_EVENT, otherPlayerData);
                     pendingMessages.put(otherPlayerId, otherPlayerData);
                 }
             }
@@ -86,13 +88,13 @@ public class ClientHandler {
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                System.out.println("Selected: " + optionSelection.toString());
+                System.out.println("Selected (InterruptedException): " + optionSelection.toString());
                 this.server.removeAllListeners("option" + eventId);
                 this.pendingMessages.clear();
                 return options.get(0);
             }
 
-            System.out.println("Selected: " + optionSelection.toString());
+            System.out.println("Selected (Properly): " + optionSelection.toString());
             this.pendingMessages.clear();
             this.server.removeAllListeners("option" + eventId);
 
@@ -105,7 +107,7 @@ public class ClientHandler {
             if (player != null && player.getPlayerId() != null) {
                 var message = ClientMessage.createClientMessage(player, null, winningCards, players,
                         hand, 0, -1);
-                clients.get(player.getPlayerId()).sendEvent("gameUpdate", message);
+                clients.get(player.getPlayerId()).sendEvent(Server.GAME_UPDATE_EVENT, message);
                 pendingMessages.put(player.getPlayerId(), message);
             }
         }

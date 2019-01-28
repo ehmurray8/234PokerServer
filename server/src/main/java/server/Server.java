@@ -13,6 +13,11 @@ public class Server {
 
     private static final double DEFAULT_BALANCE = 200.0;
 
+    private static final String WELCOME_EVENT = "welcomeStatus";
+    private static final String RETURN_TO_GAME_EVENT = "returnToGame";
+    public static final String GAME_UPDATE_EVENT = "gameUpdate";
+    private static final String JOIN_GAME_EVENT = "joinGame";
+
     public static void main(String[] mainArgs) {
         Configuration config = new Configuration();
         config.setHostname("localhost");
@@ -30,8 +35,8 @@ public class Server {
             System.out.println("Connect: " + client.toString());
         });
 
-        server.addEventListener("welcomeStatus", Map.class, (client, data, ackRequest) -> {
-            System.out.println("Welcome status");
+        server.addEventListener(WELCOME_EVENT, Map.class, (client, data, ackRequest) -> {
+            System.out.println("Welcome status " + client.getSessionId());
             String username;
             try {
                 username = (String) data.get("username");
@@ -43,18 +48,23 @@ public class Server {
                 defaultClientHandler.addClient(usernameMap.get(username), client);
                 var payload = new HashMap<String, Boolean>();
                 payload.put("joinGame", true);
-                client.sendEvent("returnToGame", payload);
+                System.out.println("Sending return to game event");
+                client.sendEvent(RETURN_TO_GAME_EVENT, payload);
                 var message = defaultClientHandler.getPendingMessage(usernameMap.get(username));
                 if (message != null) {
-                    client.sendEvent("gameUpdate", message);
+                    client.sendEvent(GAME_UPDATE_EVENT, message);
                 }
             }
         });
 
-        server.addEventListener("joinGame", Map.class, (client, data, ackRequest) -> {
-            System.out.println("Join Game");
-            var map = (LinkedHashMap) data;
-            var username = (String) map.get("username");
+        server.addEventListener(JOIN_GAME_EVENT, Map.class, (client, data, ackRequest) -> {
+            System.out.println("Join Game: " + client.getSessionId());
+            LinkedHashMap map;
+            String username;
+            try {
+                map = (LinkedHashMap) data;
+                username = (String) map.get("username");
+            } catch (ClassCastException ignored) { return; }
 
             if (usernameMap.containsKey(username)) {
                 var playerId = usernameMap.get(username);

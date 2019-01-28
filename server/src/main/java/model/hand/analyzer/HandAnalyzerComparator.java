@@ -76,7 +76,17 @@ public class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
     }
 
     private int comparePairs() {
-        int comparison = compareCardsDescending(sortedHand, otherSortedHand);
+        var pairRanks = handAnalyzer.getPairRanks();
+        reverseList(pairRanks);
+        var otherPairRanks = otherHandAnalyzer.getPairRanks();
+        reverseList(otherPairRanks);
+
+        int comparison = compareCardsDescending(pairRanks, otherPairRanks);
+        if (comparison != 0) {
+            return comparison;
+        }
+
+        comparison = compareCardsDescending(sortedHand, otherSortedHand);
         if(comparison != 0) {
             return comparison;
         }

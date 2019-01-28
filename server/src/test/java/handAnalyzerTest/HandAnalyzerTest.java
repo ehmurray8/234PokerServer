@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import model.hand.analyzer.HandAnalyzerComparator;
+import model.hand.analyzer.OmahaAnalyzer;
 import org.junit.Test;
 
 import model.hand.analyzer.HandAnalyzer;
@@ -753,5 +754,32 @@ public class HandAnalyzerTest {
         HandAnalyzer hA2 = new HoldEmAnalyzer(Arrays.asList(otherCards));
 
         assertEquals(0, handAnalyzerComparator.compare(hA1, hA2));
+    }
+
+    @Test
+    public void testPairInHandVsPair() {
+        Card card1 = new Card(Rank.ACE, Suit.CLUBS);
+        Card card2 = new Card(Rank.FIVE, Suit.CLUBS);
+        Card card3 = new Card(Rank.NINE, Suit.DIAMONDS);
+        Card card4 = new Card(Rank.TEN, Suit.DIAMONDS);
+
+        Card boardCard1 = new Card(Rank.FIVE, Suit.CLUBS);
+        Card boardCard2 = new Card(Rank.JACK, Suit.CLUBS);
+        Card boardCard3 = new Card(Rank.SIX, Suit.DIAMONDS);
+        Card boardCard4 = new Card(Rank.TWO, Suit.DIAMONDS);
+        Card boardCard5 = new Card(Rank.QUEEN, Suit.HEARTS);
+
+        Card otherCard1 = new Card(Rank.ACE, Suit.HEARTS);
+        Card otherCard2 = new Card(Rank.NINE, Suit.HEARTS);
+        Card otherCard3 = new Card(Rank.NINE, Suit.CLUBS);
+        Card otherCard4 = new Card(Rank.TEN, Suit.SPADES);
+
+        Card[] cards = { card1, card2, card3, card4, boardCard1, boardCard2, boardCard3, boardCard4, boardCard5 };
+        Card[] otherCards = { otherCard1, otherCard2, otherCard3, otherCard4, boardCard1, boardCard2, boardCard3, boardCard4, boardCard5 };
+
+        HandAnalyzer hA1 = new OmahaAnalyzer(Arrays.asList(cards));
+        HandAnalyzer hA2 = new OmahaAnalyzer(Arrays.asList(otherCards));
+
+        assertTrue(handAnalyzerComparator.compare(hA2, hA1) > 0);
     }
 }
