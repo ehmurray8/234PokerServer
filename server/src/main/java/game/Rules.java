@@ -47,7 +47,9 @@ public class Rules {
 	
 	/** The type of game the players will be playing at the table. */
 	private GameType gameType;
-	
+
+	private double minimumChipAmount;
+
 	/**
 	 * Tournament constructor.
 	 *
@@ -64,7 +66,8 @@ public class Rules {
 	 * @param gameType the type of game the players will be playing at the table
 	 */
 	public Rules(double smallBlind, double bigBlind, double ante, int timeLimitSecs, int maxCapacity, double[] prizes,
-				 int blindLevelTimeMinutes, double[] bigBlinds, double[] smallBlinds, double[] antes, GameType gameType) {
+				 int blindLevelTimeMinutes, double[] bigBlinds, double[] smallBlinds, double[] antes, GameType gameType,
+				 double minimumChipAmount) {
 		this.smallBlind = smallBlind;
 		this.bigBlind = bigBlind;
 		this.ante = ante;
@@ -77,6 +80,7 @@ public class Rules {
 		this.smallBlinds = smallBlinds;
 		this.antes = antes;
 		this.gameType = gameType;
+		this.minimumChipAmount = minimumChipAmount;
 	}
 	
     /**
@@ -89,7 +93,8 @@ public class Rules {
 	 * @param maxCapacity the maximum number of people allowed to sit at the table
 	 * @param gameType the type of game the players will be playing at the table
 	 */
-	public Rules(double smallBlind, double bigBlind, double ante, int timeLimitSecs, int maxCapacity, GameType gameType) {
+	public Rules(double smallBlind, double bigBlind, double ante, int timeLimitSecs, int maxCapacity, GameType gameType,
+				 double minimumChipAmount) {
 		this.smallBlind = smallBlind;
 		this.bigBlind = bigBlind;
 		this.ante = ante;
@@ -103,11 +108,12 @@ public class Rules {
 		this.antes = new double[0];
 		this.gameType = gameType;
 		this.straddleAmount = -1;
+		this.minimumChipAmount = minimumChipAmount;
 	}
 
 	public Rules(double smallBlind, double bigBlind, double straddleAmount, double ante,
-				 int timeLimitSecs, int maxCapacity, GameType gameType) {
-		this(smallBlind, bigBlind, ante, timeLimitSecs, maxCapacity, gameType);
+				 int timeLimitSecs, int maxCapacity, GameType gameType, double minimumChipAmount) {
+		this(smallBlind, bigBlind, ante, timeLimitSecs, maxCapacity, gameType, minimumChipAmount);
 		this.straddleAmount = straddleAmount;
 	}
 	
@@ -172,7 +178,16 @@ public class Rules {
 	public int getMaxCapacity() {
 		return this.maxCapacity;
 	}
-	
+
+	public double getMinimumChipAmount() {
+		return minimumChipAmount;
+	}
+
+	public void setMinimumChipAmount(double minimumChipAmount) {
+		this.minimumChipAmount = minimumChipAmount;
+	}
+
+
 	@Override
 	public String toString() {
 		return "Big Blind: " + this.bigBlind + ", Small Blind: " + this.smallBlind + ", Ante: " + this.ante +

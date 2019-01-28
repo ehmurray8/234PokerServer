@@ -9,8 +9,9 @@ import java.util.stream.IntStream;
 
 public class TestHand extends TexasHoldEmHand {
 
-    public TestHand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
-        super(smallBlindAmount, bigBlindAmount, anteAmount, players);
+    public TestHand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players,
+                    double minimumChipAmount) {
+        super(smallBlindAmount, bigBlindAmount, anteAmount, players, minimumChipAmount);
         numberOfCards = 2;
     }
 

@@ -29,7 +29,7 @@ public class GameTest {
 
 	@Before
 	public void setUp() {
-		rules = new Rules(1, 2, 1, 20, 6, GameType.TEST);
+		rules = new Rules(1, 2, 1, 20, 6, GameType.TEST, 1);
 	    var p1 = new Player(1000, "Player 1");
 		var p2 = new Player(1000, "Player 2");
 		var p4 = new Player(1000, "Player 4");

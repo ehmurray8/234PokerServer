@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Date;
 
 public class ClientMessage {
 
@@ -22,9 +23,11 @@ public class ClientMessage {
     private List<Boolean> raiseCommunityCards;
     private List<Boolean> raiseUserCards;
     private boolean userHasFolded;
+    private long decisionEndTime;
     private int decisionTimeMaxSeconds;
     private int eventId;
     private int numberOfCards;
+    private double betStepSize;
 
 
     private static Player createPlayer(model.player.Player player,
@@ -68,8 +71,10 @@ public class ClientMessage {
         message.setUserInfo(player, winningCards, options);
         message.setPlayerInfo(players, winningCards, mainPlayerIndex, hand);
         message.setHandInfo(hand, winningCards);
+        message.setDecisionEndTimeFrom(decisionTimeMaxSeconds);
         message.setDecisionTimeMaxSeconds(decisionTimeMaxSeconds);
         message.setEventId(eventId);
+        message.setBetStepSize(hand.getBetStepSize());
 
         if (hand.getWinningPlayers().contains(player)) {
             message.setLastUserAmount(hand.getWinnings());
@@ -103,7 +108,7 @@ public class ClientMessage {
             var player = players.get(i);
             if (player != null && mainPlayerIndex != i) {
                 var showCards = winningCards != null;
-                if (player.hasFolded()) {
+                if (player.hasFolded() || hand.onlyOnePlayerLeftInHand()) {
                     showCards = false;
                 }
                 this.players.add(createPlayer(player, winningCards, showCards));
@@ -128,6 +133,11 @@ public class ClientMessage {
         setNumberOfCards(hand.getNumberOfCards());
     }
 
+    private void setDecisionEndTimeFrom(int decisionTimeMaxSeconds) {
+        var currentMilliseconds = new Date().getTime();
+        decisionEndTime = currentMilliseconds + (decisionTimeMaxSeconds * 1000);
+    }
+
     private ClientMessage() {
         this.players = new ArrayList<>();
         this.communityCards = new ArrayList<>();
@@ -141,7 +151,6 @@ public class ClientMessage {
         this.raiseCommunityCards = new ArrayList<>();
         this.raiseUserCards = new ArrayList<>();
         this.userHasFolded = false;
-        this.decisionTimeMaxSeconds = 0;
         this.eventId = 0;
     }
 
@@ -233,14 +242,6 @@ public class ClientMessage {
         this.userHasFolded = userHasFolded;
     }
 
-    public int getDecisionTimeMaxSeconds() {
-        return decisionTimeMaxSeconds;
-    }
-
-    public void setDecisionTimeMaxSeconds(int decisionTimeMaxSeconds) {
-        this.decisionTimeMaxSeconds = decisionTimeMaxSeconds;
-    }
-
     public String getUsername() {
         return username;
     }
@@ -263,6 +264,30 @@ public class ClientMessage {
 
     public void setNumberOfCards(int numberOfCards) {
         this.numberOfCards = numberOfCards;
+    }
+
+    public long getDecisionEndTime() {
+        return decisionEndTime;
+    }
+
+    public void setDecisionEndTime(long decisionEndTime) {
+        this.decisionEndTime = decisionEndTime;
+    }
+
+    public int getDecisionTimeMaxSeconds() {
+        return decisionTimeMaxSeconds;
+    }
+
+    public void setDecisionTimeMaxSeconds(int decisionTimeMaxSeconds) {
+        this.decisionTimeMaxSeconds = decisionTimeMaxSeconds;
+    }
+
+    public double getBetStepSize() {
+        return betStepSize;
+    }
+
+    public void setBetStepSize(double betStepSize) {
+        this.betStepSize = betStepSize;
     }
 
     static class Player {

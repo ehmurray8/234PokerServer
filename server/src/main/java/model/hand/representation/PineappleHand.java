@@ -7,8 +7,8 @@ import model.player.Player;
 
 public class PineappleHand extends Hand {
 
-    public PineappleHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
-        super(smallBlind, bigBlind, ante, players);
+    public PineappleHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players, double minimumChipAmount) {
+        super(smallBlind, bigBlind, ante, players, minimumChipAmount);
         numberOfCards = 3;
     }
 

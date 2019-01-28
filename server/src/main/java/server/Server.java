@@ -20,7 +20,7 @@ public class Server {
 
         final SocketIOServer server = new SocketIOServer(config);
 
-        var defaultRules = new Rules(1.0, 2.0, 0, 30, 6, Rules.GameType.HOLDEM);
+        var defaultRules = new Rules(1.0, 2.0, 0, 30, 6, Rules.GameType.OMAHA, 1);
         var defaultClientHandler = new ClientHandler(server);
 
         var singleGame = new Game(Collections.emptyList(), defaultRules, defaultClientHandler);

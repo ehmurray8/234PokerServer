@@ -35,6 +35,7 @@ public abstract class Hand {
     private double winnings = 0;
     private List<Player> winningPlayers;
     private String winningHandString = "";
+    private double minimumChipAmount;
 
     /**	Pots that are currently opened, main pot is at index 0. */
     private final List<Pot> openPots;
@@ -42,17 +43,19 @@ public abstract class Hand {
     /** All openPots that have been opened during the hand. */
     private final List<Pot> closedPots;
 
-    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, boolean isShortDeck) {
+    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, boolean isShortDeck,
+         double minimumChipAmount) {
         this(isShortDeck);
         this.smallBlindAmount = smallBlindAmount;
         this.bigBlindAmount = bigBlindAmount;
         this.anteAmount = anteAmount;
         this.players = players;
+        this.minimumChipAmount = minimumChipAmount;
         openPots.add(new Pot(players));
     }
 
-    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players) {
-        this(smallBlindAmount, bigBlindAmount, anteAmount, players, false);
+    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, double minimumChipAmount) {
+        this(smallBlindAmount, bigBlindAmount, anteAmount, players, false, minimumChipAmount);
     }
 
     private Hand(boolean isShortDeck) {
@@ -71,6 +74,10 @@ public abstract class Hand {
 
     public int getNumberOfCards() {
         return numberOfCards;
+    }
+
+    public double getBetStepSize() {
+        return minimumChipAmount;
     }
 
     public List<Pot> getOpenPots() {
@@ -430,7 +437,11 @@ public abstract class Hand {
     private void createFoldCallRaiseOptions(List<Option> options, Player player, double amountOwed) {
         options.add(new Option(Option.OptionType.FOLD, 0));
         if(amountOwed != 0) {
-            options.add(new Option(Option.OptionType.CALL, amountOwed));
+            if (amountOwed <= player.getBalance()) {
+                options.add(new Option(Option.OptionType.CALL, amountOwed));
+            } else {
+                options.add(new Option(Option.OptionType.CALL, player.getBalance()));
+            }
         }
         if(amountOwed + minBetAmount() < player.getBalance()) {
             int count = (int) players.stream()

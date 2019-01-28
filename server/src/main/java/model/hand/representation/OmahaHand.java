@@ -11,8 +11,8 @@ import model.player.Player;
 
 public class OmahaHand extends Hand {
 
-    public OmahaHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players) {
-        super(smallBlind, bigBlind, ante, players);
+    public OmahaHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players, double minimumChipAmount) {
+        super(smallBlind, bigBlind, ante, players, minimumChipAmount);
         numberOfCards = 4;
     }
 

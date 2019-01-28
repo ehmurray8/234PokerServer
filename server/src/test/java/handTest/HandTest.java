@@ -30,7 +30,7 @@ public class HandTest {
 		player1 = new TestPlayer(2000, "P1");
 		player2 = new TestPlayer(2000, "P2");
 		players = new ArrayList<>(Arrays.asList(player1, player2));
-		hand = new TestHand(60, 120, 30, players);
+		hand = new TestHand(60, 120, 30, players, 1);
 	}
 
 	@Test
@@ -44,7 +44,7 @@ public class HandTest {
 
 	@Test
 	public void testDealOmahaHand() {
-		var omahaHand = new OmahaHand(20, 40, 0, players);
+		var omahaHand = new OmahaHand(20, 40, 0, players, 1);
 
 		player1.setMaxCards(4);
 		player2.setMaxCards(4);
@@ -58,7 +58,7 @@ public class HandTest {
 
 	@Test
 	public void testDealPineappleHand() {
-		var pineappleHand = new PineappleHand(20, 40, 0, players);
+		var pineappleHand = new PineappleHand(20, 40, 0, players, 1);
 
 		player1.setMaxCards(3);
 		player2.setMaxCards(3);
@@ -108,7 +108,7 @@ public class HandTest {
 		Player p5 = new Player(700, "P5");
 		Player p6 = new Player(100000, "P6");
 		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
+		Hand hand = new TexasHoldEmHand(60, 120, 30, players, 1);
 		hand.dealInitialHand();
 		hand.chargeAntes();
         assertEquals(4970, p1.getBalance(), 0.0);
@@ -139,7 +139,7 @@ public class HandTest {
 		Player p5 = new Player(700, "P5");
 		Player p6 = new Player(100000, "P6");
 		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
+		Hand hand = new TexasHoldEmHand(60, 120, 30, players, 1);
 		hand.dealInitialHand();
 		hand.chargeSmallBlind(1);
 		hand.chargeBigBlind(2);
@@ -161,7 +161,7 @@ public class HandTest {
 		Player p5 = new Player(7, "P5");
 		Player p6 = new Player(100, "P6");
 		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-		Hand hand = new TexasHoldEmHand(60, 120, 30, players);
+		Hand hand = new TexasHoldEmHand(60, 120, 30, players, 1);
 		hand.dealInitialHand();
 		hand.chargeAntes();
         assertEquals(4, hand.getClosedPots().size());
@@ -195,7 +195,7 @@ public class HandTest {
 		var player = new Player(10.0, "P1");
 		var players = new ArrayList<Player>();
 		players.add(player);
-		Hand hand = new TexasHoldEmHand(10.0, 20.0, 0.0, players);
+		Hand hand = new TexasHoldEmHand(10.0, 20.0, 0.0, players, 1);
 		assertFalse(hand.playersBetting());
 	}
 
@@ -375,6 +375,26 @@ public class HandTest {
         assertEquals(4000, player2.getBalance(), 0);
     }
 
+    @Test
+    public void testChopPot() {
+		setupBoard1();
+
+		player1.updateBalance(-2000);
+
+		Card player1Card = new Card(Card.Rank.THREE, Card.Suit.HEARTS);
+		Card player1Card1 = new Card(Card.Rank.TWO, Card.Suit.HEARTS);
+
+		Card player2Card = new Card(Card.Rank.THREE, Card.Suit.DIAMONDS);
+		Card player2Card2 = new Card(Card.Rank.TWO, Card.Suit.DIAMONDS);
+
+		player1.setHand(new Card[]{player1Card, player1Card1});
+		player2.setHand(new Card[]{player2Card, player2Card2});
+		hand.payWinners();
+
+		assertEquals(2000, player1.getBalance(), 0);
+		assertEquals(2000, player2.getBalance(), 0);
+	}
+
     private void setupBoard1() {
 	    Card card1 = new Card(Card.Rank.ACE, Card.Suit.CLUBS);
 	    Card card2 = new Card(Card.Rank.JACK, Card.Suit.CLUBS);
@@ -384,10 +404,10 @@ public class HandTest {
 
 	    hand.setCommunityCards(new Card[]{card1, card2, card3, card4, card5});
 
-	    var bigBet = new Option(Option.OptionType.BET, 2100);
-	    var bigCall = new Option(Option.OptionType.CALL, 2100);
+		player1.updateBalance(2000);
 
-        player1.updateBalance(2000);
+	    var bigBet = new Option(Option.OptionType.ALLIN, 2000);
+	    var bigCall = new Option(Option.OptionType.CALL, 2000);
 
         hand.executeOption(player1,  bigBet);
         hand.executeOption(player2, bigCall);
@@ -415,7 +435,7 @@ public class HandTest {
 		hand.executeOption(player2, allin);
 
 		var options = hand.generateOptions(player1);
-		assertTrue(options.contains(new Option(Option.OptionType.CALL, allin.getAmount())));
+		assertTrue(options.contains(new Option(Option.OptionType.CALL, player1.getBalance())));
 		assertTrue(options.contains(new Option(Option.OptionType.FOLD, 0)));
 	}
 

@@ -8,14 +8,14 @@ import model.player.Player;
 public class TexasHoldEmHand extends Hand {
 
     public TexasHoldEmHand(double smallBlindAmount, double bigBlindAmount, double anteAmount,
-                           ArrayList<Player> players) {
-        super(smallBlindAmount, bigBlindAmount, anteAmount, players);
+                           ArrayList<Player> players, double minimumChipAmount) {
+        super(smallBlindAmount, bigBlindAmount, anteAmount, players, minimumChipAmount);
         numberOfCards = 2;
     }
 
     public TexasHoldEmHand(double smallBlindAmount, double bigBlindAmount, double anteAmount,
-                           ArrayList<Player> players, boolean isShortDeck) {
-        super(smallBlindAmount, bigBlindAmount, anteAmount, players, isShortDeck);
+                           ArrayList<Player> players, boolean isShortDeck, double minimumChipAmount) {
+        super(smallBlindAmount, bigBlindAmount, anteAmount, players, isShortDeck, minimumChipAmount);
         numberOfCards = 2;
     }
 

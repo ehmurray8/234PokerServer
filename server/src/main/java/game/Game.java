@@ -197,23 +197,28 @@ public class Game {
         Hand currentHand;
         switch(currGameType){
         case HOLDEM:
-            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+                    playersInHand, rules.getMinimumChipAmount());
             break;
         case PINEAPPLE:
-            currentHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            currentHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand,
+                    rules.getMinimumChipAmount());
             break;
         case OMAHA:
-            currentHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            currentHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand,
+                    rules.getMinimumChipAmount());
             break;
         case TEST:
-            currentHand = new TestHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            currentHand = new TestHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand,
+                    rules.getMinimumChipAmount());
             break;
         case SHORTDECK:
             currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-                    playersInHand, true);
+                    playersInHand, true, rules.getMinimumChipAmount());
             break;
         default:
-            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand);
+            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+                    playersInHand, rules.getMinimumChipAmount());
         }
         return currentHand;
     }
