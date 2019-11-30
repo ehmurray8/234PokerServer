@@ -1,4 +1,4 @@
-package handAnalyzerTest;
+package model.hand.analyzer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,7 +7,6 @@ import java.util.Arrays;
 import model.hand.representation.HandRank;
 import org.junit.Test;
 
-import model.hand.analyzer.HoldEmAnalyzer;
 import model.card.Card;
 import model.card.Card.Rank;
 import model.card.Card.Suit;

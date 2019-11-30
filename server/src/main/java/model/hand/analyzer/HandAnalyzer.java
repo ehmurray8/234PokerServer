@@ -12,13 +12,12 @@ import static extensions.ListExtensions.reverseList;
 import static model.hand.analyzer.AnalyzerHelpers.*;
 
 /**
- * The HandAnalyzer is represented by the Hand's best rank, the best five card hand, the ranks of any pairs,
- * the full hand, and the ranks of the full house if the hand contains one.
+ * The HandAnalyzer is represented by the Hand's best rank, the best five model.card model.hand, the ranks of any pairs,
+ * the full model.hand, and the ranks of the full house if the model.hand contains one.
  */
 public abstract class HandAnalyzer {
 
     public static final HandAnalyzerComparator HAND_ANALYZER_COMPARATOR = new HandAnalyzerComparator();
-    private static final ShortDeckHandAnalyzerComparator SHORT_DECK_HAND_ANALYZER_COMPARATOR = new ShortDeckHandAnalyzerComparator();
     private static final HandRank.HandRankComparator HAND_RANK_COMPARATOR = new HandRank.HandRankComparator();
 
     private HandRank topRank;
@@ -87,11 +86,7 @@ public abstract class HandAnalyzer {
 
     private void findTopRank() {
         FiveCardAnalyzer analyzer;
-        if(!isShortDeck) {
-            analyzer = new FiveCardAnalyzer(allHands.get(0));
-        } else {
-            analyzer = new ShortDeckFiveCardAnalyzer(allHands.get(0));
-        }
+        analyzer = new FiveCardAnalyzer(allHands.get(0));
         topRank = analyzer.getRank();
         allHands.forEach(this::compareTopRank);
     }
@@ -104,13 +99,7 @@ public abstract class HandAnalyzer {
     }
 
     private HandRank getHandRank(List<Card> hand) {
-        FiveCardAnalyzer fiveCardAnalyzer;
-        if(!isShortDeck) {
-            fiveCardAnalyzer = new FiveCardAnalyzer(hand);
-        } else {
-            fiveCardAnalyzer = new ShortDeckFiveCardAnalyzer(hand);
-        }
-        return fiveCardAnalyzer.getRank();
+        return new FiveCardAnalyzer(hand).getRank();
     }
 
     private List<SimpleAnalyzer> createAnalyzersForTopRankHands() {
@@ -122,17 +111,13 @@ public abstract class HandAnalyzer {
     private void addTopRankAnalyzers(List<Card> hand, List<SimpleAnalyzer> topRankAnalyzers) {
         var rankCheck = getHandRank(hand);
         if (HAND_RANK_COMPARATOR.compare(rankCheck, topRank) == 0) {
-            SimpleAnalyzer analyzer = new SimpleAnalyzer(hand, isShortDeck);
+            SimpleAnalyzer analyzer = new SimpleAnalyzer(hand);
             topRankAnalyzers.add(analyzer);
         }
     }
 
     private void findTopHand(List<SimpleAnalyzer> topRankAnalyzers) {
-        if(!isShortDeck) {
-            topHandAnalyzer = Collections.max(topRankAnalyzers, HAND_ANALYZER_COMPARATOR);
-        } else {
-            topHandAnalyzer = Collections.max(topRankAnalyzers, SHORT_DECK_HAND_ANALYZER_COMPARATOR);
-        }
+        topHandAnalyzer = Collections.max(topRankAnalyzers, HAND_ANALYZER_COMPARATOR);
         bestHandRanks = topHandAnalyzer.getBestHandRanks();
         bestHand = topHandAnalyzer.getFullHand();
     }

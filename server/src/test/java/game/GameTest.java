@@ -1,4 +1,4 @@
-package gameTest;
+package game;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,14 +9,11 @@ import static org.junit.Assert.*;
 import client.OptionSelection.SelectionType;
 import client.OptionSelection;
 import client.TestClientHandler;
-import game.Game;
-import game.TestGame;
 import model.card.Card;
 import model.player.TestPlayer;
 import org.junit.Before;
 import org.junit.Test;
 
-import game.Rules;
 import game.Rules.GameType;
 import model.player.Player;
 
@@ -29,7 +26,15 @@ public class GameTest {
 
 	@Before
 	public void setUp() {
-		rules = new Rules(1, 2, 1, 20, 6, GameType.TEST, 1);
+	    rules = Rules.builder()
+                .smallBlind(1)
+                .bigBlind(2)
+                .ante(1)
+                .timeLimitSecs(20)
+                .maxCapacity(6)
+                .gameType(GameType.HOLDEM)
+                .minimumChipAmount(1)
+                .build();
 	    var p1 = new Player(1000, "Player 1");
 		var p2 = new Player(1000, "Player 2");
 		var p4 = new Player(1000, "Player 4");

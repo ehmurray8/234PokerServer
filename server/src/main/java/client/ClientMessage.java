@@ -26,7 +26,6 @@ public class ClientMessage {
     private long decisionEndTime;
     private int decisionTimeMaxSeconds;
     private int eventId;
-    private int numberOfCards;
     private double betStepSize;
 
 
@@ -130,7 +129,6 @@ public class ClientMessage {
         if (winningCards != null) {
             this.raiseCommunityCards = hand.getCommunityCards().stream().map(winningCards::contains).collect(Collectors.toList());
         }
-        setNumberOfCards(hand.getNumberOfCards());
     }
 
     private void setDecisionEndTimeFrom(int decisionTimeMaxSeconds) {
@@ -256,14 +254,6 @@ public class ClientMessage {
 
     public void setEventId(int eventId) {
         this.eventId = eventId;
-    }
-
-    public int getNumberOfCards() {
-        return numberOfCards;
-    }
-
-    public void setNumberOfCards(int numberOfCards) {
-        this.numberOfCards = numberOfCards;
     }
 
     public long getDecisionEndTime() {

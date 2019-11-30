@@ -23,7 +23,7 @@ class AnalyzerHelpers {
     /**
      * Recurse through {@code fullHand} and returns all the possible combinations of size k.
      *
-     * @param fullHand seven card hand to get the combinations from
+     * @param fullHand seven model.card model.hand to get the combinations from
      * @param k size of the combinations
      * @return all the combinations of size k
      */

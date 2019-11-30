@@ -1,10 +1,9 @@
-package handTest;
+package model.hand.representation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import model.card.Card;
-import model.hand.representation.*;
 import model.option.Option;
 import model.player.TestPlayer;
 import org.junit.Before;

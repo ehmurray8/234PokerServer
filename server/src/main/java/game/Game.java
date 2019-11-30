@@ -16,10 +16,10 @@ public class Game {
 	private static int GAME_ENDED = -1;
 
 	private Player[] players;
-    private Rules rules;
+    Rules rules;
 	int dealerNum;
 	private int currentAction;
-	private ArrayList<Player> playersInHand;
+	ArrayList<Player> playersInHand;
 	private ClientHandler clientHandler;
 
 	public Game(List<Player> players, Rules rules, ClientHandler clientHandler) {
@@ -188,7 +188,7 @@ public class Game {
         }
     }
 
-	private Hand createHand() {
+	Hand createHand() {
 	    GameType currGameType = rules.getGameType();
         if(currGameType == GameType.MIXED) {
             currGameType = askDealerForGameType();
@@ -207,14 +207,6 @@ public class Game {
         case OMAHA:
             currentHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand,
                     rules.getMinimumChipAmount());
-            break;
-        case TEST:
-            currentHand = new TestHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand,
-                    rules.getMinimumChipAmount());
-            break;
-        case SHORTDECK:
-            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-                    playersInHand, true, rules.getMinimumChipAmount());
             break;
         default:
             currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),

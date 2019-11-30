@@ -6,7 +6,6 @@ import java.util.stream.IntStream;
 
 import model.card.Card;
 import model.card.Deck;
-import model.card.ShortDeck;
 import model.hand.analyzer.HandAnalyzer;
 import model.hand.analyzer.HoldEmAnalyzer;
 import model.option.Option;
@@ -23,7 +22,7 @@ import model.player.Player;
  */
 public abstract class Hand {
 
-    final Stack<Card> deck;
+    final Deck deck;
     final ArrayList<Card> communityCards;
     private double smallBlindAmount;
     private double bigBlindAmount;
@@ -31,7 +30,6 @@ public abstract class Hand {
     ArrayList<Player> players;
     private double lastRaiseAmount = 0;
     private Set<Card> winningCards;
-    int numberOfCards = 0;
     private double winnings = 0;
     private List<Player> winningPlayers;
     private String winningHandString = "";
@@ -43,38 +41,21 @@ public abstract class Hand {
     /** All openPots that have been opened during the hand. */
     private final List<Pot> closedPots;
 
-    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, boolean isShortDeck,
-         double minimumChipAmount) {
-        this(isShortDeck);
+    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, double minimumChipAmount) {
+        this.deck = new Deck();
         this.smallBlindAmount = smallBlindAmount;
         this.bigBlindAmount = bigBlindAmount;
         this.anteAmount = anteAmount;
         this.players = players;
         this.minimumChipAmount = minimumChipAmount;
-        openPots.add(new Pot(players));
-    }
-
-    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, double minimumChipAmount) {
-        this(smallBlindAmount, bigBlindAmount, anteAmount, players, false, minimumChipAmount);
-    }
-
-    private Hand(boolean isShortDeck) {
-        if(!isShortDeck) {
-            deck = new Deck();
-        } else {
-            deck = new ShortDeck();
-        }
         communityCards = new ArrayList<>();
         openPots = new ArrayList<>();
         closedPots = new ArrayList<>();
         winningCards = new HashSet<>();
+        openPots.add(new Pot(players));
     }
 
     public abstract void dealInitialHand();
-
-    public int getNumberOfCards() {
-        return numberOfCards;
-    }
 
     public double getBetStepSize() {
         return minimumChipAmount;
@@ -118,18 +99,18 @@ public abstract class Hand {
     }
 
     public final void dealFlop() {
-        deck.pop();
-        IntStream.range(0, 3).forEach(iteration -> communityCards.add(deck.pop()));
+        deck.dealCard();
+        IntStream.range(0, 3).forEach(iteration -> communityCards.add(deck.dealCard()));
     }
 
     public final void dealTurn() {
-        deck.pop();
-        communityCards.add(deck.pop());
+        deck.dealCard();
+        communityCards.add(deck.dealCard());
     }
 
     public final void dealRiver() {
-        deck.pop();
-        communityCards.add(deck.pop());
+        deck.dealCard();
+        communityCards.add(deck.dealCard());
     }
 
     private void chargeAmount(double amount, List<Player> playersToCharge) {

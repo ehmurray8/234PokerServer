@@ -9,6 +9,8 @@ import model.player.Player;
 
 import java.util.*;
 
+import static game.Rules.GameType.OMAHA;
+
 public class Server {
 
     private static final double DEFAULT_BALANCE = 200.0;
@@ -25,7 +27,16 @@ public class Server {
 
         final SocketIOServer server = new SocketIOServer(config);
 
-        var defaultRules = new Rules(1.0, 2.0, 0, 30, 6, Rules.GameType.OMAHA, 1);
+        var defaultRules = Rules.builder()
+                .smallBlind(1)
+                .bigBlind(2)
+                .ante(0)
+                .timeLimitSecs(30)
+                .maxCapacity(6)
+                .gameType(OMAHA)
+                .minimumChipAmount(1)
+                .build();
+
         var defaultClientHandler = new ClientHandler(server);
 
         var singleGame = new Game(Collections.emptyList(), defaultRules, defaultClientHandler);

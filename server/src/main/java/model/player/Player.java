@@ -66,10 +66,10 @@ public class Player  {
     }
 
     /**
-     * Add the amount this turn, and deduct from the player's balance.
+     * Add the amount this turn, and deduct from the model.player's balance.
      *
      * @param addAmt the amount to add for this turn
-     * @return true if the player has enough in their balance
+     * @return true if the model.player has enough in their balance
      */
     public boolean addAmountThisTurn(double addAmt) {
     	if(addAmt <= this.balance) { 

@@ -1,11 +1,10 @@
-package playerTest;
+package model.player;
 
 import org.junit.Test;
 
 import model.card.Card;
 import model.card.Card.Rank;
 import model.card.Card.Suit;
-import model.player.Player;
 
 import java.util.ArrayList;
 

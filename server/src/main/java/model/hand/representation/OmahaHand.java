@@ -11,15 +11,14 @@ import model.player.Player;
 
 public class OmahaHand extends Hand {
 
-    public OmahaHand(double smallBlind, double bigBlind, double ante, ArrayList<Player> players, double minimumChipAmount) {
-        super(smallBlind, bigBlind, ante, players, minimumChipAmount);
-        numberOfCards = 4;
+    public OmahaHand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, double minimumChipAmount) {
+        super(smallBlindAmount, bigBlindAmount, anteAmount, players, minimumChipAmount);
     }
 
     @Override
     public final void dealInitialHand() {
         IntStream.range(0, 4).forEach(iteration ->
-            players.forEach(player -> player.addCard(deck.pop()))
+            players.forEach(player -> player.addCard(deck.dealCard()))
         );
     }
 

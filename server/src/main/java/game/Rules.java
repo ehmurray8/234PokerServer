@@ -3,194 +3,126 @@ package game;
 public class Rules {
 
 	public enum GameType {
-		HOLDEM, PINEAPPLE, OMAHA, MIXED, SHORTDECK, TEST
+		HOLDEM, PINEAPPLE, OMAHA, MIXED
 	}
 	
-	/** Amount the small blind starts at. */
-	private double smallBlind;
-	
-	/** Amount the big blind starts at. */
-	private double bigBlind;
+	private final int smallBlind;
+	private final int bigBlind;
+	private final int ante;
+	private final int timeLimitSecs;
+	private final int maxCapacity;
+	private final int[] prizes;
+	private final GameType gameType;
+	private final int minimumChipAmount;
 
-	private double straddleAmount;
-	
-	/** Amount the ante starts at. */
-	private double ante;
-	
-	/** Amount of time in seconds each player gets to act. */
-	private int timeLimitSecs;
-	
-	/** Maximum number of players allowed to sit at the table. */
-	private int maxCapacity;
-	
-	/**
-	 * The prizes for finishing in a certain place, the first place prize is located at position 0.
-	 * Prizes only pertain to tournaments.
-	 */
-	private double[] prizes;
-	
-	/** Whether or not the game is a tournament. */
-	private boolean isTourney;
-	
-	/** The length of the blind level in minutes. */
-	private int blindLevelTimeMinutes;
-	
-	/** The amount for the big blinds at each level, this array excludes the initial bigBlind. */
-	private double[] bigBlinds;
-	
-	/** The amount for the small blinds at each level, this array excludes the initial smallBlind. */
-	private double[] smallBlinds;
-	
-	/** The amount for the antes at each level, this array excludes the initial ante. */
-	private double[] antes;
-	
-	
-	/** The type of game the players will be playing at the table. */
-	private GameType gameType;
-
-	private double minimumChipAmount;
-
-	/**
-	 * Tournament constructor.
-	 *
-	 * @param smallBlind the amount the small blind begins at
-	 * @param bigBlind the amount the big blind begins at
-	 * @param ante the amount the ante begins at
-	 * @param timeLimitSecs the amount each player has to act;
-	 * @param maxCapacity the maximum number of players allowed to sit at the table
-	 * @param prizes the prizes awarded to the highest finishers
-	 * @param blindLevelTimeMinutes the amount of time each blind level lasts
-	 * @param bigBlinds the amount of money the big blind is at each level
-	 * @param smallBlinds the amount of money the small blind is at each level
-	 * @param antes the amount of money the ante is at each level
-	 * @param gameType the type of game the players will be playing at the table
-	 */
-	public Rules(double smallBlind, double bigBlind, double ante, int timeLimitSecs, int maxCapacity, double[] prizes,
-				 int blindLevelTimeMinutes, double[] bigBlinds, double[] smallBlinds, double[] antes, GameType gameType,
-				 double minimumChipAmount) {
-		this.smallBlind = smallBlind;
-		this.bigBlind = bigBlind;
-		this.ante = ante;
-		this.timeLimitSecs = timeLimitSecs;
-		this.maxCapacity = maxCapacity;
-		this.prizes = prizes;
-		this.isTourney = true;
-		this.blindLevelTimeMinutes = blindLevelTimeMinutes;
-		this.bigBlinds = bigBlinds;
-		this.smallBlinds = smallBlinds;
-		this.antes = antes;
-		this.gameType = gameType;
-		this.minimumChipAmount = minimumChipAmount;
-	}
-	
-    /**
-	 * Cash game constructor.
-	 * 
-	 * @param smallBlind the amount of money the small blind will be
-	 * @param bigBlind the amount of money the big blind will be
-	 * @param ante the amount of money the ante will be
-	 * @param timeLimitSecs the number of seconds each player has to act on their turn
-	 * @param maxCapacity the maximum number of people allowed to sit at the table
-	 * @param gameType the type of game the players will be playing at the table
-	 */
-	public Rules(double smallBlind, double bigBlind, double ante, int timeLimitSecs, int maxCapacity, GameType gameType,
-				 double minimumChipAmount) {
-		this.smallBlind = smallBlind;
-		this.bigBlind = bigBlind;
-		this.ante = ante;
-		this.timeLimitSecs = timeLimitSecs;
-		this.maxCapacity = maxCapacity;
-		this.prizes = new double[0];
-		this.isTourney = false;
-		this.blindLevelTimeMinutes = 0;
-		this.bigBlinds = new double[0];
-		this.smallBlinds = new double[0];
-		this.antes = new double[0];
-		this.gameType = gameType;
-		this.straddleAmount = -1;
-		this.minimumChipAmount = minimumChipAmount;
+	private Rules(RulesBuilder rulesBuilder) {
+	    validateRulesBuilder(rulesBuilder);
+		this.smallBlind = rulesBuilder.smallBlind;
+		this.bigBlind = rulesBuilder.bigBlind;
+		this.ante = rulesBuilder.ante;
+		this.timeLimitSecs = rulesBuilder.timeLimitSecs;
+		this.maxCapacity = rulesBuilder.maxCapacity;
+		this.prizes = rulesBuilder.prizes;
+		this.gameType = rulesBuilder.gameType;
+		this.minimumChipAmount = rulesBuilder.minimumChipAmount;
 	}
 
-	public Rules(double smallBlind, double bigBlind, double straddleAmount, double ante,
-				 int timeLimitSecs, int maxCapacity, GameType gameType, double minimumChipAmount) {
-		this(smallBlind, bigBlind, ante, timeLimitSecs, maxCapacity, gameType, minimumChipAmount);
-		this.straddleAmount = straddleAmount;
-	}
-	
-	
-    public double[] getAntes() {
-		return antes;
-	}
-
-	public GameType getGameType() {
+	GameType getGameType() {
 		return gameType;
 	}
 
-	
-	public double[] getPrizes() {
+	public int[] getPrizes() {
 		return prizes;
 	}
 
-	public boolean isTourney() {
-		return isTourney;
-	}
-
-	public int getBlindLevelTimeMinutes() {
-		return blindLevelTimeMinutes;
-	}
-
-	public double[] getBigBlinds() {
-		return bigBlinds;
-	}
-
-	public double[] getSmallBlinds() {
-		return smallBlinds;
-	}
-
-	public double getSmallBlind() {
+	int getSmallBlind() {
 		return this.smallBlind;
 	}
-	
-	public void setSmallBlind(double smallBlind) {
-		this.smallBlind = smallBlind;
-	}
 
-	public double getBigBlind() {
+	int getBigBlind() {
 		return bigBlind;
 	}
 
-	public void setBigBlind(double bigBlind) {
-		this.bigBlind = bigBlind;
-	}
-
-	public double getAnte() {
+	int getAnte() {
 		return ante;
 	}
 
-	public void setAnte(double ante) {
-		this.ante = ante;
-	}
-
-	public int getTimeLimitSecs() {
+	int getTimeLimitSecs() {
 		return timeLimitSecs;
 	}
 	
-	public int getMaxCapacity() {
+	int getMaxCapacity() {
 		return this.maxCapacity;
 	}
 
-	public double getMinimumChipAmount() {
+	int getMinimumChipAmount() {
 		return minimumChipAmount;
 	}
 
-	public void setMinimumChipAmount(double minimumChipAmount) {
-		this.minimumChipAmount = minimumChipAmount;
+	public static RulesBuilder builder() {
+		return new RulesBuilder();
 	}
 
+	public static class RulesBuilder {
+		private GameType gameType;
+		private int[] prizes;
+		private int smallBlind;
+		private int bigBlind;
+		private int ante = 0;
+		private int timeLimitSecs;
+		private int maxCapacity;
+		private int minimumChipAmount;
 
-	@Override
-	public String toString() {
-		return "Big Blind: " + this.bigBlind + ", Small Blind: " + this.smallBlind + ", Ante: " + this.ante +
-				", Time limit: " + this.timeLimitSecs + "s";
+	    public RulesBuilder gameType(final GameType gameType) {
+			this.gameType = gameType;
+			return this;
+		}
+
+		public RulesBuilder prizes(final int[] prizes) {
+	    	this.prizes = prizes;
+	    	return this;
+		}
+
+		public RulesBuilder smallBlind(final int smallBlind) {
+	    	this.smallBlind = smallBlind;
+	    	return this;
+		}
+
+		public RulesBuilder bigBlind(final int bigBlind) {
+	    	this.bigBlind = bigBlind;
+	    	return this;
+		}
+
+		public RulesBuilder ante(final int ante) {
+	    	this.ante = ante;
+	    	return this;
+		}
+
+		public RulesBuilder timeLimitSecs(final int timeLimitSecs) {
+	    	this.timeLimitSecs = timeLimitSecs;
+	    	return this;
+		}
+
+		public RulesBuilder maxCapacity(final int maxCapacity) {
+	    	this.maxCapacity = maxCapacity;
+	    	return this;
+		}
+
+		public RulesBuilder minimumChipAmount(final int minimumChipAmount) {
+	    	this.minimumChipAmount = minimumChipAmount;
+	    	return this;
+		}
+
+		public Rules build() {
+	    	return new Rules(this);
+		}
+	}
+
+	private static void validateRulesBuilder(final RulesBuilder rulesBuilder) {
+		if (rulesBuilder.minimumChipAmount == 0 || rulesBuilder.gameType == null || rulesBuilder.maxCapacity == 0
+				|| rulesBuilder.smallBlind == 0 || rulesBuilder.bigBlind == 0) {
+			throw new IllegalArgumentException("Failed to create a rules object: minimumChipAmount, gameType, "
+					+ "maxCapacity, smallBlind, and bigBlind must all be set.");
+		}
 	}
 }

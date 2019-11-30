@@ -51,12 +51,10 @@ public class Card {
 
     @Override
     public final boolean equals(Object obj) {
-        try {
-            if (obj.getClass().isAssignableFrom(this.getClass())) {
-                final Card otherCard = (Card) obj;
-                return this.getRank().equals(otherCard.getRank()) && this.getSuit().equals(otherCard.getSuit());
-            }
-        } catch (NullPointerException ignored) { }
+        if (obj != null && obj.getClass().isAssignableFrom(this.getClass())) {
+            final Card otherCard = (Card) obj;
+            return this.getRank().equals(otherCard.getRank()) && this.getSuit().equals(otherCard.getSuit());
+        }
         return false;
     }
 

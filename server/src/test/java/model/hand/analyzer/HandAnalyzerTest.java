@@ -1,4 +1,4 @@
-package handAnalyzerTest;
+package model.hand.analyzer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -6,12 +6,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import model.hand.analyzer.HandAnalyzerComparator;
-import model.hand.analyzer.OmahaAnalyzer;
 import org.junit.Test;
 
-import model.hand.analyzer.HandAnalyzer;
-import model.hand.analyzer.HoldEmAnalyzer;
 import model.card.Card;
 import model.card.Card.Rank;
 import model.card.Card.Suit;

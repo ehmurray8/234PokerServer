@@ -13,18 +13,23 @@ public class TestGame extends Game {
     private int numRuns = 0;
     private List<Card> communityCards;
 
-    public TestGame(List<Player> players, Rules rules, ClientHandler clientHandler, List<Card> communityCards) {
+    TestGame(List<Player> players, Rules rules, ClientHandler clientHandler, List<Card> communityCards) {
         super(players, rules, clientHandler);
         dealerNum = 0;
         this.communityCards = communityCards;
     }
 
-    public void setNumRuns(int numRuns) {
+    void setNumRuns(int numRuns) {
         this.numRuns = numRuns;
     }
 
-    public void moveDealer() {
+    void moveDealer() {
         incrementDealerNum();
+    }
+
+    Hand createHand() {
+        return new TestHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
+                playersInHand, rules.getMinimumChipAmount());
     }
 
     @Override

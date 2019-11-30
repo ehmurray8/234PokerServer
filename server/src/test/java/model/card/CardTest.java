@@ -1,4 +1,4 @@
-package cardTest;
+package model.card;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -8,7 +8,6 @@ import java.util.Comparator;
 
 import org.junit.Test;
 
-import model.card.Card;
 import model.card.Card.Rank;
 import model.card.Card.Suit;
 
