@@ -332,9 +332,9 @@ public abstract class Hand {
         players.forEach(player -> createAnalyzers(player, analyzers));
         List<Integer> potWinnerIndexes = new ArrayList<>();
         IntStream.range(0, pot.getPlayers().size()).filter(i -> analyzers.get(i) != null).forEach(i -> {
-            if(potWinnerIndexes.isEmpty()) {
-                potWinnerIndexes.add(i);
-            }
+//            if(potWinnerIndexes.isEmpty()) {
+//                potWinnerIndexes.add(i);
+//            }
             updatePotWinnerIndexes(analyzers, potWinnerIndexes, i);
         });
         winnings = pot.getAmount() / potWinnerIndexes.size();
@@ -368,7 +368,12 @@ public abstract class Hand {
 
     private void updatePotWinnerIndexes(List<HandAnalyzer> handAnalyzers, List<Integer> potWinnerIndexes, int index) {
         HandAnalyzer newAnalyzer = handAnalyzers.get(index);
-        HandAnalyzer currentWinnerAnalyzer = handAnalyzers.get(potWinnerIndexes.get(0));
+        HandAnalyzer currentWinnerAnalyzer;
+        if (potWinnerIndexes.isEmpty()) {
+            currentWinnerAnalyzer = newAnalyzer;
+        } else {
+            currentWinnerAnalyzer = handAnalyzers.get(potWinnerIndexes.get(0));
+        }
         if(HandAnalyzer.HAND_ANALYZER_COMPARATOR.compare(newAnalyzer, currentWinnerAnalyzer) > 0) {
             winningCards.clear();
             winningCards.addAll(newAnalyzer.getBestHand());
