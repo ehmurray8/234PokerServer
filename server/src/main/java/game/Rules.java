@@ -27,7 +27,7 @@ public class Rules {
 		this.minimumChipAmount = rulesBuilder.minimumChipAmount;
 	}
 
-	GameType getGameType() {
+	public GameType getGameType() {
 		return gameType;
 	}
 
@@ -35,27 +35,27 @@ public class Rules {
 		return prizes;
 	}
 
-	int getSmallBlind() {
+	public int getSmallBlind() {
 		return this.smallBlind;
 	}
 
-	int getBigBlind() {
+	public int getBigBlind() {
 		return bigBlind;
 	}
 
-	int getAnte() {
+	public int getAnte() {
 		return ante;
 	}
 
-	int getTimeLimitSecs() {
+	public int getTimeLimitSecs() {
 		return timeLimitSecs;
 	}
 	
-	int getMaxCapacity() {
+	public int getMaxCapacity() {
 		return this.maxCapacity;
 	}
 
-	int getMinimumChipAmount() {
+	public int getMinimumChipAmount() {
 		return minimumChipAmount;
 	}
 

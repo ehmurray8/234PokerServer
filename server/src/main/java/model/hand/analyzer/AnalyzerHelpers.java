@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-class AnalyzerHelpers {
+final class AnalyzerHelpers {
+    private AnalyzerHelpers() { }
+
     static final int PAIR_FREQUENCY = 2, TRIPS_FREQUENCY = 3, QUADS_FREQUENCY = 4;
     static final int STRAIGHT_LENGTH = 5, BROADWAY_LENGTH = 6;
 

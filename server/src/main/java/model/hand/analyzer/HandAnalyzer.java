@@ -8,7 +8,6 @@ import model.card.Card;
 import model.card.Card.Rank;
 import model.hand.representation.HandRank;
 
-import static extensions.ListExtensions.reverseList;
 import static model.hand.analyzer.AnalyzerHelpers.*;
 
 /**
@@ -28,31 +27,18 @@ public abstract class HandAnalyzer {
     private ArrayList<Rank> fullHouseRanks;
     private List<List<Card>> allHands;
     private Map<Rank, Integer> rankMap;
-    private boolean isShortDeck = false;
     private List<Card> bestHand;
 
 
     HandAnalyzer(List<Card> fullHand) {
-        this();
-        this.fullHand = fullHand;
-        rankMap = handToRankMap(fullHand);
-        analyze();
-    }
-
-    HandAnalyzer(List<Card> fullHand, boolean isShortDeck) {
-        this();
-        this.fullHand = fullHand;
-        rankMap = handToRankMap(fullHand);
-        this.isShortDeck = isShortDeck;
-        analyze();
-    }
-
-    private HandAnalyzer() {
         topRank = HandRank.HIGH_CARD;
         bestHandRanks = new ArrayList<>();
         pairRanks = new ArrayList<>();
         fullHouseRanks = new ArrayList<>();
         bestHand = new ArrayList<>();
+        this.fullHand = fullHand;
+        rankMap = handToRankMap(fullHand);
+        analyze();
     }
 
     public final HandRank getTopRank() {
@@ -80,7 +66,7 @@ public abstract class HandAnalyzer {
         List<SimpleAnalyzer> topRankAnalyzers = createAnalyzersForTopRankHands();
         findTopHand(topRankAnalyzers);
         pairRanks = topHandAnalyzer.getPairRanks();
-        reverseList(pairRanks);
+        pairRanks.sort(Collections.reverseOrder());
         fullHouseRanks = (ArrayList<Rank>) topHandAnalyzer.getFullHouseRanks();
     }
 
@@ -123,10 +109,7 @@ public abstract class HandAnalyzer {
     }
 
     final List<Rank> getNonPairRanks() {
-        List<Rank> nonPairRanks = bestHandRanks.stream().filter(rank -> !pairRanks.contains(rank))
-                .collect(Collectors.toList());
-        reverseList(nonPairRanks);
-        return nonPairRanks;
+        return bestHandRanks.stream().filter(rank -> !pairRanks.contains(rank)).sorted(Collections.reverseOrder()).collect(Collectors.toList());
     }
 
     final List<Card> getFullHand() {
@@ -140,7 +123,7 @@ public abstract class HandAnalyzer {
     final void findPairRanks() {
         pairRanks = rankMap.entrySet().stream().filter(entry -> entry.getValue() > 1).map(Entry::getKey)
                 .collect(Collectors.toList());
-        reverseList(pairRanks);
+        pairRanks.sort(Collections.reverseOrder());
     }
 
     final void findFullHouseRanks() {

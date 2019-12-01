@@ -15,7 +15,7 @@ class FiveCardAnalyzer  {
     final List<Card> hand;
     private final ArrayList<Card.Rank> pairRanks;
     private boolean has3Kind = false, has4Kind = false, hasFlush = false, hasBroadway = false;
-    boolean hasStraight;
+    private boolean hasStraight;
 
     public HandRank getRank() {
         return rank;
@@ -100,7 +100,7 @@ class FiveCardAnalyzer  {
         }
     }
 
-    void checkCardsAreSequential(List<Card.Rank> rankList) {
+    private void checkCardsAreSequential(List<Card.Rank> rankList) {
         hasStraight = true;
         for (int i = 0; i < hand.size() - 1 && hasStraight; i++) {
             if (rankList.get(i + 1).getStrength() - rankList.get(i).getStrength() != 1) {

@@ -189,30 +189,8 @@ public class Game {
     }
 
 	Hand createHand() {
-	    GameType currGameType = rules.getGameType();
-        if(currGameType == GameType.MIXED) {
-            currGameType = askDealerForGameType();
-        }
-
-        Hand currentHand;
-        switch(currGameType){
-        case HOLDEM:
-            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-                    playersInHand, rules.getMinimumChipAmount());
-            break;
-        case PINEAPPLE:
-            currentHand = new PineappleHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand,
-                    rules.getMinimumChipAmount());
-            break;
-        case OMAHA:
-            currentHand = new OmahaHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(), playersInHand,
-                    rules.getMinimumChipAmount());
-            break;
-        default:
-            currentHand = new TexasHoldEmHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-                    playersInHand, rules.getMinimumChipAmount());
-        }
-        return currentHand;
+	    GameType currentGameType = rules.getGameType() == GameType.MIXED ? askDealerForGameType() : rules.getGameType();
+        return Hand.createHand(rules, playersInHand, currentGameType);
     }
 
     protected void runHand() {

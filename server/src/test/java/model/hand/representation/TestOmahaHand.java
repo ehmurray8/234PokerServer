@@ -1,16 +1,16 @@
 package model.hand.representation;
 
-import java.util.List;
-
 import game.Rules;
 import model.card.Card;
 import model.hand.analyzer.HandAnalyzer;
 import model.hand.analyzer.OmahaAnalyzer;
 import model.player.Player;
 
-class OmahaHand extends Hand {
+import java.util.List;
 
-    OmahaHand(final Rules rules, final List<Player> players, final int numberOfCards) {
+public class TestOmahaHand extends TestHand {
+
+    public TestOmahaHand(final Rules rules, final List<Player> players, final int numberOfCards) {
         super(rules, players, numberOfCards);
     }
 

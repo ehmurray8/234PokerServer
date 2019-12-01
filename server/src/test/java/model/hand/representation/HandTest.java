@@ -2,7 +2,9 @@ package model.hand.representation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import game.Rules;
 import model.card.Card;
 import model.option.Option;
 import model.player.TestPlayer;
@@ -11,6 +13,9 @@ import org.junit.Test;
 
 import model.player.Player;
 
+import static game.Rules.GameType.HOLDEM;
+import static game.Rules.GameType.PINEAPPLE;
+import static game.Rules.GameType.OMAHA;
 import static org.junit.Assert.*;
 
 
@@ -29,7 +34,7 @@ public class HandTest {
 		player1 = new TestPlayer(2000, "P1");
 		player2 = new TestPlayer(2000, "P2");
 		players = new ArrayList<>(Arrays.asList(player1, player2));
-		hand = new TestHand(60, 120, 30, players, 1);
+		hand = createHand(60, 120, 0, 1, HOLDEM, players);
 	}
 
 	@Test
@@ -43,7 +48,7 @@ public class HandTest {
 
 	@Test
 	public void testDealOmahaHand() {
-		var omahaHand = new OmahaHand(20, 40, 0, players, 1);
+		Hand omahaHand = createHand(20, 40, 0, 1, OMAHA, players);
 
 		player1.setMaxCards(4);
 		player2.setMaxCards(4);
@@ -57,7 +62,7 @@ public class HandTest {
 
 	@Test
 	public void testDealPineappleHand() {
-		var pineappleHand = new PineappleHand(20, 40, 0, players, 1);
+		Hand pineappleHand = createHand(20, 40, 0, 1, PINEAPPLE, players);
 
 		player1.setMaxCards(3);
 		player2.setMaxCards(3);
@@ -89,6 +94,7 @@ public class HandTest {
 
 	@Test
 	public void testChargeAntesBasic() {
+	    hand = createHand(60, 120, 30, 1, HOLDEM, players);
 		hand.dealInitialHand();
 		hand.chargeAntes();
 
@@ -107,7 +113,7 @@ public class HandTest {
 		Player p5 = new Player(700, "P5");
 		Player p6 = new Player(100000, "P6");
 		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-		Hand hand = new TexasHoldEmHand(60, 120, 30, players, 1);
+		Hand hand = createHand(60, 120, 30, 1, HOLDEM, players);
 		hand.dealInitialHand();
 		hand.chargeAntes();
         assertEquals(4970, p1.getBalance(), 0.0);
@@ -138,7 +144,8 @@ public class HandTest {
 		Player p5 = new Player(700, "P5");
 		Player p6 = new Player(100000, "P6");
 		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-		Hand hand = new TexasHoldEmHand(60, 120, 30, players, 1);
+
+		Hand hand = createHand(60, 120, 30, 1, HOLDEM, players);
 		hand.dealInitialHand();
 		hand.chargeSmallBlind(1);
 		hand.chargeBigBlind(2);
@@ -160,7 +167,7 @@ public class HandTest {
 		Player p5 = new Player(7, "P5");
 		Player p6 = new Player(100, "P6");
 		ArrayList<Player> players = new ArrayList<>(Arrays.asList(p1, p2, p3, p4, p5, p6));
-		Hand hand = new TexasHoldEmHand(60, 120, 30, players, 1);
+		Hand hand = createHand(60, 120, 30, 1, HOLDEM, players);
 		hand.dealInitialHand();
 		hand.chargeAntes();
         assertEquals(4, hand.getClosedPots().size());
@@ -194,7 +201,7 @@ public class HandTest {
 		var player = new Player(10.0, "P1");
 		var players = new ArrayList<Player>();
 		players.add(player);
-		Hand hand = new TexasHoldEmHand(10.0, 20.0, 0.0, players, 1);
+		Hand hand = createHand(10, 20, 0, 1, HOLDEM, players);
 		assertFalse(hand.playersBetting());
 	}
 
@@ -459,5 +466,26 @@ public class HandTest {
         assertTrue(options.contains(new Option(Option.OptionType.RAISE, bet.getAmount() * 2)));
         assertTrue(options.contains(new Option(Option.OptionType.ALLIN, player1.getBalance())));
         assertTrue(options.contains(new Option(Option.OptionType.FOLD, 0)));
+	}
+
+	private TestHand createHand(final int smallBlind, final int bigBlind, final int ante, final int minimumChipAmount,
+							final Rules.GameType gameType, final List<Player> players) {
+		Rules rules = Rules.builder()
+				.smallBlind(smallBlind)
+				.bigBlind(bigBlind)
+				.ante(ante)
+				.minimumChipAmount(minimumChipAmount)
+				.gameType(gameType)
+				.maxCapacity(6)
+				.timeLimitSecs(1)
+				.build();
+		if (gameType == HOLDEM) {
+			return new TestHand(rules, players, 2);
+		} else if (gameType == Rules.GameType.PINEAPPLE) {
+			return new TestHand(rules, players, 3);
+		} else if (gameType == Rules.GameType.OMAHA) {
+			return new TestOmahaHand(rules, players, 4);
+		}
+		throw new IllegalArgumentException("Cannot create hand.");
 	}
 }

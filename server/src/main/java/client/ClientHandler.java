@@ -58,7 +58,7 @@ public class ClientHandler {
             if (this.server != null) {
                 this.server.addEventListener("option" + eventId, Map.class, (responseClient, data, ackRequest) -> {
                     System.out.println(data.toString());
-                    var optionType = Option.stringToOptionType(data.get("type"));
+                    var optionType = Option.stringToOptionType((String) data.get("type"));
                     if (optionType != null) {
                         try {
                             double amount = Double.parseDouble(data.get("amount").toString());

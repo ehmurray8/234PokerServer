@@ -15,7 +15,6 @@ public class Option {
 
         private final String string;
 
-
         OptionType(String string) {
             this.string = string;
         }
@@ -39,14 +38,7 @@ public class Option {
         return amount;
     }
 
-    public static Option.OptionType stringToOptionType(Object optionObject) {
-        String optionString;
-        try {
-            optionString = (String) optionObject;
-        } catch (ClassCastException e) {
-            return null;
-        }
-
+    public static Option.OptionType stringToOptionType(String optionString) {
         if (optionString.equalsIgnoreCase("check")) {
             return Option.OptionType.CHECK;
         } else if (optionString.equalsIgnoreCase("fold")) {

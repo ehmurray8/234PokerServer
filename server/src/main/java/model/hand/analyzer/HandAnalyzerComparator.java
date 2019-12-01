@@ -3,17 +3,17 @@ package model.hand.analyzer;
 import model.card.Card;
 import model.hand.representation.HandRank;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static extensions.ListExtensions.reverseList;
 
 public class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
     
     private List<Card.Rank> sortedHand;
     private List<Card.Rank> otherSortedHand;
-    HandAnalyzer handAnalyzer;
-    HandAnalyzer otherHandAnalyzer;
+    private HandAnalyzer handAnalyzer;
+    private HandAnalyzer otherHandAnalyzer;
 
     @Override
     public int compare(HandAnalyzer ha1, HandAnalyzer ha2) {
@@ -23,7 +23,7 @@ public class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
         return compareStrengths(value);
     }
 
-    int compareStrengths(int value) {
+    private int compareStrengths(int value) {
         if (value == 0 && !handAnalyzer.getTopRank().equals(HandRank.ROYAL_FLUSH)) {
             initSortedHands();
             HandRank rank = handAnalyzer.getTopRank();
@@ -35,8 +35,8 @@ public class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
     private void initSortedHands() {
         sortedHand = handAnalyzer.getBestHandRanks();
         otherSortedHand = otherHandAnalyzer.getBestHandRanks();
-        reverseList(sortedHand);
-        reverseList(otherSortedHand);
+        sortedHand.sort(Collections.reverseOrder());
+        otherSortedHand.sort(Collections.reverseOrder());
     }
 
     private int compareEqualRanks(HandRank rank) {
@@ -77,9 +77,9 @@ public class HandAnalyzerComparator implements Comparator<HandAnalyzer> {
 
     private int comparePairs() {
         var pairRanks = handAnalyzer.getPairRanks();
-        reverseList(pairRanks);
+        pairRanks.sort(Collections.reverseOrder());
         var otherPairRanks = otherHandAnalyzer.getPairRanks();
-        reverseList(otherPairRanks);
+        otherPairRanks.sort(Collections.reverseOrder());
 
         int comparison = compareCardsDescending(pairRanks, otherPairRanks);
         if (comparison != 0) {

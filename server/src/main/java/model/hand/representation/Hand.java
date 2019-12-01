@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import game.Rules;
 import model.card.Card;
 import model.card.Deck;
 import model.hand.analyzer.HandAnalyzer;
@@ -22,18 +23,16 @@ import model.player.Player;
  */
 public abstract class Hand {
 
-    final Deck deck;
-    final ArrayList<Card> communityCards;
-    private double smallBlindAmount;
-    private double bigBlindAmount;
-    private double anteAmount;
-    ArrayList<Player> players;
+    private final Deck deck;
+    private final Rules rules;
+    private final int numberOfCards;
+    private final List<Card> communityCards;
+    private final List<Player> players;
     private double lastRaiseAmount = 0;
-    private Set<Card> winningCards;
+    private final Set<Card> winningCards;
     private double winnings = 0;
     private List<Player> winningPlayers;
     private String winningHandString = "";
-    private double minimumChipAmount;
 
     /**	Pots that are currently opened, main pot is at index 0. */
     private final List<Pot> openPots;
@@ -41,13 +40,11 @@ public abstract class Hand {
     /** All openPots that have been opened during the hand. */
     private final List<Pot> closedPots;
 
-    Hand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players, double minimumChipAmount) {
-        this.deck = new Deck();
-        this.smallBlindAmount = smallBlindAmount;
-        this.bigBlindAmount = bigBlindAmount;
-        this.anteAmount = anteAmount;
+    protected Hand(final Rules rules, final List<Player> players, final int numberOfCards) {
+        this.rules = rules;
+        this.numberOfCards = numberOfCards;
         this.players = players;
-        this.minimumChipAmount = minimumChipAmount;
+        deck = new Deck();
         communityCards = new ArrayList<>();
         openPots = new ArrayList<>();
         closedPots = new ArrayList<>();
@@ -55,17 +52,37 @@ public abstract class Hand {
         openPots.add(new Pot(players));
     }
 
-    public abstract void dealInitialHand();
-
-    public double getBetStepSize() {
-        return minimumChipAmount;
+    public static Hand createHand(final Rules rules, final List<Player> players, final Rules.GameType handGameType) {
+        if (players == null)  {
+            throw new NullPointerException("Cannot create a Hand with a null list of players");
+        }
+        if (players.size() < 2) {
+            throw new IllegalArgumentException("Cannot create a Hand with less than 2 players.");
+        }
+        switch (handGameType) {
+            case HOLDEM: return new TexasHoldEmHand(rules, players, 2);
+            case PINEAPPLE: return new TexasHoldEmHand(rules, players, 3);
+            case OMAHA: return new OmahaHand(rules, players, 4);
+            case MIXED: throw new IllegalArgumentException("Cannot create a Hand with a GameType of MIXED.");
+        }
+        return null;
     }
 
-    public List<Pot> getOpenPots() {
+    public void dealInitialHand() {
+        IntStream.range(0, numberOfCards).forEach(iteration ->
+            players.forEach(player -> player.addCard(deck.dealCard()))
+        );
+    }
+
+    public double getBetStepSize() {
+        return rules.getMinimumChipAmount();
+    }
+
+    List<Pot> getOpenPots() {
     	return openPots;
     }
     
-    public List<Pot> getClosedPots() {
+    List<Pot> getClosedPots() {
     	return closedPots;
     }
 
@@ -88,29 +105,23 @@ public abstract class Hand {
         return winningPlayers;
     }
 
-    public final ArrayList<Card> getCommunityCards() {
+    public List<Card> getCommunityCards() {
         return communityCards;
-    }
-
-    public final String toString() {
-        double totalAmountInPots = openPots.stream().map(Pot::getAmount).reduce(0.0, (pot1, pot2) -> pot1 + pot2);
-        return communityCards.toString() + " Pot: " + totalAmountInPots + " Big: " +
-               bigBlindAmount + " Small: " + smallBlindAmount;
     }
 
     public final void dealFlop() {
         deck.dealCard();
-        IntStream.range(0, 3).forEach(iteration -> communityCards.add(deck.dealCard()));
+        IntStream.range(0, 3).forEach(iteration -> getCommunityCards().add(deck.dealCard()));
     }
 
     public final void dealTurn() {
         deck.dealCard();
-        communityCards.add(deck.dealCard());
+        getCommunityCards().add(deck.dealCard());
     }
 
     public final void dealRiver() {
         deck.dealCard();
-        communityCards.add(deck.dealCard());
+        getCommunityCards().add(deck.dealCard());
     }
 
     private void chargeAmount(double amount, List<Player> playersToCharge) {
@@ -220,27 +231,27 @@ public abstract class Hand {
     }
 
     public final void chargeAntes() {
-    	openPots.get(0).setAmountOwed(anteAmount);
-    	chargeAmount(anteAmount, players);
+    	openPots.get(0).setAmountOwed(rules.getAnte());
+    	chargeAmount(rules.getAnte(), players);
     	players.forEach(Player::clearAmtThisTurn);
     	removeOldPots();
     }
     
     public final void chargeBigBlind(int bigBlindPos) {
-    	double potNum = bigBlindAmount;
-    	lastRaiseAmount = bigBlindAmount;
+    	double potNum = rules.getBigBlind();
+    	lastRaiseAmount = rules.getBigBlind();
     	if(this.openPots.size() > 1) {
-    		potNum = bigBlindAmount - openPots.get(0).getAmountOwed();
+    		potNum = rules.getBigBlind() - openPots.get(0).getAmountOwed();
     	}
     	openPots.get(openPots.size() - 1).setAmountOwed(potNum);
-        chargeAmount(bigBlindAmount, Collections.singletonList(players.get(bigBlindPos)));
+        chargeAmount(rules.getBigBlind(), Collections.singletonList(players.get(bigBlindPos)));
     	removeBrokePlayers();
     	removeOldPots();
     }
     
     public final void chargeSmallBlind(int smallBlindPos) {
-    	openPots.get(0).setAmountOwed(smallBlindAmount);
-        chargeAmount(smallBlindAmount, Collections.singletonList(players.get(smallBlindPos)));
+    	openPots.get(0).setAmountOwed(rules.getSmallBlind());
+        chargeAmount(rules.getSmallBlind(), Collections.singletonList(players.get(smallBlindPos)));
     }
     
     public void setupBetRound() {
@@ -439,9 +450,6 @@ public abstract class Hand {
     }
 
     private double minBetAmount() {
-        if(bigBlindAmount > 0) {
-            return bigBlindAmount;
-        }
-        return anteAmount;
+        return rules.getBigBlind() > 0 ? rules.getBigBlind() : rules.getAnte();
     }
 }

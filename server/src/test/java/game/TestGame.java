@@ -28,8 +28,7 @@ public class TestGame extends Game {
     }
 
     Hand createHand() {
-        return new TestHand(rules.getSmallBlind(), rules.getBigBlind(), rules.getAnte(),
-                playersInHand, rules.getMinimumChipAmount());
+        return new TestHand(rules, playersInHand, 2);
     }
 
     @Override

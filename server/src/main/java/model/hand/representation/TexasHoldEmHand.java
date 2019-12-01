@@ -1,21 +1,13 @@
 package model.hand.representation;
 
-import java.util.ArrayList;
-import java.util.stream.IntStream;
+import java.util.List;
 
+import game.Rules;
 import model.player.Player;
 
-public class TexasHoldEmHand extends Hand {
+class TexasHoldEmHand extends Hand {
 
-    public TexasHoldEmHand(double smallBlindAmount, double bigBlindAmount, double anteAmount,
-                           ArrayList<Player> players, double minimumChipAmount) {
-        super(smallBlindAmount, bigBlindAmount, anteAmount, players, minimumChipAmount);
-    }
-
-    @Override
-    public final void dealInitialHand() {
-        IntStream.range(0, 2).forEach(iteration ->
-            players.forEach(player -> player.addCard(deck.dealCard()))
-        );
+    TexasHoldEmHand(final Rules rules, final List<Player> players, final int numberOfCards) {
+        super(rules, players, numberOfCards);
     }
 }

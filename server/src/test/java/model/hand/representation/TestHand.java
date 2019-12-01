@@ -1,23 +1,32 @@
 package model.hand.representation;
 
+import game.Rules;
 import model.card.Card;
 import model.player.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-public class TestHand extends TexasHoldEmHand {
+public class TestHand extends Hand {
 
-    public TestHand(double smallBlindAmount, double bigBlindAmount, double anteAmount, ArrayList<Player> players,
-                    double minimumChipAmount) {
-        super(smallBlindAmount, bigBlindAmount, anteAmount, players, minimumChipAmount);
+    private List<Card> testCommunityCards;
+
+    public TestHand(final Rules rules, final List<Player> players, final int numberOfCards) {
+        super(rules, players, numberOfCards);
+        this.testCommunityCards = new ArrayList<>();
     }
 
-    public void setCommunityCards(Card[] cards) {
-        communityCards.addAll(Arrays.asList(cards));
+    void setCommunityCards(Card[] cards) {
+        testCommunityCards.addAll(Arrays.asList(cards));
     }
 
     public void addCommunityCard(Card card) {
-        communityCards.add(card);
+        testCommunityCards.add(card);
+    }
+
+    @Override
+    public List<Card> getCommunityCards() {
+        return testCommunityCards;
     }
 }
