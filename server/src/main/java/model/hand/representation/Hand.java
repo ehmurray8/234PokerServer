@@ -65,6 +65,10 @@ public abstract class Hand {
         );
     }
 
+    public int getNumberOfCards() {
+        return numberOfCards;
+    }
+
     public int getBetStepSize() {
         return rules.getMinimumChipAmount();
     }
@@ -330,9 +334,8 @@ public abstract class Hand {
         IntStream.range(0, pot.getPlayers().size()).filter(i -> analyzers.get(i) != null).forEach(i -> {
             if(potWinnerIndexes.isEmpty()) {
                 potWinnerIndexes.add(i);
-            } else {
-                updatePotWinnerIndexes(analyzers, potWinnerIndexes, i);
             }
+            updatePotWinnerIndexes(analyzers, potWinnerIndexes, i);
         });
         winnings = pot.getAmount() / potWinnerIndexes.size();
         winningPlayers = new ArrayList<>();

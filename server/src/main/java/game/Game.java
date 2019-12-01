@@ -38,7 +38,7 @@ public class Game {
 	    return Arrays.stream(players).map(Player::getPlayerId).filter(pid -> pid == playerId).toArray().length > 0;
     }
 
-	public int getDealerNum() {
+	int getDealerNum() {
 		return dealerNum;
 	}
 
@@ -51,8 +51,12 @@ public class Game {
             dealerNum = (dealerNum + 1) % players.length;
 		} while (players[dealerNum] == null || players[dealerNum].isSittingOut());
 	}
-	
-	private int findStartingLocation() {
+
+    public ClientHandler getClientHandler() {
+        return clientHandler;
+    }
+
+    private int findStartingLocation() {
 		int startLoc = -1;
 		int num = 1;
 		do {
@@ -65,7 +69,7 @@ public class Game {
 		return startLoc;
 	}
 	
-	public int smallBlindNum() {
+	int smallBlindNum() {
 		int num = 1;
 		int smallBlindNum;
 		do {
@@ -75,7 +79,7 @@ public class Game {
 		return smallBlindNum;
 	}
 	
-	public int bigBlindNum() {
+	int bigBlindNum() {
 		int num = 1;
 		int bigBlindNum;
 		do {
@@ -106,7 +110,7 @@ public class Game {
 		}
 	}
 
-	public void removePlayer(Player player) {
+	void removePlayer(Player player) {
 	    for(int i = 0; i < players.length; i++) {
             if(players[i] == player) {
                 players[i] = null;
@@ -115,7 +119,7 @@ public class Game {
         playersInHand.remove(player);
 	}
 
-	public boolean tableFull() {
+	boolean tableFull() {
 		return getNumPlayers() == rules.getMaxCapacity();
 	}
 	
@@ -124,8 +128,7 @@ public class Game {
 	}
 	
 	private void removeBrokePlayers() {
-        Arrays.stream(players).filter(player -> player != null && player.getBalance() == 0)
-                .forEach(player -> player.setSittingOut(true));
+        Arrays.stream(players).filter(player -> player != null && player.getBalance() == 0).forEach(player -> player.setSittingOut(true));
 	}
 	
 	void bettingRound(boolean resetBetting) {
@@ -144,11 +147,10 @@ public class Game {
 	}
 	
 	private Option askPlayerForOption(List<Option> options, Player player) {
-        return clientHandler.getDesiredOption(player, options, rules.getTimeLimitSecs(), this.currentHand,
-                Arrays.asList(this.players));
+        return clientHandler.getDesiredOption(player, options, rules.getTimeLimitSecs(), this.currentHand, Arrays.asList(this.players));
 	}
 	
-	public boolean tableEmpty() {
+	boolean tableEmpty() {
 	    return Arrays.stream(players).allMatch(Objects::isNull);
 	}
 	

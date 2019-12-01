@@ -15,7 +15,6 @@ public class TestClientHandler extends ClientHandler {
     private List<OptionSelection> optionNumList = null;
     private int currentSelectionNum = 0;
 
-
     public void setGameType(Rules.GameType gameType) {
         this.gameType = gameType;
     }

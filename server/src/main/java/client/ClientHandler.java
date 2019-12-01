@@ -1,40 +1,31 @@
 package client;
 
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.SocketIOServer;
 import game.Rules;
 import model.card.Card;
 import model.hand.representation.Hand;
 import model.option.Option;
+import model.option.OptionMonitor;
 import model.player.Player;
-import server.Server;
 
 import java.util.*;
 
 public class ClientHandler {
 
-    private Map<UUID, SocketIOClient> clients;
-    private SocketIOServer server = null;
-    private Option optionSelection = null;
+    private Map<UUID, ClientWrapper> clients;
     private Map<UUID, ClientMessage> pendingMessages;
+    private Map<UUID, OptionMonitor> eventMonitors;
 
-    private static Random RANDOM_GENERATOR = new Random();
-
-    public ClientHandler(SocketIOServer server) {
-        this();
-        this.server = server;
+    public ClientHandler() {
+        clients = new HashMap<>();
         this.pendingMessages = new HashMap<>();
+        this.eventMonitors = new HashMap<>();
     }
 
     public ClientMessage getPendingMessage(UUID playerId) {
         return pendingMessages.get(playerId);
     }
 
-    ClientHandler() {
-        clients = new HashMap<>();
-    }
-
-    public void addClient(UUID playerId, SocketIOClient client) {
+    public void addClient(UUID playerId, ClientWrapper client) {
         clients.remove(playerId);
         clients.put(playerId, client);
     }
@@ -45,60 +36,47 @@ public class ClientHandler {
 
     public Option getDesiredOption(Player player, List<Option> options, int timeoutSeconds, Hand hand, List<Player> players) {
         var client = clients.get(player.getPlayerId());
-        var eventId = RANDOM_GENERATOR.nextInt(1_000_000) + 1;
-        final var monitor = new Object();
-        if (client == null) {
-            return options.get(0);
-        } else {
-            var actingPlayerData = ClientMessage.createClientMessage(player, options, null, players, hand, timeoutSeconds, eventId);
-            client.sendEvent(Server.GAME_UPDATE_EVENT, actingPlayerData);
-            pendingMessages.put(player.getPlayerId(), actingPlayerData);
-            optionSelection = options.get(0);
+        var eventId = UUID.randomUUID();
+        eventMonitors.put(eventId, new OptionMonitor());
 
-            if (this.server != null) {
-                this.server.addEventListener("option" + eventId, Map.class, (responseClient, data, ackRequest) -> {
-                    System.out.println(data.toString());
-                    var optionType = Option.stringToOptionType((String) data.get("type"));
-                    if (optionType != null) {
-                        try {
-                            int amount = Integer.parseInt(data.get("amount").toString());
-                            optionSelection = new Option(optionType, amount);
-                            synchronized (monitor) {
-                                monitor.notifyAll();
-                            }
-                        } catch (ClassCastException | NumberFormatException ignored) { } }
-                });
-                System.out.println("Listening for option" + eventId);
-            }
+        Option optionSelection = options.get(0);
+        if (client != null) {
+            ClientMessage actingPlayerData = ClientMessage.createClientMessage(player, options, null,
+                    players, hand, timeoutSeconds, eventId.toString());
+            client.sendGameUpdateEvent(actingPlayerData);
+            pendingMessages.put(player.getPlayerId(), actingPlayerData);
 
             for (var otherPlayer: players) {
                 if (otherPlayer != null && otherPlayer.getPlayerId() != player.getPlayerId()) {
                     var otherPlayerData = ClientMessage.createClientMessage(otherPlayer, null, null,
-                            players, hand, timeoutSeconds, eventId);
+                            players, hand, timeoutSeconds, eventId.toString());
                     var otherPlayerId = otherPlayer.getPlayerId();
-                    clients.get(otherPlayerId).sendEvent(Server.GAME_UPDATE_EVENT, otherPlayerData);
+                    clients.get(otherPlayerId).sendGameUpdateEvent(otherPlayerData);
                     pendingMessages.put(otherPlayerId, otherPlayerData);
                 }
             }
 
             try {
                 System.out.println("Waiting... " + eventId + " for - " + timeoutSeconds);
-                synchronized (monitor) {
-                    monitor.wait(timeoutSeconds * 1_000 + 500);
+                synchronized (eventMonitors.get(eventId)) {
+                    eventMonitors.get(eventId).wait(timeoutSeconds * 1_000 + 500);
                 }
-            } catch (InterruptedException e) {
+                optionSelection = eventMonitors.get(eventId).getOption();
+                System.out.println("Selected (Properly): " + optionSelection.toString());
+            } catch (InterruptedException | NullPointerException e) {
                 e.printStackTrace();
-                System.out.println("Selected (InterruptedException): " + optionSelection.toString());
-                this.server.removeAllListeners("option" + eventId);
-                this.pendingMessages.clear();
-                return options.get(0);
+                optionSelection = options.get(0);
+                System.out.println("Selected (Exception): " + optionSelection.toString());
             }
+        }
+        return optionSelection;
+    }
 
-            System.out.println("Selected (Properly): " + optionSelection.toString());
-            this.pendingMessages.clear();
-            this.server.removeAllListeners("option" + eventId);
-
-            return optionSelection;
+    public void resolveOptionSelection(final String eventString, final Option option) {
+        UUID eventId = UUID.fromString(eventString);
+        eventMonitors.get(eventId).setOption(option);
+        synchronized (eventMonitors.get(eventId)) {
+            eventMonitors.get(eventId).notify();
         }
     }
 
@@ -106,8 +84,8 @@ public class ClientHandler {
         for(var player: players) {
             if (player != null && player.getPlayerId() != null) {
                 var message = ClientMessage.createClientMessage(player, null, winningCards, players,
-                        hand, 0, -1);
-                clients.get(player.getPlayerId()).sendEvent(Server.GAME_UPDATE_EVENT, message);
+                        hand, 0, "");
+                clients.get(player.getPlayerId()).sendGameUpdateEvent(message);
                 pendingMessages.put(player.getPlayerId(), message);
             }
         }

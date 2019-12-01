@@ -13,6 +13,7 @@ public class Player  {
     private static int NO_ACTION_THIS_TURN = -1;
 
     private static final Comparator<Card> CARD_COMPARATOR = new Card.CardComparator();
+
     private final String name;
     private int balance;
     ArrayList<Card> hand;
