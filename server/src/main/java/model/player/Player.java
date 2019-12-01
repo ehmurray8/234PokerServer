@@ -14,10 +14,10 @@ public class Player  {
 
     private static final Comparator<Card> CARD_COMPARATOR = new Card.CardComparator();
     private final String name;
-    private double balance;
+    private int balance;
     ArrayList<Card> hand;
     private boolean hasFolded;
-    private double amountThisTurn;
+    private int amountThisTurn;
     private boolean isSittingOut;
     private UUID playerId;
 
@@ -27,12 +27,12 @@ public class Player  {
         clearAmtThisTurn();
     }
 
-    public Player(double balance, String name, UUID playerId) {
+    public Player(int balance, String name, UUID playerId) {
         this(balance, name);
         this.playerId = playerId;
     }
 
-    public Player(double balance, String name) {
+    public Player(int balance, String name) {
         this.balance = balance;
         this.name = name;
         this.resetStatus();
@@ -52,12 +52,12 @@ public class Player  {
 		this.isSittingOut = isSittingOut;
 	}
 
-	public double getAmountThisTurn() {
+	public int getAmountThisTurn() {
         return amountThisTurn;
     }
 
-    public double setupRaise() {
-        double startingAmount = amountThisTurn;
+    public int setupRaise() {
+        int startingAmount = amountThisTurn;
         if(amountThisTurn > 0) {
             balance += amountThisTurn;
             amountThisTurn = 0;
@@ -71,7 +71,7 @@ public class Player  {
      * @param addAmt the amount to add for this turn
      * @return true if the model.player has enough in their balance
      */
-    public boolean addAmountThisTurn(double addAmt) {
+    public boolean addAmountThisTurn(int addAmt) {
     	if(addAmt <= this.balance) { 
     		if(amountThisTurn == NO_ACTION_THIS_TURN) {
     			amountThisTurn = 0;
@@ -96,11 +96,11 @@ public class Player  {
     	amountThisTurn = NO_ACTION_THIS_TURN;
     }
 
-    public final double getBalance() {
+    public final int getBalance() {
         return balance;
     }
 
-    public final void updateBalance(double amt) {
+    public final void updateBalance(int amt) {
         balance += amt;
     }
 

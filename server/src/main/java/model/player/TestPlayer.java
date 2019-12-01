@@ -8,7 +8,7 @@ public class TestPlayer extends Player {
 
     private int maxCards = 2;
 
-    public TestPlayer(double balance, String name) {
+    public TestPlayer(int balance, String name) {
         super(balance, name);
     }
 

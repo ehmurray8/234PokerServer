@@ -13,20 +13,20 @@ public class ClientMessage {
 
     private List<Player> players;
     private List<Card> communityCards;
-    private double mainPotAmount;
+    private int mainPotAmount;
     private List<Card> userCards;
-    private double userStackSize;
+    private int userStackSize;
     private String username;
     private List<Option> options;
-    private double lastUserAmount;
-    private List<Double> lastActionAmounts;
+    private int lastUserAmount;
+    private List<Integer> lastActionAmounts;
     private List<Boolean> raiseCommunityCards;
     private List<Boolean> raiseUserCards;
     private boolean userHasFolded;
     private long decisionEndTime;
     private int decisionTimeMaxSeconds;
     private int eventId;
-    private double betStepSize;
+    private int betStepSize;
 
 
     private static Player createPlayer(model.player.Player player,
@@ -116,7 +116,7 @@ public class ClientMessage {
                 } else if (winningCards != null && !player.hasFolded() && hand.getWinningPlayers().contains(player)) {
                     lastActionAmounts.add(hand.getWinnings());
                 } else {
-                    lastActionAmounts.add(0.0);
+                    lastActionAmounts.add(0);
                 }
             }
         }
@@ -168,11 +168,11 @@ public class ClientMessage {
         this.communityCards = communityCards;
     }
 
-    public double getMainPotAmount() {
+    public int getMainPotAmount() {
         return mainPotAmount;
     }
 
-    public void setMainPotAmount(double mainPotAmount) {
+    public void setMainPotAmount(int mainPotAmount) {
         this.mainPotAmount = mainPotAmount;
     }
 
@@ -184,11 +184,11 @@ public class ClientMessage {
         this.userCards = userCards;
     }
 
-    public double getUserStackSize() {
+    public int getUserStackSize() {
         return userStackSize;
     }
 
-    public void setUserStackSize(double userStackSize) {
+    public void setUserStackSize(int userStackSize) {
         this.userStackSize = userStackSize;
     }
 
@@ -200,19 +200,19 @@ public class ClientMessage {
         this.options = options;
     }
 
-    public double getLastUserAmount() {
+    public int getLastUserAmount() {
         return lastUserAmount;
     }
 
-    public void setLastUserAmount(double lastUserAmount) {
+    public void setLastUserAmount(int lastUserAmount) {
         this.lastUserAmount = lastUserAmount;
     }
 
-    public List<Double> getLastActionAmounts() {
+    public List<Integer> getLastActionAmounts() {
         return lastActionAmounts;
     }
 
-    public void setLastActionAmounts(List<Double> lastActionAmounts) {
+    public void setLastActionAmounts(List<Integer> lastActionAmounts) {
         this.lastActionAmounts = lastActionAmounts;
     }
 
@@ -276,7 +276,7 @@ public class ClientMessage {
         return betStepSize;
     }
 
-    public void setBetStepSize(double betStepSize) {
+    public void setBetStepSize(int betStepSize) {
         this.betStepSize = betStepSize;
     }
 

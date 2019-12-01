@@ -1,6 +1,5 @@
 package model.hand.representation;
 
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -12,15 +11,7 @@ import model.hand.analyzer.HoldEmAnalyzer;
 import model.option.Option;
 import model.player.Player;
 
-/**
- * The abstract class implements {@code HandInterface}, the class describes a generic poker hand,
- * one full turn in a poker game.
- *
- * <p>
- * The class deals the communityCards cards and allows for the players to make bets. The hand object runs through a
- * full poker hand, and decides its winner.
- * </p>
- */
+
 public abstract class Hand {
 
     private final Deck deck;
@@ -28,9 +19,9 @@ public abstract class Hand {
     private final int numberOfCards;
     private final List<Card> communityCards;
     private final List<Player> players;
-    private double lastRaiseAmount = 0;
+    private int lastRaiseAmount = 0;
     private final Set<Card> winningCards;
-    private double winnings = 0;
+    private int winnings = 0;
     private List<Player> winningPlayers;
     private String winningHandString = "";
 
@@ -74,7 +65,7 @@ public abstract class Hand {
         );
     }
 
-    public double getBetStepSize() {
+    public int getBetStepSize() {
         return rules.getMinimumChipAmount();
     }
 
@@ -90,11 +81,11 @@ public abstract class Hand {
         return winningCards;
     }
 
-    public double getTotalAmountInPots() {
-        return closedPots.stream().mapToDouble(Pot::getAmount).sum() + openPots.stream().mapToDouble(Pot::getAmount).sum();
+    public int getTotalAmountInPots() {
+        return closedPots.stream().mapToInt(Pot::getAmount).sum() + openPots.stream().mapToInt(Pot::getAmount).sum();
     }
 
-    public double getWinnings() {
+    public int getWinnings() {
         return winnings;
     }
 
@@ -124,11 +115,11 @@ public abstract class Hand {
         getCommunityCards().add(deck.dealCard());
     }
 
-    private void chargeAmount(double amount, List<Player> playersToCharge) {
+    private void chargeAmount(int amount, List<Player> playersToCharge) {
         playersToCharge.forEach(player -> chargePlayerAmount(player, amount));
     }
 
-    private void chargePlayerAmount(Player player, double amount) {
+    private void chargePlayerAmount(Player player, int amount) {
         if(player.addAmountThisTurn(amount)) {
             playerPaidFullAmount(amount);
         } else {
@@ -136,7 +127,7 @@ public abstract class Hand {
         }
     }
 
-    private void playerPaidFullAmount(double amountPaid) {
+    private void playerPaidFullAmount(int amountPaid) {
         for(Pot pot : openPots) {
             if(pot.getAmountOwed() != 0) {
                 amountPaid = payOpenPot(pot, amountPaid);
@@ -147,34 +138,34 @@ public abstract class Hand {
         }
     }
 
-    private double payOpenPot(Pot pot, double amount) {
+    private int payOpenPot(Pot pot, int amount) {
         return amount >= pot.getAmountOwed() ? addFullAmountToPot(pot, amount)
                                              : addRemainingAmountToPot(pot, amount);
     }
 
-    private double addFullAmountToPot(Pot pot, double amountPaid) {
+    private int addFullAmountToPot(Pot pot, int amountPaid) {
         amountPaid -= pot.getAmountOwed();
         pot.addAmount(pot.getAmountOwed(), 1);
         return amountPaid;
     }
 
-    private double addRemainingAmountToPot(Pot pot, double amountPaid) {
+    private int addRemainingAmountToPot(Pot pot, int amountPaid) {
         pot.addAmount(amountPaid, 1);
         return 0;
     }
 
-    private void addAmountToCurrentPot(double amount) {
+    private void addAmountToCurrentPot(int amount) {
         Pot currPot = openPots.get(openPots.size() - 1);
         currPot.setAmountOwed(currPot.getAmountOwed() + amount);
         currPot.addAmount(amount, 1);
     }
 
-    private void chargePlayerRemainingBalance(Player player, double fullAmount) {
-        double playerStartingBalance = player.getBalance();
+    private void chargePlayerRemainingBalance(Player player, int fullAmount) {
+        int playerStartingBalance = player.getBalance();
         int numPotsPaid = payAllPotsPossible(player);
         int nextPotIndex = numPotsPaid + 1;
-        double nextPotAmount = getNextPotAmount(numPotsPaid);
-        double amountOwed = fullAmount - playerStartingBalance;
+        int nextPotAmount = getNextPotAmount(numPotsPaid);
+        int amountOwed = fullAmount - playerStartingBalance;
         setupNextPot(numPotsPaid, player, amountOwed);
         if(nextPotIndex + 1 < openPots.size()) {
             Pot currentPot = openPots.get(numPotsPaid);
@@ -197,15 +188,15 @@ public abstract class Hand {
         return numPotsPaid;
     }
 
-    private double getNextPotAmount(int currentPotIndex) {
-        double nextPotAmount = 0;
+    private int getNextPotAmount(int currentPotIndex) {
+        int nextPotAmount = 0;
         if(currentPotIndex + 1 < openPots.size()) {
             nextPotAmount = openPots.get(currentPotIndex).getAmountOwed();
         }
         return nextPotAmount;
     }
 
-    private void setupNextPot(int currentPotIndex, Player player, double amountOwed) {
+    private void setupNextPot(int currentPotIndex, Player player, int amountOwed) {
         int nextPotIndex = currentPotIndex + 1;
         List<Player> playersInCurrentPot = openPots.get(currentPotIndex).getPlayers();
         Pot nextPot = new Pot(playersInCurrentPot);
@@ -213,7 +204,7 @@ public abstract class Hand {
         nextPot.removePlayer(player);
         nextPot.setAmountOwed(amountOwed);
         Pot currentPot = openPots.get(currentPotIndex);
-        double carryOver = currentPot.setAmountOwed(player.getBalance());
+        int carryOver = currentPot.setAmountOwed(player.getBalance());
         int numberPlayersPaid = currentPot.getNumPlayersPaid();
         nextPot.addAmount(carryOver, numberPlayersPaid);
         currentPot.removeAmount(carryOver * numberPlayersPaid);
@@ -238,7 +229,7 @@ public abstract class Hand {
     }
     
     public final void chargeBigBlind(int bigBlindPos) {
-    	double potNum = rules.getBigBlind();
+    	int potNum = rules.getBigBlind();
     	lastRaiseAmount = rules.getBigBlind();
     	if(this.openPots.size() > 1) {
     		potNum = rules.getBigBlind() - openPots.get(0).getAmountOwed();
@@ -270,7 +261,7 @@ public abstract class Hand {
             return false;
         }
 
-        double amountOwed = openPots.stream().mapToDouble(Pot::getAmountOwed).sum();
+        int amountOwed = openPots.stream().mapToInt(Pot::getAmountOwed).sum();
         int numPlayersWithMoney = (int) players.stream().filter(player -> player.getBalance() > 0).count();
         boolean playerNoAction = players.stream().anyMatch(player -> player.getAmountThisTurn() == -1);
 
@@ -324,8 +315,6 @@ public abstract class Hand {
 
     private void payOnlyRemainingPlayer(Pot pot) {
         winnings = pot.getAmount();
-        DecimalFormat df = new DecimalFormat(".##");
-        winnings = Double.parseDouble(df.format(winnings));
         for (Player player : pot.getPlayers()) {
             if (!player.hasFolded() && !player.isSittingOut()) {
                 player.updateBalance(winnings);
@@ -345,8 +334,7 @@ public abstract class Hand {
                 updatePotWinnerIndexes(analyzers, potWinnerIndexes, i);
             }
         });
-        DecimalFormat df = new DecimalFormat(".##");
-        winnings = Double.parseDouble(df.format(pot.getAmount() / potWinnerIndexes.size()));
+        winnings = pot.getAmount() / potWinnerIndexes.size();
         winningPlayers = new ArrayList<>();
         potWinnerIndexes.forEach(i -> {
             var player = pot.getPlayers().get(i);
@@ -400,7 +388,7 @@ public abstract class Hand {
 
     private List<Option> createOptionsForNonBrokePlayer(Player player) {
         List<Option> options = new ArrayList<>();
-        double amountOwed = openPots.stream().mapToDouble(Pot::getAmountOwed).sum();
+        int amountOwed = openPots.stream().mapToInt(Pot::getAmountOwed).sum();
         if(player.getAmountThisTurn() != -1) {
             amountOwed -= player.getAmountThisTurn();
         }
@@ -426,7 +414,7 @@ public abstract class Hand {
         }
     }
 
-    private void createFoldCallRaiseOptions(List<Option> options, Player player, double amountOwed) {
+    private void createFoldCallRaiseOptions(List<Option> options, Player player, int amountOwed) {
         options.add(new Option(Option.OptionType.FOLD, 0));
         if(amountOwed != 0) {
             if (amountOwed <= player.getBalance()) {
@@ -449,7 +437,7 @@ public abstract class Hand {
         }
     }
 
-    private double minBetAmount() {
+    private int minBetAmount() {
         return rules.getBigBlind() > 0 ? rules.getBigBlind() : rules.getAnte();
     }
 }

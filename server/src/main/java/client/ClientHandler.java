@@ -61,7 +61,7 @@ public class ClientHandler {
                     var optionType = Option.stringToOptionType((String) data.get("type"));
                     if (optionType != null) {
                         try {
-                            double amount = Double.parseDouble(data.get("amount").toString());
+                            int amount = Integer.parseInt(data.get("amount").toString());
                             optionSelection = new Option(optionType, amount);
                             synchronized (monitor) {
                                 monitor.notifyAll();

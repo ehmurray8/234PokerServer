@@ -13,7 +13,7 @@ import static game.Rules.GameType.OMAHA;
 
 public class Server {
 
-    private static final double DEFAULT_BALANCE = 200.0;
+    private static final int DEFAULT_BALANCE = 200;
 
     private static final String WELCOME_EVENT = "welcomeStatus";
     private static final String RETURN_TO_GAME_EVENT = "returnToGame";

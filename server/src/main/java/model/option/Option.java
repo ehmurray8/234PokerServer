@@ -3,7 +3,7 @@ package model.option;
 public class Option {
 
     private final OptionType type;
-    private final double amount;
+    private final int amount;
 
     public enum OptionType {
         FOLD("Fold"),
@@ -25,7 +25,7 @@ public class Option {
         }
     }
 
-    public Option(OptionType type, double amount) {
+    public Option(OptionType type, int amount) {
         this.type = type;
         this.amount = amount;
     }
@@ -34,7 +34,7 @@ public class Option {
         return type;
     }
 
-    public double getAmount() {
+    public int getAmount() {
         return amount;
     }
 

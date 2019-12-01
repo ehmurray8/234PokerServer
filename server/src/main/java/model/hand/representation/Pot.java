@@ -7,9 +7,9 @@ import model.player.Player;
 
 public class Pot {
 
-	private double amount;
+	private int amount;
 	private final List<Player> players;
-	private double amountOwed;
+	private int amountOwed;
 	private int numPlayersPaid;
 	
 	Pot(List<Player> players) {
@@ -24,11 +24,11 @@ public class Pot {
 		this.numPlayersPaid = 0;
 	}
 
-	public double getAmount() {
+	public int getAmount() {
 		return amount;
 	}
 
-	void addAmount(double amount, int numPlayers) {
+	void addAmount(int amount, int numPlayers) {
 		this.amount += amount;
 		numPlayersPaid += numPlayers;
 		if(numPlayersPaid == players.size()) {
@@ -37,7 +37,7 @@ public class Pot {
 		}
 	}
 
-	void removeAmount(double amount) {
+	void removeAmount(int amount) {
 		this.amount -= amount;
 	}
 	
@@ -53,12 +53,12 @@ public class Pot {
 		players.remove(p);
 	}
 	
-	public double getAmountOwed() {
+	public int getAmountOwed() {
 		return amountOwed;
 	}
 	
-	double setAmountOwed(double amount) {
-		double amountOver;
+	int setAmountOwed(int amount) {
+		int amountOver;
 		if(amountOwed < amount) {
 			amountOver = numPlayersPaid * (amount - amountOwed);
 			this.numPlayersPaid = 0;

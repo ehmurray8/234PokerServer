@@ -6,19 +6,20 @@ public class OptionSelection {
         FOLD(0), CHECK(0), CALL(1), BET(1), RAISE(2);
 
         int index;
+
         SelectionType(int index) {
             this.index = index;
         }
     }
 
     private int index;
-    private double amount;
+    private int amount;
 
     public OptionSelection(SelectionType type) {
         this(type.index);
     }
 
-    public OptionSelection(SelectionType type, double amount) {
+    public OptionSelection(SelectionType type, int amount) {
         this(type.index, amount);
     }
 
@@ -26,12 +27,12 @@ public class OptionSelection {
         this(index, 0);
     }
 
-    private OptionSelection(int index, double amount) {
+    private OptionSelection(int index, int amount) {
         this.index = index;
         this.amount = amount;
     }
 
-    double getAmount() {
+    int getAmount() {
         return amount;
     }
 

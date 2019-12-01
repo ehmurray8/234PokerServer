@@ -11,8 +11,6 @@ import model.option.Option;
 public class Game {
     Hand currentHand;
 
-    public static class TableFullException extends Exception { }
-
 	private static int GAME_ENDED = -1;
 
 	private Player[] players;
@@ -95,8 +93,10 @@ public class Game {
         currentAction = (currentAction + 1) % playersInHand.size();
 	}
 
-	public void addPlayer(Player player) throws TableFullException {
-	    if(tableFull()) { throw new TableFullException(); }
+	public void addPlayer(Player player) {
+	    if(tableFull()) {
+	        throw new IllegalStateException("Table is full.");
+	    }
 
 		for(int i = 0; i < players.length; i++) {
 			if(players[i] == null) {

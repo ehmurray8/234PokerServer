@@ -198,7 +198,7 @@ public class HandTest {
 
 	@Test
 	public void testPlayersBetting() {
-		var player = new Player(10.0, "P1");
+		var player = new Player(10, "P1");
 		var players = new ArrayList<Player>();
 		players.add(player);
 		Hand hand = createHand(10, 20, 0, 1, HOLDEM, players);

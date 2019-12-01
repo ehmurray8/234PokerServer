@@ -82,31 +82,24 @@ public class GameTest {
 
 	@Test
 	public void testTableFull() {
-	    try {
-			game.addPlayer(new Player(100, "P3"));
-			game.addPlayer(new Player(100, "P5"));
-			game.addPlayer(new Player(100, "P6"));
-		} catch(Game.TableFullException ignored) {}
+        game.addPlayer(new Player(100, "P3"));
+        game.addPlayer(new Player(100, "P5"));
+        game.addPlayer(new Player(100, "P6"));
 		assertTrue(game.tableFull());
 	}
 
 	@Test
 	public void testAddPlayer() {
-		try {
-			game.addPlayer(new Player(100, "P3"));
-		} catch (Game.TableFullException ignored) { }
+        game.addPlayer(new Player(100, "P3"));
         assertEquals(4, game.getNumPlayers());
 	}
 
-	@Test
+	@Test(expected = IllegalStateException.class)
     public void testOverflowTable() {
-	    try {
-	        game.addPlayer(new Player(100, "P3"));
-            game.addPlayer(new Player(100, "P5"));
-            game.addPlayer(new Player(100, "P6"));
-            game.addPlayer(new Player(100, "P7"));
-            fail();
-        } catch (Game.TableFullException ignored) { }
+        game.addPlayer(new Player(100, "P3"));
+        game.addPlayer(new Player(100, "P5"));
+        game.addPlayer(new Player(100, "P6"));
+        game.addPlayer(new Player(100, "P7"));
         assertEquals(6, game.getNumPlayers());
     }
 
@@ -115,10 +108,7 @@ public class GameTest {
         for(var player : players) {
             game.removePlayer(player);
         }
-
-	    try {
-	        game.addPlayer(new Player(100, "P1"));
-        } catch(Game.TableFullException ignored) { }
+        game.addPlayer(new Player(100, "P1"));
         assertEquals(1, game.getNumPlayers());
     }
 
