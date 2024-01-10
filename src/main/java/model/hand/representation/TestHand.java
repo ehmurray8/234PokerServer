@@ -7,16 +7,20 @@ import model.player.Player;
 
 public class TestHand extends TexasHoldEmHand {
 
-  public TestHand(double smallBlindAmount, double bigBlindAmount, double anteAmount,
-                  ArrayList<Player> players) {
-    super(smallBlindAmount, bigBlindAmount, anteAmount, players);
-  }
+    public TestHand(
+        double smallBlindAmount,
+        double bigBlindAmount,
+        double anteAmount,
+        ArrayList<Player> players
+    ) {
+        super(smallBlindAmount, bigBlindAmount, anteAmount, players);
+    }
 
-  public void setCommunityCards(Card[] cards) {
-    communityCards.addAll(Arrays.asList(cards));
-  }
+    public void setCommunityCards(Card[] cards) {
+        communityCards.addAll(Arrays.asList(cards));
+    }
 
-  public void addCommunityCard(Card card) {
-    communityCards.add(card);
-  }
+    public void addCommunityCard(Card card) {
+        communityCards.add(card);
+    }
 }

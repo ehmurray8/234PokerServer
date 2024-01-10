@@ -6,22 +6,22 @@ import model.card.Card;
 
 public class SimpleAnalyzer extends HandAnalyzer {
 
-  SimpleAnalyzer(List<Card> fullHand) {
-    super(fullHand);
-    ArrayList<Card> fullHandList = new ArrayList<>(getFullHand());
-    FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(fullHandList);
-    setTopRank(fiveCardAnalyzer.getRank());
-  }
+    SimpleAnalyzer(List<Card> fullHand) {
+        super(fullHand);
+        ArrayList<Card> fullHandList = new ArrayList<>(getFullHand());
+        FiveCardAnalyzer fiveCardAnalyzer = new FiveCardAnalyzer(fullHandList);
+        setTopRank(fiveCardAnalyzer.getRank());
+    }
 
-  @Override
-  public List<List<Card>> fiveCardCombinations(List<Card> fullHand) {
-    return null;
-  }
+    @Override
+    public List<List<Card>> fiveCardCombinations(List<Card> fullHand) {
+        return null;
+    }
 
-  @Override
-  public final void analyze() {
-    findPairRanks();
-    findFullHouseRanks();
-    findBestHand();
-  }
+    @Override
+    public final void analyze() {
+        findPairRanks();
+        findFullHouseRanks();
+        findBestHand();
+    }
 }
